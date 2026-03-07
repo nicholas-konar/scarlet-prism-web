@@ -1,0 +1,58 @@
+import { useRef, useState, useEffect } from "react"
+
+interface MessageInputProps {
+    onSubmit: (message: string) => Promise<void>
+    isDisabled: boolean
+}
+
+export function MessageInput({ onSubmit, isDisabled }: MessageInputProps) {
+    const [message, setMessage] = useState("")
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+    // Auto-resize textarea with max height constraint
+    useEffect(() => {
+        const textarea = textareaRef.current
+        if (textarea) {
+            textarea.style.height = "auto"
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px"
+        }
+    }, [message])
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (message.trim() && !isDisabled) {
+            await onSubmit(message)
+            setMessage("")
+            // Reset textarea height
+            if (textareaRef.current) {
+                textareaRef.current.style.height = "auto"
+            }
+        }
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey && !isDisabled) {
+            e.preventDefault()
+            handleSubmit(e as unknown as React.FormEvent)
+        }
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="message-input-form-wrapper">
+            <fieldset className="message-input-form">
+                <legend>type a message... (enter to send)</legend>
+                <textarea
+                    ref={textareaRef}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isDisabled}
+                    rows={1}
+                />
+                <button type="submit" disabled={isDisabled || !message.trim()}>
+                    Send
+                </button>
+            </fieldset>
+        </form>
+    )
+}
