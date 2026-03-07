@@ -40,12 +40,13 @@ export function MessageInput({ onSubmit, isDisabled }: MessageInputProps) {
     return (
         <form onSubmit={handleSubmit} className="message-input-form-wrapper">
             <fieldset className="message-input-form">
-                <legend>type a message... (enter to send)</legend>
+                <legend>Prompt</legend>
                 <textarea
                     ref={textareaRef}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
+                    placeholder="type a message... (enter to send)"
                     disabled={isDisabled}
                     rows={1}
                 />
