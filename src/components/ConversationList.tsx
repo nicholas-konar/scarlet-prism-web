@@ -1,3 +1,4 @@
+import { useState } from "react"
 import type { Conversation } from "@/types/api"
 
 interface ConversationListProps {
@@ -17,6 +18,7 @@ export function ConversationList({
     onNewChat,
     isLoading,
 }: ConversationListProps) {
+    const [hoveredId, setHoveredId] = useState<string | null>(null)
     return (
         <fieldset className="conversation-list">
             <legend>Conversations</legend>
@@ -30,10 +32,12 @@ export function ConversationList({
                                 selectedId === conv.id ? "selected" : ""
                             }`}
                             onClick={() => onSelect(conv.id)}
+                            onMouseEnter={() => setHoveredId(conv.id)}
+                            onMouseLeave={() => setHoveredId(null)}
                             disabled={isLoading}
                         >
                             <span className="indicator">
-                                {selectedId === conv.id ? ">" : " "}
+                                {selectedId === conv.id || hoveredId === conv.id ? ">" : " "}
                             </span>
                             <span className="label">{conv.id}</span>
                         </button>

@@ -168,7 +168,6 @@ fieldset legend {
     width: 100%;
     padding: 8px var(--gap);
     border: none;
-    border-bottom: var(--border);
     background-color: #fff;
     text-align: left;
     font-size: 12px;
@@ -178,12 +177,18 @@ fieldset legend {
 }
 
 .list-item:hover:not(:disabled) {
+    background-color: #fff;
+    color: #000;
+    font-weight: normal;
+}
+
+.list-item.selected {
     background-color: #000;
     color: #fff;
     font-weight: 600;
 }
 
-.list-item.selected {
+.list-item.selected:hover:not(:disabled) {
     background-color: #000;
     color: #fff;
     font-weight: 600;
