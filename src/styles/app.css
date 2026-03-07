@@ -5,6 +5,15 @@
     --border: 1px solid #000;
 }
 
+/* ===== Fieldset Legend ===== */
+
+fieldset legend {
+    padding: 0 var(--gap);
+    margin-left: var(--gap);
+    font-size: 12px;
+    font-weight: 600;
+}
+
 /* ===== Auth Pages ===== */
 
 .auth-page {
@@ -149,12 +158,6 @@
     min-height: 0;
 }
 
-.conversation-list legend {
-    padding: 0 var(--gap);
-    margin-left: var(--gap);
-    font-size: 12px;
-    font-weight: 600;
-}
 
 .list-items {
     flex: 1;
@@ -235,12 +238,6 @@
     margin: 0;
 }
 
-.messages-container legend {
-    padding: 0 var(--gap);
-    margin-left: var(--gap);
-    font-size: 12px;
-    font-weight: 600;
-}
 
 .empty-state {
     padding: var(--gap);
@@ -272,7 +269,6 @@
     padding: 0 8px;
     margin-left: 8px;
     font-size: 11px;
-    font-weight: 600;
 }
 
 .message-label {
@@ -330,10 +326,6 @@
 
 .message-input-form legend {
     grid-column: 1 / -1;
-    padding: 0;
-    margin: 0;
-    font-size: 12px;
-    font-weight: 600;
 }
 
 .message-input-form textarea {
