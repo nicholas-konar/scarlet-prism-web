@@ -14,6 +14,9 @@ build/
 *.swo
 *~
 
+# Project notes (local only)
+CLAUDE.md
+
 # Environment
 .env
 .env.local
