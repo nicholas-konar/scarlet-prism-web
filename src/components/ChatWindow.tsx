@@ -11,6 +11,10 @@ interface ChatWindowProps {
     onSendMessage: (message: string) => Promise<void>
     isLoading: boolean
     currentModelId?: string
+    selectedModel: string
+    onModelChange: (model: string) => void
+    streamError: string | null
+    onClearError: () => void
 }
 
 export function ChatWindow({
@@ -21,6 +25,10 @@ export function ChatWindow({
     onSendMessage,
     isLoading,
     currentModelId,
+    selectedModel,
+    onModelChange,
+    streamError,
+    onClearError,
 }: ChatWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -30,7 +38,7 @@ export function ChatWindow({
     }, [messages, streamingText])
 
     const conversationTitle = conversationId || "Chat"
-    const isEmpty = !conversationId && messages.length === 0 && !streamingText
+    const isEmpty = !conversationId && messages.length === 0 && !streamingText && !streamError
 
     return (
         <div className="chat-window">
@@ -45,6 +53,13 @@ export function ChatWindow({
                         {messages.map((msg) => (
                             <MessageBubble key={msg.id} message={msg} />
                         ))}
+
+                        {streamError && (
+                            <fieldset className="message-bubble error">
+                                <legend>error</legend>
+                                <div className="message-text">{streamError}</div>
+                            </fieldset>
+                        )}
 
                         {streamingText && (
                             <div className="message-bubble assistant streaming">
@@ -64,6 +79,8 @@ export function ChatWindow({
             <MessageInput
                 onSubmit={onSendMessage}
                 isDisabled={isStreaming || isLoading}
+                selectedModel={selectedModel}
+                onModelChange={onModelChange}
             />
         </div>
     )

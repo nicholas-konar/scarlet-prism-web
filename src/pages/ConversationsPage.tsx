@@ -7,7 +7,7 @@ import { ChatWindow } from "@/components/ChatWindow"
 import * as conversationApi from "@/api/conversations"
 import type { Conversation, Message } from "@/types/api"
 
-const DEFAULT_MODEL_ID = "gpt-4o"
+const DEFAULT_MODEL_ID = "gpt-4.1-nano"
 
 export function ConversationsPage() {
     const { user, logout } = useAuth()
@@ -20,12 +20,16 @@ export function ConversationsPage() {
     const [isLoadingConversations, setIsLoadingConversations] = useState(true)
     const [isLoadingMessages, setIsLoadingMessages] = useState(false)
     const [apiError, setApiError] = useState<string | null>(null)
+    const [selectedModel, setSelectedModel] = useState(
+        user?.defaultModelId || DEFAULT_MODEL_ID,
+    )
     const {
         streamingText,
         isStreaming,
         conversationId: newConversationId,
         sendMessage,
         reset: resetStream,
+        error: streamError,
     } = useStreamChat()
 
     // Load conversations on mount
@@ -51,12 +55,15 @@ export function ConversationsPage() {
     // Load messages when selected conversation changes (but not while streaming)
     useEffect(() => {
         if (!selectedConversationId) {
-            setMessages([])
+            // Don't clear messages if we're streaming or have errors (pending message)
+            if (!isStreaming && !streamError) {
+                setMessages([])
+            }
             return
         }
 
-        // Don't reload messages if we're currently streaming
-        if (isStreaming) {
+        // Don't reload messages if we're currently streaming or have a pending error
+        if (isStreaming || streamError) {
             return
         }
 
@@ -76,7 +83,7 @@ export function ConversationsPage() {
         }
 
         loadMessages()
-    }, [selectedConversationId, isStreaming, resetStream])
+    }, [selectedConversationId, isStreaming, streamError, resetStream])
 
     // Update messages when streaming completes
     useEffect(() => {
@@ -129,25 +136,31 @@ export function ConversationsPage() {
         setSearchParams({})
     }
 
+    const clearStreamError = () => {
+        resetStream()
+    }
+
     const handleSendMessage = async (message: string) => {
         try {
-            // Add user message to UI immediately (append since oldest first)
-            if (newConversationId || selectedConversationId) {
+            clearStreamError()
+
+            // Add user message to UI immediately
+            const conversationId = newConversationId || selectedConversationId
+            if (conversationId) {
                 const userMessage: Message = {
                     id: `temp-${Date.now()}`,
-                    conversationId: newConversationId || selectedConversationId!,
+                    conversationId,
                     role: "user",
                     text: message,
-                    modelId: DEFAULT_MODEL_ID,
+                    modelId: selectedModel,
                     createdAt: new Date().toISOString(),
                 }
                 setMessages((prev) => [...prev, userMessage])
             }
 
-            // Then stream the AI response
             await sendMessage(
                 message,
-                DEFAULT_MODEL_ID,
+                selectedModel,
                 selectedConversationId || undefined,
             )
         } catch (err) {
@@ -188,7 +201,11 @@ export function ConversationsPage() {
                     isStreaming={isStreaming}
                     onSendMessage={handleSendMessage}
                     isLoading={isLoadingMessages}
-                    currentModelId={DEFAULT_MODEL_ID}
+                    currentModelId={selectedModel}
+                    selectedModel={selectedModel}
+                    onModelChange={setSelectedModel}
+                    streamError={streamError}
+                    onClearError={clearStreamError}
                 />
             </div>
         </div>
