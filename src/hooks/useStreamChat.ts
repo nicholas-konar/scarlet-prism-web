@@ -27,7 +27,11 @@ export function useStreamChat(): UseStreamChatResult {
     }, [])
 
     const sendMessage = useCallback(
-        async (prompt: string, modelId: string, _conversationId?: string) => {
+        async (
+            prompt: string,
+            modelId: string,
+            _conversationId?: string,
+        ) => {
             setError(null)
             setIsStreaming(true)
             setStreamingText("")
