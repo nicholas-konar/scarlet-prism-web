@@ -5,6 +5,7 @@ export interface User {
     email: string
     createdAt: string
     updatedAt: string
+    defaultModelId?: string
 }
 
 export interface AuthResponse {
