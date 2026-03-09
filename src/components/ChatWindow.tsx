@@ -14,7 +14,6 @@ interface ChatWindowProps {
     selectedModel: string
     onModelChange: (model: string) => void
     streamError: string | null
-    onClearError: () => void
 }
 
 export function ChatWindow({
@@ -28,7 +27,6 @@ export function ChatWindow({
     selectedModel,
     onModelChange,
     streamError,
-    onClearError,
 }: ChatWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useSearchParams, useNavigate } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { useStreamChat } from "@/hooks/useStreamChat"
 import { ConversationList } from "@/components/ConversationList"
@@ -11,7 +11,6 @@ const DEFAULT_MODEL_ID = "gpt-4.1-nano"
 
 export function ConversationsPage() {
     const { user, logout } = useAuth()
-    const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams()
     const selectedConversationId = searchParams.get("id")
 
@@ -144,7 +143,7 @@ export function ConversationsPage() {
         try {
             clearStreamError()
 
-            // Add user message to UI immediately
+            // Add user message to UI immediately with pending status
             const conversationId = newConversationId || selectedConversationId
             if (conversationId) {
                 const userMessage: Message = {
@@ -154,6 +153,7 @@ export function ConversationsPage() {
                     text: message,
                     modelId: selectedModel,
                     createdAt: new Date().toISOString(),
+                    status: "pending",
                 }
                 setMessages((prev) => [...prev, userMessage])
             }
@@ -205,7 +205,6 @@ export function ConversationsPage() {
                     selectedModel={selectedModel}
                     onModelChange={setSelectedModel}
                     streamError={streamError}
-                    onClearError={clearStreamError}
                 />
             </div>
         </div>

@@ -32,6 +32,8 @@ export interface Message {
     inputTokens?: number
     outputTokens?: number
     createdAt: string
+    status?: "pending" | "sent" | "persisted" | "failed"
+    error?: string
 }
 
 export interface Conversation {

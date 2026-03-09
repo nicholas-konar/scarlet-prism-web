@@ -37,7 +37,7 @@ export function useStreamChat(): UseStreamChatResult {
             setStreamingText("")
 
             try {
-                let currentConversationId = _conversationId || conversationId
+                let currentConversationId = _conversationId || conversationId || undefined
 
                 await streamChat(
                     {
