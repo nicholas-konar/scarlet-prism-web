@@ -143,7 +143,7 @@ export function ConversationsPage() {
         try {
             clearStreamError()
 
-            // Create temp user message with pending status
+            // Create temp user message for optimistic UI
             const tempMessageId = `temp-${Date.now()}`
             const tempConversationId = newConversationId || selectedConversationId
             const userMessage: Message = {
@@ -153,7 +153,6 @@ export function ConversationsPage() {
                 text: message,
                 modelId: selectedModel,
                 createdAt: new Date().toISOString(),
-                status: "pending",
             }
             setMessages((prev) => [...prev, userMessage])
 

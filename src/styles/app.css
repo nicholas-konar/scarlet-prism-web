@@ -299,20 +299,6 @@ fieldset legend {
     padding: var(--gap);
 }
 
-.message-bubble.failed {
-    opacity: 0.6;
-}
-
-.message-bubble.failed .message-text {
-    border: 1px dashed #dc2626;
-}
-
-.message-status {
-    font-size: 11px;
-    color: #dc2626;
-    padding: 0 8px;
-}
-
 .message-label {
     font-size: 11px;
     font-weight: bold;
