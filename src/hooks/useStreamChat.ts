@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react"
 import { streamChat } from "@/api/conversations"
+import type { Message } from "@/types/api"
 
 interface UseStreamChatResult {
     streamingText: string
@@ -9,6 +10,7 @@ interface UseStreamChatResult {
         prompt: string,
         modelId: string,
         conversationId?: string,
+        onMessageReceived?: (message: Message) => void,
     ) => Promise<void>
     error: string | null
     reset: () => void
@@ -31,6 +33,7 @@ export function useStreamChat(): UseStreamChatResult {
             prompt: string,
             modelId: string,
             _conversationId?: string,
+            onMessageReceived?: (message: Message) => void,
         ) => {
             setError(null)
             setIsStreaming(true)
@@ -49,20 +52,23 @@ export function useStreamChat(): UseStreamChatResult {
                         try {
                             const event = JSON.parse(chunk)
 
-                            // Check for conversation ID
-                            if (event.id) {
-                                currentConversationId = event.id
-                                setConversationId(event.id)
+                            // Phase 1: User message with conversation ID
+                            if (event.conversationId && event.message) {
+                                currentConversationId = event.conversationId
+                                setConversationId(event.conversationId)
+                                if (onMessageReceived) {
+                                    onMessageReceived(event.message)
+                                }
                             }
-                            // Check for text delta
+                            // Phase 2: Text delta
                             else if (event.delta) {
                                 setStreamingText((prev) => prev + event.delta)
                             }
-                            // Check for completion
+                            // Phase 2: Completion
                             else if (event.done) {
                                 // Streaming complete
                             }
-                            // Check for error
+                            // Error (can occur at any phase)
                             else if (event.error) {
                                 setError(event.error)
                             }

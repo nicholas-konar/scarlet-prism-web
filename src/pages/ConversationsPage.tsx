@@ -143,25 +143,32 @@ export function ConversationsPage() {
         try {
             clearStreamError()
 
-            // Add user message to UI immediately with pending status
-            const conversationId = newConversationId || selectedConversationId
-            if (conversationId) {
-                const userMessage: Message = {
-                    id: `temp-${Date.now()}`,
-                    conversationId,
-                    role: "user",
-                    text: message,
-                    modelId: selectedModel,
-                    createdAt: new Date().toISOString(),
-                    status: "pending",
-                }
-                setMessages((prev) => [...prev, userMessage])
+            // Create temp user message with pending status
+            const tempMessageId = `temp-${Date.now()}`
+            const tempConversationId = newConversationId || selectedConversationId
+            const userMessage: Message = {
+                id: tempMessageId,
+                conversationId: tempConversationId || tempMessageId,
+                role: "user",
+                text: message,
+                modelId: selectedModel,
+                createdAt: new Date().toISOString(),
+                status: "pending",
+            }
+            setMessages((prev) => [...prev, userMessage])
+
+            // When Phase 1 arrives with real message, replace temp with real
+            const handlePhaseOneMessage = (realMessage: Message) => {
+                setMessages((prev) =>
+                    prev.map((msg) => (msg.id === tempMessageId ? realMessage : msg))
+                )
             }
 
             await sendMessage(
                 message,
                 selectedModel,
                 selectedConversationId || undefined,
+                handlePhaseOneMessage,
             )
         } catch (err) {
             console.error("Failed to send message:", err)
