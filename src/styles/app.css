@@ -253,7 +253,7 @@ fieldset legend {
 
 .message-with-retry {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-end;
     gap: 8px;
     width: 100%;
@@ -265,19 +265,16 @@ fieldset legend {
     border: none;
     background-color: transparent;
     color: #000;
-    font-size: 12px;
-    font-family: "Courier New", Courier, monospace;
+    font-size: 10px;
     cursor: pointer;
-    margin-top: 2px;
-    transition: opacity 0.15s ease;
 }
 
-.retry-button:hover {
-    opacity: 0.6;
-}
-
-.retry-button:active {
-    opacity: 0.8;
+.retry-button:hover,
+.retry-button:hover:not(:disabled) {
+    background-color: transparent;
+    color: #000;
+    font-weight: normal;
+    opacity: 0.5;
 }
 
 .message-bubble {
