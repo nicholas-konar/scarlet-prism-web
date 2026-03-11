@@ -351,14 +351,16 @@ fieldset legend {
 /* ===== Model Selector ===== */
 
 .model-selector {
-    margin-bottom: 8px;
+    border: var(--border);
+    margin: 0 0 8px;
+    padding: 2px 4px 4px;
 }
 
 .model-selector select {
     width: 100%;
     padding: 6px 8px;
     font-size: 12px;
-    border: var(--border);
+    border: none;
     background-color: #fff;
     cursor: pointer;
     font-family: "Courier New", Courier, monospace;

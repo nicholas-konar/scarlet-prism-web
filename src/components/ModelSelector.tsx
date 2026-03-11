@@ -12,7 +12,8 @@ export function ModelSelector({
     disabled,
 }: ModelSelectorProps) {
     return (
-        <div className="model-selector">
+        <fieldset className="model-selector">
+            <legend>Model</legend>
             <select
                 value={selectedModel}
                 onChange={(e) => onModelChange(e.target.value)}
@@ -24,6 +25,6 @@ export function ModelSelector({
                     </option>
                 ))}
             </select>
-        </div>
+        </fieldset>
     )
 }
