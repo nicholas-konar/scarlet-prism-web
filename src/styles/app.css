@@ -175,7 +175,14 @@ fieldset legend {
     align-items: center;
 }
 
-.list-item.selected {
+.list-item:hover:not(:disabled) {
+    background-color: #fff;
+    color: #000;
+    font-weight: normal;
+}
+
+.list-item.selected,
+.list-item.selected:hover:not(:disabled) {
     background-color: #000;
     color: #fff;
     font-weight: 600;
@@ -183,6 +190,12 @@ fieldset legend {
 
 .list-item .indicator {
     min-width: 8px;
+    visibility: hidden;
+}
+
+.list-item:hover:not(:disabled) .indicator,
+.list-item.selected .indicator {
+    visibility: visible;
 }
 
 .list-item .label {
