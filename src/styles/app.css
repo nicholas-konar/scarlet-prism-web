@@ -353,15 +353,15 @@ fieldset legend {
 .model-selector {
     border: var(--border);
     margin: 0 0 8px;
-    padding: 2px 4px 4px;
+    padding: 0 6px 4px;
 }
 
 .model-selector select {
     width: 100%;
-    padding: 6px 8px;
+    padding: 0 8px;
     font-size: 12px;
     border: none;
-    background-color: #fff;
+    background-color: transparent;
     cursor: pointer;
     font-family: "Courier New", Courier, monospace;
 }
@@ -373,13 +373,18 @@ fieldset legend {
 
 /* ===== Message Input ===== */
 
+.message-input-form-wrapper {
+    flex-shrink: 0;
+}
+
 .message-input-form {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: var(--gap);
-    padding: var(--gap);
+    align-items: center;
+    padding: 2px 4px 6px;
     border: var(--border);
     margin: 0;
+    cursor: text;
 }
 
 .message-input-form legend {
@@ -387,17 +392,36 @@ fieldset legend {
 }
 
 .message-input-form textarea {
-    padding: 8px;
+    padding: 2px 4px;
     font-size: 12px;
     resize: none;
     max-height: 120px;
-    min-height: 40px;
+    min-height: 18px;
+    border: none;
+}
+
+.message-input-form textarea:focus {
+    background-color: transparent;
 }
 
 .message-input-form button {
-    padding: 8px 16px;
+    padding: 4px 8px;
     font-size: 12px;
-    align-self: flex-end;
+    align-self: center;
+    border: none;
+    background-color: transparent;
+}
+
+.message-input-form button:disabled {
+    opacity: 1;
+    cursor: default;
+}
+
+.message-input-form button:hover:not(:disabled) {
+    background-color: transparent;
+    color: #000;
+    font-weight: normal;
+    opacity: 0.5;
 }
 
 /* ===== Mobile Responsive ===== */

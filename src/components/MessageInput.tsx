@@ -52,7 +52,10 @@ export function MessageInput({
                 onModelChange={onModelChange}
                 disabled={isDisabled}
             />
-            <fieldset className="message-input-form">
+            <fieldset
+                className="message-input-form"
+                onClick={() => textareaRef.current?.focus()}
+            >
                 <legend>Prompt</legend>
                 <textarea
                     ref={textareaRef}
@@ -64,7 +67,7 @@ export function MessageInput({
                     rows={1}
                 />
                 <button type="submit" disabled={isDisabled || !message.trim()}>
-                    Send
+                    [send →]
                 </button>
             </fieldset>
         </form>
