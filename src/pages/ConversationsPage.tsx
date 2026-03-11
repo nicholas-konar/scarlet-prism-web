@@ -236,7 +236,6 @@ export function ConversationsPage() {
                     isStreaming={isStreaming}
                     onSendMessage={handleSendMessage}
                     isLoading={isLoadingMessages}
-                    currentModelId={selectedModel}
                     selectedModel={selectedModel}
                     onModelChange={setSelectedModel}
                     streamError={streamError}

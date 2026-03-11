@@ -10,7 +10,6 @@ interface ChatWindowProps {
     isStreaming: boolean
     onSendMessage: (message: string, isRetry?: boolean, retryMessageId?: string) => Promise<void>
     isLoading: boolean
-    currentModelId?: string
     selectedModel: string
     onModelChange: (model: string) => void
     streamError: string | null
@@ -25,7 +24,6 @@ export function ChatWindow({
     isStreaming,
     onSendMessage,
     isLoading,
-    currentModelId,
     selectedModel,
     onModelChange,
     streamError,
@@ -69,13 +67,13 @@ export function ChatWindow({
                         )}
 
                         {streamingText && (
-                            <div className="message-bubble assistant streaming">
-                                <div className="message-label">[{currentModelId}]</div>
+                            <fieldset className="message-bubble assistant">
+                                <legend>{selectedModel}</legend>
                                 <div className="message-text">
                                     {streamingText}
                                     <span className="cursor">▋</span>
                                 </div>
-                            </div>
+                            </fieldset>
                         )}
 
                         <div ref={messagesEndRef} />

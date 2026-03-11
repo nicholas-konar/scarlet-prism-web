@@ -320,11 +320,6 @@ fieldset legend {
     padding: var(--gap);
 }
 
-.message-label {
-    font-size: 11px;
-    font-weight: bold;
-}
-
 .message-text {
     font-size: 12px;
     line-height: 1.4;
