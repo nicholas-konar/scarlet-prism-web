@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { useStreamChat } from "@/hooks/useStreamChat"
@@ -32,6 +32,13 @@ export function ConversationsPage() {
         error: streamError,
     } = useStreamChat()
 
+    // Fetch messages for a conversation, reversing from newest-first to oldest-first
+    const fetchMessages = useCallback(async (conversationId: string) => {
+        const response = await conversationApi.getConversationMessages(conversationId)
+        setMessages([...response.data].reverse())
+        resetStream()
+    }, [resetStream])
+
     // Load conversations on mount
     useEffect(() => {
         const loadConversations = async () => {
@@ -55,26 +62,20 @@ export function ConversationsPage() {
     // Load messages when selected conversation changes (but not while streaming)
     useEffect(() => {
         if (!selectedConversationId) {
-            // Don't clear messages if we're streaming or have errors (pending message)
             if (!isStreaming && !streamError) {
                 setMessages([])
             }
             return
         }
 
-        // Don't reload messages if we're currently streaming or have a pending error
         if (isStreaming || streamError) {
             return
         }
 
-        const loadMessages = async () => {
+        const load = async () => {
             try {
                 setIsLoadingMessages(true)
-                const response =
-                    await conversationApi.getConversationMessages(selectedConversationId)
-                // Backend returns newest first, reverse for display (oldest first)
-                setMessages([...response.data].reverse())
-                resetStream()
+                await fetchMessages(selectedConversationId)
             } catch (err) {
                 console.error("Failed to load messages:", err)
             } finally {
@@ -82,30 +83,20 @@ export function ConversationsPage() {
             }
         }
 
-        loadMessages()
-    }, [selectedConversationId, isStreaming, streamError, resetStream])
+        load()
+    }, [selectedConversationId, isStreaming, streamError, fetchMessages])
 
-    // Update messages when streaming completes
+    // Reload messages when streaming completes to get final saved data
     useEffect(() => {
         if (!isStreaming && streamingText && newConversationId) {
-            // After streaming completes, reload the conversation
-            // This ensures we get the final saved message with ID, tokens, etc.
-            const reloadMessages = async () => {
-                try {
-                    const response =
-                        await conversationApi.getConversationMessages(newConversationId)
-                    // Backend returns newest first, reverse for display (oldest first)
-                    setMessages([...response.data].reverse())
-                    resetStream() // Clear streaming state
-                } catch (err) {
+            const timer = setTimeout(() => {
+                fetchMessages(newConversationId).catch((err) =>
                     console.error("Failed to reload messages:", err)
-                }
-            }
-
-            const timer = setTimeout(reloadMessages, 500)
+                )
+            }, 500)
             return () => clearTimeout(timer)
         }
-    }, [isStreaming, streamingText, newConversationId])
+    }, [isStreaming, streamingText, newConversationId, fetchMessages])
 
     // Sync new conversation to URL when created via streaming
     useEffect(() => {
@@ -136,37 +127,24 @@ export function ConversationsPage() {
         setSearchParams({})
     }
 
-    const clearStreamError = () => {
-        resetStream()
-        setLastUserMessageId(null)
-    }
-
     const handleSendMessage = async (
         message: string,
         isRetry?: boolean,
         retryMessageId?: string,
     ) => {
         try {
-            clearStreamError()
+            resetStream()
+            setLastUserMessageId(null)
 
-            // Create temp user message for optimistic UI (only for new messages)
-            let tempMessageId: string
-            let tempConversationId: string | null
-
-            if (isRetry && retryMessageId) {
-                // Retry: use existing message ID
-                tempMessageId = retryMessageId
-                tempConversationId = selectedConversationId
-            } else {
-                // New message: create temp
-                tempMessageId = `temp-${Date.now()}`
-                tempConversationId = newConversationId || selectedConversationId
-            }
+            const tempMessageId = isRetry && retryMessageId
+                ? retryMessageId
+                : `temp-${Date.now()}`
 
             if (!isRetry) {
+                const conversationId = newConversationId || selectedConversationId
                 const userMessage: Message = {
                     id: tempMessageId,
-                    conversationId: tempConversationId || tempMessageId,
+                    conversationId: conversationId || tempMessageId,
                     role: "user",
                     text: message,
                     modelId: selectedModel,
@@ -175,8 +153,7 @@ export function ConversationsPage() {
                 setMessages((prev) => [...prev, userMessage])
             }
 
-            // When Phase 1 arrives with real message, replace temp with real
-            const handlePhaseOneMessage = (realMessage: Message) => {
+            const onUserMessageSucceeded = (realMessage: Message) => {
                 setMessages((prev) =>
                     prev.map((msg) => (msg.id === tempMessageId ? realMessage : msg))
                 )
@@ -187,7 +164,7 @@ export function ConversationsPage() {
                 message,
                 selectedModel,
                 selectedConversationId || undefined,
-                handlePhaseOneMessage,
+                onUserMessageSucceeded,
                 isRetry,
                 retryMessageId,
             )

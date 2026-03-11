@@ -58,7 +58,7 @@ export function useStreamChat(): UseStreamChatResult {
                         try {
                             const event = JSON.parse(chunk)
 
-                            // Phase 1: User message with conversation ID
+                            // Server confirmed user message saved
                             if (event.conversationId && event.message) {
                                 currentConversationId = event.conversationId
                                 setConversationId(event.conversationId)
@@ -66,15 +66,15 @@ export function useStreamChat(): UseStreamChatResult {
                                     onMessageReceived(event.message)
                                 }
                             }
-                            // Phase 2: Text delta
+                            // AI response chunk
                             else if (event.delta) {
                                 setStreamingText((prev) => prev + event.delta)
                             }
-                            // Phase 2: Completion
+                            // AI response complete
                             else if (event.done) {
                                 // Streaming complete
                             }
-                            // Error (can occur at any phase)
+                            // Error
                             else if (event.error) {
                                 setError(event.error)
                             }
