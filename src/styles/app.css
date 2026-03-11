@@ -291,7 +291,8 @@ fieldset legend {
     max-width: 80%;
 }
 
-.message-bubble.assistant {
+.message-bubble.assistant,
+.message-bubble.error {
     align-items: flex-start;
     border: var(--border);
     margin: 0;
@@ -299,32 +300,23 @@ fieldset legend {
     width: 80%;
 }
 
-.message-bubble.assistant legend {
+.message-bubble.assistant legend,
+.message-bubble.error legend {
     padding: 0 8px;
     margin-left: 8px;
     font-size: 11px;
 }
 
 .message-bubble.error {
-    align-items: flex-start;
-    border: 1px solid #dc2626;
-    margin: 0;
-    padding: 0;
-    width: 80%;
+    border-color: #dc2626;
 }
 
 .message-bubble.error legend {
-    padding: 0 8px;
-    margin-left: 8px;
-    font-size: 11px;
     color: #dc2626;
 }
 
 .message-bubble.error .message-text {
-    background-color: #fff;
     color: #dc2626;
-    border: none;
-    max-width: none;
     padding: var(--gap);
 }
 
