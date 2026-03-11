@@ -55,4 +55,6 @@ export interface ChatRequest {
     prompt: string
     modelId: string
     conversationId?: string
+    isRetry?: boolean
+    messageId?: string
 }

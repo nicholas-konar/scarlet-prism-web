@@ -11,6 +11,8 @@ interface UseStreamChatResult {
         modelId: string,
         conversationId?: string,
         onMessageReceived?: (message: Message) => void,
+        isRetry?: boolean,
+        messageId?: string,
     ) => Promise<void>
     error: string | null
     reset: () => void
@@ -34,6 +36,8 @@ export function useStreamChat(): UseStreamChatResult {
             modelId: string,
             _conversationId?: string,
             onMessageReceived?: (message: Message) => void,
+            isRetry?: boolean,
+            messageId?: string,
         ) => {
             setError(null)
             setIsStreaming(true)
@@ -47,6 +51,8 @@ export function useStreamChat(): UseStreamChatResult {
                         prompt,
                         modelId,
                         conversationId: currentConversationId,
+                        isRetry,
+                        messageId,
                     },
                     (chunk: string) => {
                         try {

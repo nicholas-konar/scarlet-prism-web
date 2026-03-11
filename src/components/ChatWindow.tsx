@@ -8,12 +8,14 @@ interface ChatWindowProps {
     messages: Message[]
     streamingText: string
     isStreaming: boolean
-    onSendMessage: (message: string) => Promise<void>
+    onSendMessage: (message: string, isRetry?: boolean, retryMessageId?: string) => Promise<void>
     isLoading: boolean
     currentModelId?: string
     selectedModel: string
     onModelChange: (model: string) => void
     streamError: string | null
+    lastUserMessageId: string | null
+    onRetry: () => Promise<void>
 }
 
 export function ChatWindow({
@@ -27,6 +29,8 @@ export function ChatWindow({
     selectedModel,
     onModelChange,
     streamError,
+    lastUserMessageId,
+    onRetry,
 }: ChatWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -49,7 +53,12 @@ export function ChatWindow({
                 ) : (
                     <>
                         {messages.map((msg) => (
-                            <MessageBubble key={msg.id} message={msg} />
+                            <MessageBubble
+                                key={msg.id}
+                                message={msg}
+                                showRetry={msg.id === lastUserMessageId && !!streamError}
+                                onRetry={onRetry}
+                            />
                         ))}
 
                         {streamError && (

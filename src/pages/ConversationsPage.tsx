@@ -22,6 +22,7 @@ export function ConversationsPage() {
     const [selectedModel, setSelectedModel] = useState(
         user?.defaultModelId || DEFAULT_MODEL_ID,
     )
+    const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
     const {
         streamingText,
         isStreaming,
@@ -137,30 +138,49 @@ export function ConversationsPage() {
 
     const clearStreamError = () => {
         resetStream()
+        setLastUserMessageId(null)
     }
 
-    const handleSendMessage = async (message: string) => {
+    const handleSendMessage = async (
+        message: string,
+        isRetry?: boolean,
+        retryMessageId?: string,
+    ) => {
         try {
             clearStreamError()
 
-            // Create temp user message for optimistic UI
-            const tempMessageId = `temp-${Date.now()}`
-            const tempConversationId = newConversationId || selectedConversationId
-            const userMessage: Message = {
-                id: tempMessageId,
-                conversationId: tempConversationId || tempMessageId,
-                role: "user",
-                text: message,
-                modelId: selectedModel,
-                createdAt: new Date().toISOString(),
+            // Create temp user message for optimistic UI (only for new messages)
+            let tempMessageId: string
+            let tempConversationId: string | null
+
+            if (isRetry && retryMessageId) {
+                // Retry: use existing message ID
+                tempMessageId = retryMessageId
+                tempConversationId = selectedConversationId
+            } else {
+                // New message: create temp
+                tempMessageId = `temp-${Date.now()}`
+                tempConversationId = newConversationId || selectedConversationId
             }
-            setMessages((prev) => [...prev, userMessage])
+
+            if (!isRetry) {
+                const userMessage: Message = {
+                    id: tempMessageId,
+                    conversationId: tempConversationId || tempMessageId,
+                    role: "user",
+                    text: message,
+                    modelId: selectedModel,
+                    createdAt: new Date().toISOString(),
+                }
+                setMessages((prev) => [...prev, userMessage])
+            }
 
             // When Phase 1 arrives with real message, replace temp with real
             const handlePhaseOneMessage = (realMessage: Message) => {
                 setMessages((prev) =>
                     prev.map((msg) => (msg.id === tempMessageId ? realMessage : msg))
                 )
+                setLastUserMessageId(realMessage.id)
             }
 
             await sendMessage(
@@ -168,9 +188,18 @@ export function ConversationsPage() {
                 selectedModel,
                 selectedConversationId || undefined,
                 handlePhaseOneMessage,
+                isRetry,
+                retryMessageId,
             )
         } catch (err) {
             console.error("Failed to send message:", err)
+        }
+    }
+
+    const handleRetry = async () => {
+        const userMessage = messages.find((msg) => msg.id === lastUserMessageId)
+        if (userMessage && streamError) {
+            await handleSendMessage(userMessage.text, true, userMessage.id)
         }
     }
 
@@ -211,6 +240,8 @@ export function ConversationsPage() {
                     selectedModel={selectedModel}
                     onModelChange={setSelectedModel}
                     streamError={streamError}
+                    lastUserMessageId={lastUserMessageId}
+                    onRetry={handleRetry}
                 />
             </div>
         </div>

@@ -45,7 +45,12 @@ export async function streamChat(
 
     // Strip conversationId from body since it goes in URL for existing chats
     const body = data.conversationId
-        ? { prompt: data.prompt, modelId: data.modelId }
+        ? {
+              prompt: data.prompt,
+              modelId: data.modelId,
+              ...(data.isRetry && { isRetry: data.isRetry }),
+              ...(data.messageId && { messageId: data.messageId }),
+          }
         : data
 
     return apiStream(
