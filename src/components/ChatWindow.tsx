@@ -36,7 +36,7 @@ export function ChatWindow({
 
     // Auto-scroll to bottom
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
     }, [messages, streamingText])
 
     const conversationTitle = conversationId || "Chat"

@@ -289,6 +289,7 @@ fieldset legend {
 
 .message-bubble.user {
     align-items: flex-end;
+    max-width: 80%;
 }
 
 .message-bubble.assistant {
@@ -345,6 +346,7 @@ fieldset legend {
     background-color: #000;
     color: #fff;
     border: var(--border);
+    max-width: none;
 }
 
 .message-bubble.assistant .message-text {
