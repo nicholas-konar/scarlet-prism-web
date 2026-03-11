@@ -158,7 +158,6 @@ fieldset legend {
     min-height: 0;
 }
 
-
 .list-items {
     flex: 1;
     overflow-y: auto;
@@ -176,19 +175,7 @@ fieldset legend {
     align-items: center;
 }
 
-.list-item:hover:not(:disabled) {
-    background-color: #fff;
-    color: #000;
-    font-weight: normal;
-}
-
 .list-item.selected {
-    background-color: #000;
-    color: #fff;
-    font-weight: 600;
-}
-
-.list-item.selected:hover:not(:disabled) {
     background-color: #000;
     color: #fff;
     font-weight: 600;
@@ -242,7 +229,6 @@ fieldset legend {
     border: var(--border);
     margin: 0;
 }
-
 
 .empty-state {
     padding: var(--gap);
@@ -337,23 +323,16 @@ fieldset legend {
 .message-text {
     font-size: 12px;
     line-height: 1.4;
-    max-width: 80%;
     padding: 8px;
-    border: var(--border);
 }
 
 .message-bubble.user .message-text {
     background-color: #000;
     color: #fff;
     border: var(--border);
-    max-width: none;
 }
 
 .message-bubble.assistant .message-text {
-    background-color: #fff;
-    color: #000;
-    border: none;
-    max-width: none;
     padding: var(--gap);
 }
 
@@ -382,7 +361,7 @@ fieldset legend {
     width: 100%;
     padding: 6px 8px;
     font-size: 12px;
-    border: 1px solid #000;
+    border: var(--border);
     background-color: #fff;
     cursor: pointer;
     font-family: "Courier New", Courier, monospace;
@@ -438,10 +417,6 @@ fieldset legend {
         position: fixed;
         inset: 0;
         z-index: 10;
-    }
-
-    .message-text {
-        max-width: 100%;
     }
 
     .header {

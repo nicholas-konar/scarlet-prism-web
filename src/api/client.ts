@@ -1,11 +1,5 @@
 /* Base fetch wrapper with authorization header */
 
-interface RequestInit extends globalThis.RequestInit {
-    body?: BodyInit | null
-}
-
-type BodyInit = string | FormData | URLSearchParams | ReadableStream<Uint8Array>
-
 export class ApiError extends Error {
     constructor(
         public status: number,
