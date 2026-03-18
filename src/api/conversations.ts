@@ -51,7 +51,11 @@ export async function streamChat(
               ...(data.isRetry && { isRetry: data.isRetry }),
               ...(data.messageId && { messageId: data.messageId }),
           }
-        : data
+        : {
+              prompt: data.prompt,
+              modelId: data.modelId,
+              ...(data.sermonIds?.length && { sermonIds: data.sermonIds }),
+          }
 
     return apiStream(
         endpoint,
