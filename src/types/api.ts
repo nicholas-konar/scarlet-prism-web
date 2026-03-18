@@ -87,7 +87,7 @@ export interface PaginatedResponse<T> {
     nextCursor: string | null
 }
 
-export interface ChatRequest {
+export interface ConversationRequest {
     prompt: string
     modelId: string
     conversationId?: string

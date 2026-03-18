@@ -1,5 +1,5 @@
 import { apiCall, apiStream } from "./client"
-import type { Conversation, Message, ChatRequest, PaginatedResponse } from "@/types/api"
+import type { Conversation, Message, ConversationRequest, PaginatedResponse } from "@/types/api"
 
 export async function listConversations(
     limit?: number,
@@ -35,7 +35,7 @@ export async function getConversationMessages(
 }
 
 export async function streamChat(
-    data: ChatRequest,
+    data: ConversationRequest,
     onChunk: (chunk: string) => void,
 ): Promise<void> {
     // Use /conversations for new chats, /conversations/:id for existing
