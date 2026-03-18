@@ -7,7 +7,7 @@ import { SermonList } from "@/components/SermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
 import * as conversationApi from "@/api/conversations"
 import * as sermonsApi from "@/api/sermons"
-import type { Conversation, Message, Sermon, ConversationSermon } from "@/types/api"
+import type { Conversation, Message, Sermon, ConversationSermon, ConversationEvent } from "@/types/api"
 
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
 
@@ -19,8 +19,9 @@ export function ConversationsPage() {
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [messages, setMessages] = useState<Message[]>([])
     const [sermons, setSermons] = useState<Sermon[]>([])
-    const [activeSermons, setActiveSermons] = useState<ConversationSermon[]>([])
+    const [allConversationSermons, setAllConversationSermons] = useState<ConversationSermon[]>([])
     const [pendingSermonIds, setPendingSermonIds] = useState<string[]>([])
+    const [pendingEvents, setPendingEvents] = useState<ConversationEvent[]>([])
     const [isLoadingConversations, setIsLoadingConversations] = useState(true)
     const [isLoadingMessages, setIsLoadingMessages] = useState(false)
     const [apiError, setApiError] = useState<string | null>(null)
@@ -47,12 +48,12 @@ export function ConversationsPage() {
         resetStream()
     }, [resetStream])
 
-    const fetchActiveSermons = useCallback(async (conversationId: string) => {
+    const fetchConversationSermons = useCallback(async (conversationId: string) => {
         try {
-            const sermons = await sermonsApi.getConversationSermons(conversationId)
-            setActiveSermons(sermons)
+            const records = await sermonsApi.getConversationSermons(conversationId)
+            setAllConversationSermons(records)
         } catch {
-            setActiveSermons([])
+            setAllConversationSermons([])
         }
     }, [])
 
@@ -91,7 +92,7 @@ export function ConversationsPage() {
         if (!selectedConversationId) {
             if (!isStreaming && !streamError) {
                 setMessages([])
-                setActiveSermons([])
+                setAllConversationSermons([])
             }
             return
         }
@@ -102,7 +103,7 @@ export function ConversationsPage() {
             try {
                 setIsLoadingMessages(true)
                 await fetchMessages(selectedConversationId)
-                await fetchActiveSermons(selectedConversationId)
+                await fetchConversationSermons(selectedConversationId)
             } catch (err) {
                 console.error("Failed to load conversation:", err)
             } finally {
@@ -111,7 +112,7 @@ export function ConversationsPage() {
         }
 
         load()
-    }, [selectedConversationId, isStreaming, streamError, fetchMessages, fetchActiveSermons])
+    }, [selectedConversationId, isStreaming, streamError, fetchMessages, fetchConversationSermons])
 
     // Reload messages after streaming completes
     useEffect(() => {
@@ -139,32 +140,47 @@ export function ConversationsPage() {
         }
     }, [newConversationId, selectedConversationId, conversations, user])
 
-    // Clear pending selections once a new conversation is confirmed server-side,
-    // and immediately fetch active resources so the sidebar reflects attached sermons
+    // Once a new conversation is confirmed server-side, fetch full sermon history
+    // so the sidebar and event log reflect the sermons that were just attached
     useEffect(() => {
         if (newConversationId) {
-            fetchActiveSermons(newConversationId)
+            fetchConversationSermons(newConversationId)
             setPendingSermonIds([])
+            setPendingEvents([])
         }
-    }, [newConversationId, fetchActiveSermons])
+    }, [newConversationId, fetchConversationSermons])
 
     const handleSelectConversation = (id: string) => {
         resetStream()
         setPendingSermonIds([])
+        setPendingEvents([])
+        setAllConversationSermons([])
         setSearchParams({ id })
     }
 
     const handleNewConversation = () => {
         resetStream()
         setMessages([])
-        setActiveSermons([])
+        setAllConversationSermons([])
         setPendingSermonIds([])
+        setPendingEvents([])
         setSearchParams({})
     }
 
     const handleTogglePendingSermon = (sermonId: string) => {
+        const sermon = sermons.find((s) => s.id === sermonId)
+        const title = sermon?.title ?? sermonId
+        const isRemoving = pendingSermonIds.includes(sermonId)
+        const pendingEvent: ConversationEvent = {
+            id: `pending-${sermonId}-${Date.now()}`,
+            text: isRemoving
+                ? `Removed "${title}" from new conversation`
+                : `Added "${title}" to new conversation`,
+            createdAt: new Date().toISOString(),
+        }
+        setPendingEvents((prev) => [...prev, pendingEvent])
         setPendingSermonIds((prev) =>
-            prev.includes(sermonId) ? prev.filter((id) => id !== sermonId) : [...prev, sermonId],
+            isRemoving ? prev.filter((id) => id !== sermonId) : [...prev, sermonId],
         )
     }
 
@@ -226,7 +242,7 @@ export function ConversationsPage() {
         if (!effectiveConversationId) return
         try {
             const record = await sermonsApi.attachSermon(effectiveConversationId, sermon.id)
-            setActiveSermons((prev) => [...prev, record])
+            setAllConversationSermons((prev) => [...prev, { ...record, sermon }])
         } catch (err) {
             console.error("Failed to attach sermon:", err)
         }
@@ -236,11 +252,40 @@ export function ConversationsPage() {
         if (!effectiveConversationId) return
         try {
             await sermonsApi.detachSermon(effectiveConversationId, conversationSermonId)
-            setActiveSermons((prev) => prev.filter((r) => r.id !== conversationSermonId))
+            const removedAt = new Date().toISOString()
+            setAllConversationSermons((prev) =>
+                prev.map((r) => (r.id === conversationSermonId ? { ...r, removedAt } : r)),
+            )
         } catch (err) {
             console.error("Failed to detach sermon:", err)
         }
     }
+
+    const activeSermons = allConversationSermons.filter((r) => !r.removedAt)
+
+    const conversationEvents: ConversationEvent[] = effectiveConversationId
+        ? allConversationSermons.flatMap((r) => {
+              const title =
+                  r.sermon?.title ??
+                  sermons.find((s) => s.id === r.sermonId)?.title ??
+                  r.sermonId
+              const events: ConversationEvent[] = [
+                  {
+                      id: `attach-${r.id}`,
+                      text: `Attached "${title}" to conversation`,
+                      createdAt: r.createdAt,
+                  },
+              ]
+              if (r.removedAt) {
+                  events.push({
+                      id: `detach-${r.id}`,
+                      text: `Removed "${title}" from conversation`,
+                      createdAt: r.removedAt,
+                  })
+              }
+              return events
+          })
+        : pendingEvents
 
     return (
         <div className="conversations-page">
@@ -289,6 +334,7 @@ export function ConversationsPage() {
                 <ConversationWindow
                     conversationId={effectiveConversationId}
                     messages={messages}
+                    events={conversationEvents}
                     streamingText={streamingText}
                     isStreaming={isStreaming}
                     onSendMessage={handleSendMessage}
