@@ -38,12 +38,11 @@ export async function streamConversation(
     data: ConversationRequest,
     onChunk: (chunk: string) => void,
 ): Promise<void> {
-    // Use /conversations for new chats, /conversations/:id for existing
     const endpoint = data.conversationId
         ? `/conversations/${data.conversationId}`
         : "/conversations"
 
-    // Strip conversationId from body since it goes in URL for existing chats
+    // Strip conversationId from body since it goes in the URL for existing conversations
     const body = data.conversationId
         ? {
               prompt: data.prompt,
