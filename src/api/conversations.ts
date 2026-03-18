@@ -34,7 +34,7 @@ export async function getConversationMessages(
     })
 }
 
-export async function streamChat(
+export async function streamConversation(
     data: ConversationRequest,
     onChunk: (chunk: string) => void,
 ): Promise<void> {
