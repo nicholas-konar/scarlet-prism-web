@@ -240,15 +240,15 @@ fieldset legend {
     text-align: center;
 }
 
-.new-chat-btn {
+.new-conversation-btn {
     width: 100%;
     padding: 8px;
     font-size: 12px;
 }
 
-/* ===== Chat Window ===== */
+/* ===== Conversation Window ===== */
 
-.chat-window {
+.conversation-window {
     display: flex;
     flex-direction: column;
     overflow: hidden;
