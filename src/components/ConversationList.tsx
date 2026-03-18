@@ -4,7 +4,7 @@ interface ConversationListProps {
     conversations: Conversation[]
     selectedId: string | null
     onSelect: (id: string) => void
-    onNewChat: () => void
+    onNewConversation: () => void
     isLoading: boolean
 }
 
@@ -12,7 +12,7 @@ export function ConversationList({
     conversations,
     selectedId,
     onSelect,
-    onNewChat,
+    onNewConversation,
     isLoading,
 }: ConversationListProps) {
     return (
@@ -40,8 +40,8 @@ export function ConversationList({
             </div>
 
             <div className="list-footer">
-                <button className="new-chat-btn" onClick={onNewChat} disabled={isLoading}>
-                    [+ new chat]
+                <button className="new-conversation-btn" onClick={onNewConversation} disabled={isLoading}>
+                    [+ new conversation]
                 </button>
             </div>
         </fieldset>
