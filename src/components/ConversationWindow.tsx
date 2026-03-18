@@ -9,7 +9,11 @@ interface ConversationWindowProps {
     events: ConversationEvent[]
     streamingText: string
     isStreaming: boolean
-    onSendMessage: (message: string, isRetry?: boolean, retryMessageId?: string) => Promise<void>
+    onSendMessage: (
+        message: string,
+        isRetry?: boolean,
+        retryMessageId?: string,
+    ) => Promise<void>
     isLoading: boolean
     selectedModel: string
     onModelChange: (model: string) => void
@@ -38,7 +42,7 @@ export function ConversationWindow({
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
     }, [messages, events, streamingText])
 
-    const conversationTitle = conversationId || "Conversation"
+    const conversationTitle = conversationId || "New Conversation"
     const isEmpty =
         !conversationId &&
         messages.length === 0 &&
@@ -76,7 +80,8 @@ export function ConversationWindow({
                                     key={item.data.id}
                                     message={item.data}
                                     showRetry={
-                                        item.data.id === lastUserMessageId && !!streamError
+                                        item.data.id === lastUserMessageId &&
+                                        !!streamError
                                     }
                                     onRetry={onRetry}
                                 />
