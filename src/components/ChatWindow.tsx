@@ -32,7 +32,6 @@ export function ChatWindow({
 }: ChatWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
-    // Auto-scroll to bottom
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
     }, [messages, streamingText])

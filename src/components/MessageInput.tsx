@@ -17,7 +17,6 @@ export function MessageInput({
     const [message, setMessage] = useState("")
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-    // Auto-resize textarea with max height constraint
     useEffect(() => {
         const textarea = textareaRef.current
         if (textarea) {
@@ -31,7 +30,6 @@ export function MessageInput({
         if (message.trim() && !isDisabled) {
             await onSubmit(message)
             setMessage("")
-            // Reset textarea height
             if (textareaRef.current) {
                 textareaRef.current.style.height = "auto"
             }
@@ -47,11 +45,13 @@ export function MessageInput({
 
     return (
         <form onSubmit={handleSubmit} className="message-input-form-wrapper">
-            <ModelSelector
-                selectedModel={selectedModel}
-                onModelChange={onModelChange}
-                disabled={isDisabled}
-            />
+            <div className="selectors-row">
+                <ModelSelector
+                    selectedModel={selectedModel}
+                    onModelChange={onModelChange}
+                    disabled={isDisabled}
+                />
+            </div>
             <fieldset
                 className="message-input-form"
                 onClick={() => textareaRef.current?.focus()}
