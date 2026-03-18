@@ -75,6 +75,13 @@ export interface ConversationSermon {
     sermonId: string
     removedAt: string | null
     createdAt: string
+    sermon?: Sermon
+}
+
+export interface ConversationEvent {
+    id: string
+    text: string
+    createdAt: string
 }
 
 export interface PaginationQuery {
