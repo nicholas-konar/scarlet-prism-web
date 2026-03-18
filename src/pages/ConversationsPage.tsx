@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
-import { useStreamChat } from "@/hooks/useStreamChat"
+import { useConversationStream } from "@/hooks/useConversationStream"
 import { ConversationList } from "@/components/ConversationList"
 import { SermonList } from "@/components/SermonList"
-import { ChatWindow } from "@/components/ChatWindow"
+import { ConversationWindow } from "@/components/ConversationWindow"
 import * as conversationApi from "@/api/conversations"
 import * as sermonsApi from "@/api/sermons"
 import type { Conversation, Message, Sermon, ConversationSermon } from "@/types/api"
@@ -36,7 +36,7 @@ export function ConversationsPage() {
         sendMessage,
         reset: resetStream,
         error: streamError,
-    } = useStreamChat()
+    } = useConversationStream()
 
     // The effective conversation ID — either from URL or newly created via streaming
     const effectiveConversationId = selectedConversationId || newConversationId || null
@@ -154,7 +154,7 @@ export function ConversationsPage() {
         setSearchParams({ id })
     }
 
-    const handleNewChat = () => {
+    const handleNewConversation = () => {
         resetStream()
         setMessages([])
         setActiveSermons([])
@@ -277,7 +277,7 @@ export function ConversationsPage() {
                         conversations={conversations}
                         selectedId={selectedConversationId}
                         onSelect={handleSelectConversation}
-                        onNewChat={handleNewChat}
+                        onNewConversation={handleNewConversation}
                         isLoading={isLoadingConversations}
                     />
                 </div>
@@ -286,7 +286,7 @@ export function ConversationsPage() {
                     <div className="api-error-banner">API Error: {apiError}</div>
                 )}
 
-                <ChatWindow
+                <ConversationWindow
                     conversationId={effectiveConversationId}
                     messages={messages}
                     streamingText={streamingText}
@@ -303,3 +303,4 @@ export function ConversationsPage() {
         </div>
     )
 }
+
