@@ -146,9 +146,33 @@ fieldset legend {
     align-items: stretch;
 }
 
+/* ===== Sidebar ===== */
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* ===== Sermon List Panel ===== */
+
+.sermon-list-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: var(--border);
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+}
+
 /* ===== Conversation List ===== */
 
 .conversation-list {
+    flex: 2;
     display: flex;
     flex-direction: column;
     border: var(--border);
@@ -371,6 +395,29 @@ fieldset legend {
     cursor: not-allowed;
 }
 
+/* ===== Congregation Header ===== */
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+}
+
+.congregation-name {
+    font-size: 12px;
+    padding: 2px 8px;
+    border: var(--border);
+}
+
+/* ===== Selectors Row ===== */
+
+.selectors-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: stretch;
+}
+
 /* ===== Message Input ===== */
 
 .message-input-form-wrapper {
@@ -431,11 +478,11 @@ fieldset legend {
         grid-template-columns: 1fr;
     }
 
-    .conversation-list {
+    .sidebar {
         display: none;
     }
 
-    .conversation-list.mobile-open {
+    .sidebar.mobile-open {
         display: flex;
         position: fixed;
         inset: 0;

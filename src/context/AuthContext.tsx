@@ -1,10 +1,12 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react"
-import type { User } from "@/types/api"
+import type { User, Congregation } from "@/types/api"
 import * as authApi from "@/api/auth"
+import * as congregationsApi from "@/api/congregations"
 
 interface AuthContextValue {
     token: string | null
     user: User | null
+    currentCongregation: Congregation | null
     isLoading: boolean
     login: (email: string, password: string) => Promise<void>
     signup: (email: string, password: string) => Promise<void>
@@ -17,19 +19,33 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [token, setToken] = useState<string | null>(null)
     const [user, setUser] = useState<User | null>(null)
+    const [currentCongregation, setCurrentCongregation] = useState<Congregation | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
-    // Load token from localStorage on mount
+    async function loadCongregation(congregationId: string | null) {
+        if (!congregationId) {
+            setCurrentCongregation(null)
+            return
+        }
+        try {
+            const congregation = await congregationsApi.getCongregation(congregationId)
+            setCurrentCongregation(congregation)
+        } catch {
+            setCurrentCongregation(null)
+        }
+    }
+
     useEffect(() => {
         const storedToken = localStorage.getItem("token")
         if (storedToken) {
             setToken(storedToken)
-            // Try to verify token is still valid by fetching user
             authApi
                 .getMe()
-                .then((u) => setUser(u))
+                .then((u) => {
+                    setUser(u)
+                    return loadCongregation(u.congregationId)
+                })
                 .catch(() => {
-                    // Token is invalid, clear it
                     localStorage.removeItem("token")
                     setToken(null)
                 })
@@ -44,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("token", response.token)
         setToken(response.token)
         setUser(response.user)
+        await loadCongregation(response.user.congregationId)
     }
 
     const signup = async (email: string, password: string) => {
@@ -51,12 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("token", response.token)
         setToken(response.token)
         setUser(response.user)
+        await loadCongregation(response.user.congregationId)
     }
 
     const logout = () => {
         localStorage.removeItem("token")
         setToken(null)
         setUser(null)
+        setCurrentCongregation(null)
     }
 
     return (
@@ -64,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             value={{
                 token,
                 user,
+                currentCongregation,
                 isLoading,
                 login,
                 signup,

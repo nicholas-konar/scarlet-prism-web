@@ -3,19 +3,24 @@ import { useSearchParams } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { useStreamChat } from "@/hooks/useStreamChat"
 import { ConversationList } from "@/components/ConversationList"
+import { SermonList } from "@/components/SermonList"
 import { ChatWindow } from "@/components/ChatWindow"
 import * as conversationApi from "@/api/conversations"
-import type { Conversation, Message } from "@/types/api"
+import * as sermonsApi from "@/api/sermons"
+import type { Conversation, Message, Sermon, ConversationSermon } from "@/types/api"
 
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
 
 export function ConversationsPage() {
-    const { user, logout } = useAuth()
+    const { user, logout, currentCongregation } = useAuth()
     const [searchParams, setSearchParams] = useSearchParams()
     const selectedConversationId = searchParams.get("id")
 
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [messages, setMessages] = useState<Message[]>([])
+    const [sermons, setSermons] = useState<Sermon[]>([])
+    const [activeSermons, setActiveSermons] = useState<ConversationSermon[]>([])
+    const [pendingSermonIds, setPendingSermonIds] = useState<string[]>([])
     const [isLoadingConversations, setIsLoadingConversations] = useState(true)
     const [isLoadingMessages, setIsLoadingMessages] = useState(false)
     const [apiError, setApiError] = useState<string | null>(null)
@@ -23,6 +28,7 @@ export function ConversationsPage() {
         user?.defaultModelId || DEFAULT_MODEL_ID,
     )
     const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
+
     const {
         streamingText,
         isStreaming,
@@ -32,16 +38,27 @@ export function ConversationsPage() {
         error: streamError,
     } = useStreamChat()
 
-    // Fetch messages for a conversation, reversing from newest-first to oldest-first
+    // The effective conversation ID — either from URL or newly created via streaming
+    const effectiveConversationId = selectedConversationId || newConversationId || null
+
     const fetchMessages = useCallback(async (conversationId: string) => {
         const response = await conversationApi.getConversationMessages(conversationId)
         setMessages([...response.data].reverse())
         resetStream()
     }, [resetStream])
 
+    const fetchActiveSermons = useCallback(async (conversationId: string) => {
+        try {
+            const sermons = await sermonsApi.getConversationSermons(conversationId)
+            setActiveSermons(sermons)
+        } catch {
+            setActiveSermons([])
+        }
+    }, [])
+
     // Load conversations on mount
     useEffect(() => {
-        const loadConversations = async () => {
+        const load = async () => {
             try {
                 setIsLoadingConversations(true)
                 setApiError(null)
@@ -49,61 +66,67 @@ export function ConversationsPage() {
                 setConversations(response.data)
             } catch (err) {
                 const message = err instanceof Error ? err.message : String(err)
-                console.error("Failed to load conversations:", message)
                 setApiError(message)
             } finally {
                 setIsLoadingConversations(false)
             }
         }
-
-        loadConversations()
+        load()
     }, [])
 
-    // Load messages when selected conversation changes (but not while streaming)
+    // Load sermons when congregation is available
+    useEffect(() => {
+        if (!currentCongregation) {
+            setSermons([])
+            return
+        }
+        sermonsApi
+            .listSermons(currentCongregation.id)
+            .then((res) => setSermons(res.data))
+            .catch(() => setSermons([]))
+    }, [currentCongregation])
+
+    // Load messages + resources when selected conversation changes
     useEffect(() => {
         if (!selectedConversationId) {
             if (!isStreaming && !streamError) {
                 setMessages([])
+                setActiveSermons([])
             }
             return
         }
 
-        if (isStreaming || streamError) {
-            return
-        }
+        if (isStreaming || streamError) return
 
         const load = async () => {
             try {
                 setIsLoadingMessages(true)
                 await fetchMessages(selectedConversationId)
+                await fetchActiveSermons(selectedConversationId)
             } catch (err) {
-                console.error("Failed to load messages:", err)
+                console.error("Failed to load conversation:", err)
             } finally {
                 setIsLoadingMessages(false)
             }
         }
 
         load()
-    }, [selectedConversationId, isStreaming, streamError, fetchMessages])
+    }, [selectedConversationId, isStreaming, streamError, fetchMessages, fetchActiveSermons])
 
-    // Reload messages when streaming completes to get final saved data
+    // Reload messages after streaming completes
     useEffect(() => {
         if (!isStreaming && streamingText && newConversationId) {
             const timer = setTimeout(() => {
-                fetchMessages(newConversationId).catch((err) =>
-                    console.error("Failed to reload messages:", err)
-                )
+                fetchMessages(newConversationId).catch(console.error)
             }, 500)
             return () => clearTimeout(timer)
         }
     }, [isStreaming, streamingText, newConversationId, fetchMessages])
 
-    // Sync new conversation to URL when created via streaming
+    // Sync new conversation to URL
     useEffect(() => {
         if (newConversationId && newConversationId !== selectedConversationId) {
             setSearchParams({ id: newConversationId })
-
-            // Add to conversations list if not already there
             if (!conversations.find((c) => c.id === newConversationId)) {
                 const newConv: Conversation = {
                     id: newConversationId,
@@ -116,15 +139,33 @@ export function ConversationsPage() {
         }
     }, [newConversationId, selectedConversationId, conversations, user])
 
+    // Clear pending selections once a new conversation is confirmed server-side,
+    // and immediately fetch active resources so the sidebar reflects attached sermons
+    useEffect(() => {
+        if (newConversationId) {
+            fetchActiveSermons(newConversationId)
+            setPendingSermonIds([])
+        }
+    }, [newConversationId, fetchActiveSermons])
+
     const handleSelectConversation = (id: string) => {
         resetStream()
+        setPendingSermonIds([])
         setSearchParams({ id })
     }
 
-    const handleNewChat = async () => {
+    const handleNewChat = () => {
         resetStream()
         setMessages([])
+        setActiveSermons([])
+        setPendingSermonIds([])
         setSearchParams({})
+    }
+
+    const handleTogglePendingSermon = (sermonId: string) => {
+        setPendingSermonIds((prev) =>
+            prev.includes(sermonId) ? prev.filter((id) => id !== sermonId) : [...prev, sermonId],
+        )
     }
 
     const handleSendMessage = async (
@@ -136,9 +177,8 @@ export function ConversationsPage() {
             resetStream()
             setLastUserMessageId(null)
 
-            const tempMessageId = isRetry && retryMessageId
-                ? retryMessageId
-                : `temp-${Date.now()}`
+            const tempMessageId =
+                isRetry && retryMessageId ? retryMessageId : `temp-${Date.now()}`
 
             if (!isRetry) {
                 const conversationId = newConversationId || selectedConversationId
@@ -155,11 +195,12 @@ export function ConversationsPage() {
 
             const onUserMessageSucceeded = (realMessage: Message) => {
                 setMessages((prev) =>
-                    prev.map((msg) => (msg.id === tempMessageId ? realMessage : msg))
+                    prev.map((msg) => (msg.id === tempMessageId ? realMessage : msg)),
                 )
                 setLastUserMessageId(realMessage.id)
             }
 
+            const isNewConversation = !selectedConversationId && !newConversationId
             await sendMessage(
                 message,
                 selectedModel,
@@ -167,6 +208,7 @@ export function ConversationsPage() {
                 onUserMessageSucceeded,
                 isRetry,
                 retryMessageId,
+                isNewConversation && pendingSermonIds.length > 0 ? pendingSermonIds : undefined,
             )
         } catch (err) {
             console.error("Failed to send message:", err)
@@ -180,11 +222,36 @@ export function ConversationsPage() {
         }
     }
 
+    const handleAttachSermon = async (sermon: Sermon) => {
+        if (!effectiveConversationId) return
+        try {
+            const record = await sermonsApi.attachSermon(effectiveConversationId, sermon.id)
+            setActiveSermons((prev) => [...prev, record])
+        } catch (err) {
+            console.error("Failed to attach sermon:", err)
+        }
+    }
+
+    const handleDetachSermon = async (conversationSermonId: string) => {
+        if (!effectiveConversationId) return
+        try {
+            await sermonsApi.detachSermon(effectiveConversationId, conversationSermonId)
+            setActiveSermons((prev) => prev.filter((r) => r.id !== conversationSermonId))
+        } catch (err) {
+            console.error("Failed to detach sermon:", err)
+        }
+    }
+
     return (
         <div className="conversations-page">
             <div className="header">
                 <div className="header-left">
                     <h1>Scarlet Prism</h1>
+                    {currentCongregation && (
+                        <span className="congregation-name">
+                            {currentCongregation.name}
+                        </span>
+                    )}
                 </div>
                 <div className="header-right">
                     <span className="user-email">{user?.email}</span>
@@ -195,19 +262,32 @@ export function ConversationsPage() {
             </div>
 
             <div className="main-layout">
-                <ConversationList
-                    conversations={conversations}
-                    selectedId={selectedConversationId}
-                    onSelect={handleSelectConversation}
-                    onNewChat={handleNewChat}
-                    isLoading={isLoadingConversations}
-                />
+                <div className="sidebar">
+                    <SermonList
+                        sermons={sermons}
+                        activeSermons={activeSermons}
+                        pendingSermonIds={pendingSermonIds}
+                        conversationId={effectiveConversationId}
+                        onAttach={handleAttachSermon}
+                        onDetach={handleDetachSermon}
+                        onTogglePending={handleTogglePendingSermon}
+                        isDisabled={isStreaming}
+                    />
+                    <ConversationList
+                        conversations={conversations}
+                        selectedId={selectedConversationId}
+                        onSelect={handleSelectConversation}
+                        onNewChat={handleNewChat}
+                        isLoading={isLoadingConversations}
+                    />
+                </div>
+
                 {apiError && (
                     <div className="api-error-banner">API Error: {apiError}</div>
                 )}
 
                 <ChatWindow
-                    conversationId={selectedConversationId}
+                    conversationId={effectiveConversationId}
                     messages={messages}
                     streamingText={streamingText}
                     isStreaming={isStreaming}
