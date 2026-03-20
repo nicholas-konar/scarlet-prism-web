@@ -11,6 +11,7 @@ interface AuthContextValue {
     login: (email: string, password: string) => Promise<void>
     signup: (email: string, password: string) => Promise<void>
     logout: () => void
+    refreshUser: () => Promise<void>
     isAuthenticated: boolean
 }
 
@@ -35,19 +36,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    async function refreshUser() {
+        const nextUser = await authApi.getMe()
+        setUser(nextUser)
+        await loadCongregation(nextUser.congregationId)
+    }
+
     useEffect(() => {
         const storedToken = localStorage.getItem("token")
         if (storedToken) {
             setToken(storedToken)
-            authApi
-                .getMe()
-                .then((u) => {
-                    setUser(u)
-                    return loadCongregation(u.congregationId)
-                })
+            refreshUser()
                 .catch(() => {
                     localStorage.removeItem("token")
                     setToken(null)
+                    setUser(null)
+                    setCurrentCongregation(null)
                 })
                 .finally(() => setIsLoading(false))
         } else {
@@ -88,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 login,
                 signup,
                 logout,
+                refreshUser,
                 isAuthenticated: !!token,
             }}
         >
