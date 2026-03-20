@@ -10,6 +10,42 @@ export async function listSermons(
     )
 }
 
+type UploadSermonArgs = {
+    congregationId: string
+    title: string
+    speaker?: string
+    recordedOn?: string
+    audio: File
+}
+
+export async function uploadSermon({
+    congregationId,
+    title,
+    speaker,
+    recordedOn,
+    audio,
+}: UploadSermonArgs): Promise<Sermon> {
+    const body = new FormData()
+    body.append("title", title)
+    if (speaker) body.append("speaker", speaker)
+    if (recordedOn) body.append("recordedOn", recordedOn)
+    body.append("audio", audio)
+
+    return apiCall<Sermon>(`/congregations/${congregationId}/sermons`, {
+        method: "POST",
+        body,
+    })
+}
+
+export async function deleteSermon(
+    congregationId: string,
+    sermonId: string,
+): Promise<void> {
+    await apiCall(`/congregations/${congregationId}/sermons/${sermonId}`, {
+        method: "DELETE",
+    })
+}
+
 export async function getConversationSermons(
     conversationId: string,
 ): Promise<ConversationSermon[]> {

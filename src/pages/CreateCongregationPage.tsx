@@ -28,7 +28,7 @@ export function CreateCongregationPage() {
                 about: about || null,
             })
             await refreshUser()
-            navigate("/", { replace: true })
+            navigate("/admin/congregation", { replace: true })
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to create congregation")
         } finally {

@@ -6,6 +6,7 @@ import { SignupPage } from "@/pages/SignupPage"
 import { ConversationsPage } from "@/pages/ConversationsPage"
 import { HomePage } from "@/pages/HomePage"
 import { CreateCongregationPage } from "@/pages/CreateCongregationPage"
+import { CongregationAdminPage } from "@/pages/CongregationAdminPage"
 
 export function App() {
     return (
@@ -27,6 +28,14 @@ export function App() {
                         element={
                             <ProtectedRoute>
                                 <CreateCongregationPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/congregation"
+                        element={
+                            <ProtectedRoute>
+                                <CongregationAdminPage />
                             </ProtectedRoute>
                         }
                     />

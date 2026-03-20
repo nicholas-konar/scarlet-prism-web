@@ -53,6 +53,33 @@ export interface Congregation {
     updatedAt: string
 }
 
+export type CongregationPermission =
+    | "super_admin"
+    | "edit_profile"
+    | "manage_members"
+    | "manage_sermons"
+
+export interface CongregationMemberPermission {
+    id: string
+    membershipId: string
+    permission: CongregationPermission
+}
+
+export interface CongregationMembershipUser {
+    id: string
+    email: string
+}
+
+export interface CongregationMembership {
+    id: string
+    userId: string
+    congregationId: string
+    createdAt: string
+    updatedAt: string
+    permissions: CongregationMemberPermission[]
+    user: CongregationMembershipUser
+}
+
 export interface Sermon {
     id: string
     congregationId: string

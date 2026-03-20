@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { useConversationStream } from "@/hooks/useConversationStream"
 import { ConversationList } from "@/components/ConversationList"
@@ -299,6 +299,10 @@ export function ConversationsPage() {
                     )}
                 </div>
                 <div className="header-right">
+                    <nav className="header-nav">
+                        <Link to="/">Home</Link>
+                        {currentCongregation && <Link to="/admin/congregation">Admin</Link>}
+                    </nav>
                     <span className="user-email">{user?.email}</span>
                     <button className="logout-btn" onClick={logout}>
                         [logout]
@@ -349,4 +353,3 @@ export function ConversationsPage() {
         </div>
     )
 }
-
