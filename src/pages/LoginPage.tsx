@@ -17,7 +17,7 @@ export function LoginPage() {
 
         try {
             await login(email, password)
-            navigate("/conversations", { replace: true })
+            navigate("/", { replace: true })
         } catch (err) {
             const message = err instanceof Error ? err.message : "Login failed"
             setError(message)

@@ -29,7 +29,7 @@ export function SignupPage() {
 
         try {
             await signup(email, password)
-            navigate("/conversations", { replace: true })
+            navigate("/", { replace: true })
         } catch (err) {
             const message = err instanceof Error ? err.message : "Signup failed"
             setError(message)
