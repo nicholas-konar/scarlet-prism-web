@@ -375,12 +375,10 @@ export function CongregationAdminPage() {
                     </form>
                 </fieldset>
 
-                <section className="panel form-panel">
+                <fieldset className="panel form-panel admin-panel">
+                    <legend>Upload</legend>
                     <div className="section-heading">
-                        <div>
-                            <p className="eyebrow">Sermons</p>
-                            <h2>Upload and manage audio</h2>
-                        </div>
+                        <h2>Upload sermon audio</h2>
                         {!canManageSermons && <span className="pill">Read only</span>}
                     </div>
 
@@ -441,6 +439,14 @@ export function CongregationAdminPage() {
                             {sermonMessage && <span className="status-copy">{sermonMessage}</span>}
                         </div>
                     </form>
+                </fieldset>
+
+                <fieldset className="panel form-panel admin-panel">
+                    <legend>Library</legend>
+                    <div className="section-heading">
+                        <h2>Existing sermons</h2>
+                        {!canManageSermons && <span className="pill">Read only</span>}
+                    </div>
 
                     <div className="admin-list">
                         {isLoading ? (
@@ -467,7 +473,7 @@ export function CongregationAdminPage() {
                             ))
                         )}
                     </div>
-                </section>
+                </fieldset>
 
                 <fieldset className="panel form-panel admin-panel">
                     <legend>Members</legend>
