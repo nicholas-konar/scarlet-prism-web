@@ -282,12 +282,10 @@ export function CongregationAdminPage() {
             <main className="app-content admin-layout">
                 {pageError && <div className="error-message">{pageError}</div>}
 
-                <section className="panel form-panel">
+                <fieldset className="panel form-panel admin-panel">
+                    <legend>Profile</legend>
                     <div className="section-heading">
-                        <div>
-                            <p className="eyebrow">Profile</p>
-                            <h2>Congregation details</h2>
-                        </div>
+                        <h2>Congregation details</h2>
                         {!canEditProfile && <span className="pill">Read only</span>}
                     </div>
 
@@ -375,7 +373,7 @@ export function CongregationAdminPage() {
                             {profileMessage && <span className="status-copy">{profileMessage}</span>}
                         </div>
                     </form>
-                </section>
+                </fieldset>
 
                 <section className="panel form-panel">
                     <div className="section-heading">
@@ -471,12 +469,10 @@ export function CongregationAdminPage() {
                     </div>
                 </section>
 
-                <section className="panel form-panel">
+                <fieldset className="panel form-panel admin-panel">
+                    <legend>Members</legend>
                     <div className="section-heading">
-                        <div>
-                            <p className="eyebrow">Members</p>
-                            <h2>Permission matrix</h2>
-                        </div>
+                        <h2>Permission matrix</h2>
                         {!canManageMembers && <span className="pill">Read only</span>}
                     </div>
 
@@ -506,7 +502,7 @@ export function CongregationAdminPage() {
                             />
                         ))}
                     </div>
-                </section>
+                </fieldset>
             </main>
         </div>
     )
