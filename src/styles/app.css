@@ -291,7 +291,7 @@ fieldset legend {
 }
 
 .admin-layout {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .section-heading {
@@ -374,6 +374,10 @@ fieldset legend {
 .member-toggle input {
     width: 16px;
     height: 16px;
+}
+
+.admin-layout > .error-message {
+    grid-column: 1 / -1;
 }
 
 .main-layout {
@@ -662,7 +666,8 @@ fieldset legend {
 @media (max-width: 900px) {
     .main-layout,
     .info-grid,
-    .split-fields {
+    .split-fields,
+    .admin-layout {
         grid-template-columns: 1fr;
     }
 
