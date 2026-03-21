@@ -248,7 +248,9 @@ fieldset legend {
 .admin-panel {
     margin: 0;
     height: 100%;
+    align-content: start;
 }
+
 .admin-panel legend {
     margin-left: 20px;
     padding: 2px 8px;
