@@ -1,23 +1,13 @@
 import { Link } from "react-router-dom"
+import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
 
 export function HomePage() {
-    const { user, logout, currentCongregation } = useAuth()
+    const { currentCongregation } = useAuth()
 
     return (
         <div className="app-page">
-            <header className="app-header">
-                <div>
-                    <p className="eyebrow">Scarlet Prism</p>
-                    <h1>Workspace</h1>
-                </div>
-                <div className="app-header-actions">
-                    <span className="user-email">{user?.email}</span>
-                    <button type="button" onClick={logout}>
-                        Log out
-                    </button>
-                </div>
-            </header>
+            <SiteHeader title="Scarlet Prism" eyebrow={null} />
 
             <main className="app-content">
                 <section className="panel hero-panel">

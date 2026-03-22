@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import * as congregationsApi from "@/api/congregations"
 import * as sermonsApi from "@/api/sermons"
+import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
 import { membershipHasPermission } from "@/lib/congregationPermissions"
 import type {
@@ -99,13 +100,10 @@ export function CongregationAdminPage() {
     if (!currentCongregation) {
         return (
             <div className="app-page">
-                <header className="app-header">
-                    <div>
-                        <p className="eyebrow">Congregation admin</p>
-                        <h1>No congregation selected</h1>
-                    </div>
-                    <Link to="/">Back home</Link>
-                </header>
+                <SiteHeader
+                    title="No congregation selected"
+                    links={[{ label: "Home", to: "/" }]}
+                />
 
                 <main className="app-content">
                     <section className="panel">
@@ -268,16 +266,13 @@ export function CongregationAdminPage() {
 
     return (
         <div className="app-page">
-            <header className="app-header">
-                <div>
-                    <p className="eyebrow">Congregation admin</p>
-                    <h1>{currentCongregation.name}</h1>
-                </div>
-                <div className="app-header-actions">
-                    <Link to="/">Home</Link>
-                    <Link to="/conversations">Chat</Link>
-                </div>
-            </header>
+            <SiteHeader
+                title="Congregation Admin"
+                links={[
+                    { label: "Home", to: "/" },
+                    { label: "Chat", to: "/conversations" },
+                ]}
+            />
 
             <main className="app-content admin-layout">
                 {pageError && <div className="error-message">{pageError}</div>}

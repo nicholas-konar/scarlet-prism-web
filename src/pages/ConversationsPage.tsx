@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
+import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
 import { useConversationStream } from "@/hooks/useConversationStream"
 import { ConversationList } from "@/components/ConversationList"
@@ -12,7 +13,7 @@ import type { Conversation, Message, Sermon, ConversationSermon, ConversationEve
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
 
 export function ConversationsPage() {
-    const { user, logout, currentCongregation } = useAuth()
+    const { user, currentCongregation } = useAuth()
     const [searchParams, setSearchParams] = useSearchParams()
     const selectedConversationId = searchParams.get("id")
 
@@ -289,26 +290,15 @@ export function ConversationsPage() {
 
     return (
         <div className="conversations-page">
-            <div className="header">
-                <div className="header-left">
-                    <h1>Scarlet Prism</h1>
-                    {currentCongregation && (
-                        <span className="congregation-name">
-                            {currentCongregation.name}
-                        </span>
-                    )}
-                </div>
-                <div className="header-right">
-                    <nav className="header-nav">
-                        <Link to="/">Home</Link>
-                        {currentCongregation && <Link to="/admin/congregation">Admin</Link>}
-                    </nav>
-                    <span className="user-email">{user?.email}</span>
-                    <button className="logout-btn" onClick={logout}>
-                        [logout]
-                    </button>
-                </div>
-            </div>
+            <SiteHeader
+                title="Conversations"
+                links={[
+                    { label: "Home", to: "/" },
+                    ...(currentCongregation
+                        ? [{ label: "Admin", to: "/admin/congregation" }]
+                        : []),
+                ]}
+            />
 
             <div className="main-layout">
                 <div className="sidebar">

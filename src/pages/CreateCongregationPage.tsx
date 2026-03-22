@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import * as congregationsApi from "@/api/congregations"
+import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
 
 export function CreateCongregationPage() {
@@ -38,13 +39,10 @@ export function CreateCongregationPage() {
 
     return (
         <div className="app-page">
-            <header className="app-header">
-                <div>
-                    <p className="eyebrow">Congregation setup</p>
-                    <h1>Register your church</h1>
-                </div>
-                <Link to="/">Back home</Link>
-            </header>
+            <SiteHeader
+                title="Register your church"
+                links={[{ label: "Home", to: "/" }]}
+            />
 
             <main className="app-content">
                 <section className="panel form-panel">

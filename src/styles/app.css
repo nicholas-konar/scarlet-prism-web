@@ -110,13 +110,6 @@ fieldset legend {
     font-size: 20px;
 }
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: var(--gap);
-    font-size: 12px;
-}
-
 .header-nav {
     display: flex;
     gap: 8px;
@@ -164,12 +157,40 @@ fieldset legend {
     line-height: 1.1;
 }
 
-.app-header-actions {
+.site-header {
+    align-items: center;
+}
+
+.site-header-main {
+    display: grid;
+    gap: 4px;
+}
+
+.site-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.app-header-actions,
+.site-header-actions {
     display: flex;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
     justify-content: flex-end;
+}
+
+.site-header-actions {
+    margin-left: auto;
+}
+
+.site-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .eyebrow {
@@ -226,6 +247,14 @@ fieldset legend {
 }
 
 .button-link:hover {
+    text-decoration: none;
+}
+
+.congregation-link {
+    text-decoration: none;
+}
+
+.congregation-link:hover {
     text-decoration: none;
 }
 
@@ -651,14 +680,6 @@ fieldset legend {
     cursor: not-allowed;
 }
 
-/* ===== Congregation Header ===== */
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: var(--gap);
-}
-
 .congregation-name {
     font-size: 12px;
     padding: 2px 8px;
@@ -684,9 +705,11 @@ fieldset legend {
         align-items: flex-start;
     }
 
-    .header-right,
-    .app-header-actions {
+    .app-header-actions,
+    .site-header-actions,
+    .site-header-meta {
         justify-content: flex-start;
+        margin-left: 0;
     }
 
     .member-grid {
