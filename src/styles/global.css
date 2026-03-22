@@ -1,4 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap");
+
 /* CSS Reset & Base Styles */
+
+:root {
+    --font-serif: "EB Garamond", Garamond, Georgia, serif;
+}
 
 * {
     box-sizing: border-box;
@@ -12,7 +18,7 @@ html {
 }
 
 body {
-    font-family: "Courier New", Courier, monospace;
+    font-family: var(--font-serif);
     background-color: #fff;
     color: #000;
     line-height: 1.5;
@@ -22,7 +28,7 @@ input,
 textarea,
 button,
 select {
-    font-family: "Courier New", Courier, monospace;
+    font-family: var(--font-serif);
     color: #000;
     background-color: #fff;
 }

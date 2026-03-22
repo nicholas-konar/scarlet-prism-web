@@ -672,7 +672,6 @@ fieldset legend {
     border: none;
     background-color: transparent;
     cursor: pointer;
-    font-family: "Courier New", Courier, monospace;
 }
 
 .model-selector select:disabled {
