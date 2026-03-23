@@ -11,10 +11,15 @@
 /* ===== Fieldset Legend ===== */
 
 fieldset legend {
-    padding: 0 var(--gap);
-    margin-left: var(--gap);
-    font-size: var(--text-sm);
+    padding: 2px 8px;
+    margin-left: 20px;
+    background-color: #000;
+    color: #fff;
+    border-radius: 999px;
+    font-size: 10px;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
 
 /* ===== Auth Pages ===== */
@@ -64,11 +69,8 @@ fieldset legend {
 }
 
 .form-group legend {
-    font-size: var(--text-sm);
-    font-weight: 600;
-    padding: 0 8px;
+    font-size: var(--text-xs);
     margin: 0 0 -12px 12px;
-    background-color: #fff;
     position: relative;
     z-index: 1;
     width: fit-content;
@@ -314,17 +316,6 @@ fieldset legend {
     align-content: start;
 }
 
-.admin-panel legend {
-    margin-left: 20px;
-    padding: 2px 8px;
-    background-color: #000;
-    color: #fff;
-    border-radius: 999px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
 .stack-form {
     display: grid;
     gap: 16px;
@@ -476,21 +467,6 @@ fieldset legend {
     margin: 0;
     padding: 0;
     min-height: 0;
-}
-
-.sermon-list-panel legend,
-.conversation-list legend,
-.messages-container legend,
-.model-selector legend,
-.message-input-form legend {
-    margin-left: 20px;
-    padding: 2px 8px;
-    background-color: #000;
-    color: #fff;
-    border-radius: 999px;
-    font-size: var(--text-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
 }
 
 /* ===== Conversation List ===== */
@@ -647,9 +623,7 @@ fieldset legend {
 
 .message-bubble.assistant legend,
 .message-bubble.error legend {
-    padding: 0 8px;
     margin-left: 8px;
-    font-size: 11px;
 }
 
 .message-bubble.error {
@@ -657,7 +631,8 @@ fieldset legend {
 }
 
 .message-bubble.error legend {
-    color: #dc2626;
+    background-color: #000;
+    color: #fff;
 }
 
 .message-bubble.error .message-text {
