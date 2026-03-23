@@ -37,21 +37,30 @@ export function SiteHeader({
             </div>
 
             <div className="site-header-actions">
-                {links.length > 0 && (
-                    <nav className="header-nav">
-                        {links.map((link) => (
-                            <Link key={`${link.to}-${link.label}`} to={link.to}>
-                                {link.label}
-                            </Link>
-                        ))}
-                    </nav>
-                )}
-
                 <div className="site-header-meta">
                     <span className="user-email">{user?.email}</span>
-                    <button type="button" className="logout-btn" onClick={logout}>
-                        Log out
-                    </button>
+                    <div className="site-header-controls">
+                        {links.length > 0 && (
+                            <nav className="header-nav">
+                                {links.map((link) => (
+                                    <Link
+                                        key={`${link.to}-${link.label}`}
+                                        className="header-control"
+                                        to={link.to}
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ))}
+                            </nav>
+                        )}
+                        <button
+                            type="button"
+                            className="header-control logout-btn"
+                            onClick={logout}
+                        >
+                            Log out
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>

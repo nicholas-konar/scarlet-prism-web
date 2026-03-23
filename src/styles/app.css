@@ -3,6 +3,9 @@
 :root {
     --gap: 12px;
     --border: 1px solid #000;
+    --text-xs: 12px;
+    --text-sm: 13px;
+    --text-md: 15px;
 }
 
 /* ===== Fieldset Legend ===== */
@@ -10,7 +13,7 @@
 fieldset legend {
     padding: 0 var(--gap);
     margin-left: var(--gap);
-    font-size: 12px;
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
@@ -42,7 +45,7 @@ fieldset legend {
 .auth-container .subtitle {
     text-align: center;
     margin-bottom: var(--gap);
-    font-size: 14px;
+    font-size: var(--text-md);
 }
 
 .auth-form {
@@ -61,7 +64,7 @@ fieldset legend {
 }
 
 .form-group legend {
-    font-size: 12px;
+    font-size: var(--text-sm);
     font-weight: 600;
     padding: 0 8px;
     margin: 0 0 -12px 12px;
@@ -73,20 +76,20 @@ fieldset legend {
 
 .form-group input {
     padding: 8px;
-    font-size: 14px;
+    font-size: var(--text-md);
     border: var(--border);
 }
 
 .submit-btn {
     padding: 8px;
-    font-size: 14px;
+    font-size: var(--text-md);
     font-weight: bold;
 }
 
 .auth-link {
     text-align: center;
     margin-top: var(--gap);
-    font-size: 12px;
+    font-size: var(--text-sm);
 }
 
 /* ===== Conversations Page ===== */
@@ -113,25 +116,49 @@ fieldset legend {
 .header-nav {
     display: flex;
     gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
+.header-control,
 .api-error-banner {
     padding: var(--gap);
     border: var(--border);
+}
+
+.header-control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    font-size: var(--text-sm);
+    line-height: 1;
     background-color: #fff;
+    text-decoration: none;
     color: #000;
-    font-size: 12px;
+    margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 0;
+}
+
+.header-control:hover:not(:disabled) {
+    text-decoration: none;
+    background-color: #000;
+    color: #fff;
+    font-weight: 600;
+}
+
+.api-error-banner {
+    color: #000;
+    font-size: var(--text-sm);
     text-align: center;
     grid-column: 1 / -1;
 }
 
 .user-email {
-    font-size: 12px;
-}
-
-.logout-btn {
-    padding: 4px 8px;
-    font-size: 12px;
+    font-size: var(--text-sm);
+    line-height: 1.1;
 }
 
 /* ===== App Pages ===== */
@@ -187,14 +214,21 @@ fieldset legend {
 }
 
 .site-header-meta {
+    display: grid;
+    gap: 4px;
+    justify-items: end;
+}
+
+.site-header-controls {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .eyebrow {
-    font-size: 11px;
+    font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     margin-bottom: 8px;
@@ -217,7 +251,7 @@ fieldset legend {
 }
 
 .panel-copy {
-    font-size: 14px;
+    font-size: var(--text-md);
     max-width: 70ch;
 }
 
@@ -706,9 +740,13 @@ fieldset legend {
 
     .app-header-actions,
     .site-header-actions,
-    .site-header-meta {
+    .site-header-controls {
         justify-content: flex-start;
         margin-left: 0;
+    }
+
+    .site-header-meta {
+        justify-items: start;
     }
 
     .member-grid {
