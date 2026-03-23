@@ -478,6 +478,21 @@ fieldset legend {
     min-height: 0;
 }
 
+.sermon-list-panel legend,
+.conversation-list legend,
+.messages-container legend,
+.model-selector legend,
+.message-input-form legend {
+    margin-left: 20px;
+    padding: 2px 8px;
+    background-color: #000;
+    color: #fff;
+    border-radius: 999px;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
 /* ===== Conversation List ===== */
 
 .conversation-list {
