@@ -17,6 +17,7 @@ type UpsertCongregationRequest = {
     location?: string | null
     website?: string | null
     about?: string | null
+    defaultBibleTranslationId?: string | null
 }
 
 export async function createCongregation(

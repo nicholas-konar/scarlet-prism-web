@@ -54,6 +54,9 @@ export async function streamConversation(
               prompt: data.prompt,
               modelId: data.modelId,
               ...(data.sermonIds?.length && { sermonIds: data.sermonIds }),
+              ...(data.scriptureCitations?.length && {
+                  scriptureCitations: data.scriptureCitations,
+              }),
           }
 
     return apiStream(

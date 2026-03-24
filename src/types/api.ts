@@ -4,6 +4,8 @@ export interface User {
     id: string
     email: string
     congregationId: string | null
+    defaultBibleTranslationId: string | null
+    effectiveBibleTranslationId: string
     createdAt: string
     updatedAt: string
     defaultModelId?: string
@@ -49,6 +51,44 @@ export interface Congregation {
     location: string | null
     website: string | null
     about: string | null
+    defaultBibleTranslationId: string | null
+    effectiveBibleTranslationId: string
+    createdAt: string
+    updatedAt: string
+}
+
+export interface BibleTranslation {
+    id: string
+    name: string
+    languageCode: string
+    sortOrder: number
+    createdAt: string
+}
+
+export interface ScriptureBook {
+    id: string
+    name: string
+    testament: "O" | "N"
+    chapterCount: number
+    abbreviations: string[]
+}
+
+export interface ScriptureChapter {
+    number: number
+    verseCount: number
+}
+
+export interface ScriptureCitationInput {
+    translationId: string
+    bookId: string
+    startChapter: number
+    startVerse: number | null
+    endVerse: number | null
+}
+
+export interface ScriptureCitation extends ScriptureCitationInput {
+    id: string
+    label: string
     createdAt: string
     updatedAt: string
 }
@@ -86,6 +126,7 @@ export interface Sermon {
     title: string
     speaker: string | null
     recordedOn: string | null
+    scriptures: ScriptureCitation[]
     fileSizeBytes: number
     mimeType: string
     fileKey: string
@@ -103,6 +144,15 @@ export interface ConversationSermon {
     removedAt: string | null
     createdAt: string
     sermon?: Sermon
+}
+
+export interface ConversationScripture {
+    id: string
+    conversationId: string
+    scriptureCitationId: string
+    removedAt: string | null
+    createdAt: string
+    citation?: ScriptureCitation
 }
 
 export interface ConversationEvent {
@@ -126,6 +176,7 @@ export interface ConversationRequest {
     modelId: string
     conversationId?: string
     sermonIds?: string[]
+    scriptureCitations?: ScriptureCitationInput[]
     isRetry?: boolean
     messageId?: string
 }

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { streamConversation } from "@/api/conversations"
-import type { Message } from "@/types/api"
+import type { Message, ScriptureCitationInput } from "@/types/api"
 
 interface UseConversationStreamResult {
     streamingText: string
@@ -14,6 +14,7 @@ interface UseConversationStreamResult {
         isRetry?: boolean,
         messageId?: string,
         sermonIds?: string[],
+        scriptureCitations?: ScriptureCitationInput[],
     ) => Promise<void>
     error: string | null
     reset: () => void
@@ -40,6 +41,7 @@ export function useConversationStream(): UseConversationStreamResult {
             isRetry?: boolean,
             messageId?: string,
             sermonIds?: string[],
+            scriptureCitations?: ScriptureCitationInput[],
         ) => {
             setError(null)
             setIsStreaming(true)
@@ -54,6 +56,7 @@ export function useConversationStream(): UseConversationStreamResult {
                         modelId,
                         conversationId: currentConversationId,
                         sermonIds,
+                        scriptureCitations,
                         isRetry,
                         messageId,
                     },

@@ -1,5 +1,10 @@
 import { apiCall } from "./client"
-import type { Sermon, ConversationSermon, PaginatedResponse } from "@/types/api"
+import type {
+    Sermon,
+    ConversationSermon,
+    PaginatedResponse,
+    ScriptureCitationInput,
+} from "@/types/api"
 
 export async function listSermons(
     congregationId: string,
@@ -15,6 +20,7 @@ type UploadSermonArgs = {
     title: string
     speaker?: string
     recordedOn?: string
+    scriptures?: ScriptureCitationInput[]
     audio: File
 }
 
@@ -23,12 +29,16 @@ export async function uploadSermon({
     title,
     speaker,
     recordedOn,
+    scriptures,
     audio,
 }: UploadSermonArgs): Promise<Sermon> {
     const body = new FormData()
     body.append("title", title)
     if (speaker) body.append("speaker", speaker)
     if (recordedOn) body.append("recordedOn", recordedOn)
+    if (scriptures?.length) {
+        body.append("scriptures", JSON.stringify(scriptures))
+    }
     body.append("audio", audio)
 
     return apiCall<Sermon>(`/congregations/${congregationId}/sermons`, {
