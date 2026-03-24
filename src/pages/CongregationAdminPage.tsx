@@ -2,10 +2,13 @@ import { FormEvent, useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import * as congregationsApi from "@/api/congregations"
 import * as sermonsApi from "@/api/sermons"
+import * as scriptureApi from "@/api/scripture"
+import { ScriptureCitationPicker, type PendingScriptureCitation } from "@/components/ScriptureCitationPicker"
 import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
 import { membershipHasPermission } from "@/lib/congregationPermissions"
 import type {
+    BibleTranslation,
     CongregationMembership,
     CongregationPermission,
     Sermon,
@@ -23,6 +26,18 @@ function formatDate(value: string | null): string {
     return new Date(value).toLocaleDateString()
 }
 
+function formatScriptures(
+    scriptures: PendingScriptureCitation[] | Sermon["scriptures"],
+): string {
+    if (scriptures.length === 0) return "No scripture references"
+    return scriptures
+        .map(
+            (scripture) =>
+                `${scripture.label} (${scripture.translationId.toUpperCase()})`,
+        )
+        .join(", ")
+}
+
 export function CongregationAdminPage() {
     const { user, currentCongregation, refreshUser } = useAuth()
     const congregationId = currentCongregation?.id ?? null
@@ -32,13 +47,18 @@ export function CongregationAdminPage() {
         location: "",
         website: "",
         about: "",
+        defaultBibleTranslationId: "",
     })
+    const [translations, setTranslations] = useState<BibleTranslation[]>([])
     const [members, setMembers] = useState<CongregationMembership[]>([])
     const [sermons, setSermons] = useState<Sermon[]>([])
     const [selectedAudio, setSelectedAudio] = useState<File | null>(null)
     const [sermonTitle, setSermonTitle] = useState("")
     const [sermonSpeaker, setSermonSpeaker] = useState("")
     const [sermonRecordedOn, setSermonRecordedOn] = useState("")
+    const [sermonScriptures, setSermonScriptures] = useState<
+        PendingScriptureCitation[]
+    >([])
     const [pageError, setPageError] = useState<string | null>(null)
     const [profileMessage, setProfileMessage] = useState<string | null>(null)
     const [sermonMessage, setSermonMessage] = useState<string | null>(null)
@@ -57,8 +77,17 @@ export function CongregationAdminPage() {
             location: currentCongregation.location ?? "",
             website: currentCongregation.website ?? "",
             about: currentCongregation.about ?? "",
+            defaultBibleTranslationId:
+                currentCongregation.defaultBibleTranslationId ?? "",
         })
     }, [currentCongregation])
+
+    useEffect(() => {
+        scriptureApi
+            .listBibleTranslations()
+            .then(setTranslations)
+            .catch(() => setTranslations([]))
+    }, [])
 
     useEffect(() => {
         if (!congregationId) return
@@ -138,6 +167,8 @@ export function CongregationAdminPage() {
                 location: profileForm.location || null,
                 website: profileForm.website || null,
                 about: profileForm.about || null,
+                defaultBibleTranslationId:
+                    profileForm.defaultBibleTranslationId || null,
             })
             await refreshUser()
             setProfileMessage("Congregation profile updated.")
@@ -166,12 +197,16 @@ export function CongregationAdminPage() {
                 title: sermonTitle,
                 speaker: sermonSpeaker || undefined,
                 recordedOn: sermonRecordedOn || undefined,
+                scriptures: sermonScriptures.map(
+                    ({ label: _label, ...citation }) => citation,
+                ),
                 audio: selectedAudio,
             })
             setSermons((current) => [sermon, ...current])
             setSermonTitle("")
             setSermonSpeaker("")
             setSermonRecordedOn("")
+            setSermonScriptures([])
             setSelectedAudio(null)
             setSermonMessage("Sermon uploaded.")
         } catch (err) {
@@ -347,6 +382,28 @@ export function CongregationAdminPage() {
                         </label>
 
                         <label className="form-field">
+                            <span>Default Bible translation</span>
+                            <select
+                                value={profileForm.defaultBibleTranslationId}
+                                onChange={(event) =>
+                                    setProfileForm((current) => ({
+                                        ...current,
+                                        defaultBibleTranslationId:
+                                            event.target.value,
+                                    }))
+                                }
+                                disabled={!canEditProfile || isSavingProfile}
+                            >
+                                <option value="">Use system default</option>
+                                {translations.map((translation) => (
+                                    <option key={translation.id} value={translation.id}>
+                                        {translation.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+
+                        <label className="form-field">
                             <span>About</span>
                             <textarea
                                 rows={4}
@@ -411,6 +468,61 @@ export function CongregationAdminPage() {
                             </label>
                         </div>
 
+                        {translations.length > 0 && (
+                            <ScriptureCitationPicker
+                                translations={translations}
+                                defaultTranslationId={
+                                    currentCongregation.effectiveBibleTranslationId
+                                }
+                                disabled={!canManageSermons || isUploadingSermon}
+                                onAdd={(citation) =>
+                                    setSermonScriptures((current) => [
+                                        ...current,
+                                        citation,
+                                    ])
+                                }
+                            />
+                        )}
+
+                        <div className="scripture-chip-list">
+                            {sermonScriptures.length === 0 ? (
+                                <p className="panel-copy">
+                                    No scripture references selected yet.
+                                </p>
+                            ) : (
+                                sermonScriptures.map((scripture, index) => (
+                                    <div
+                                        key={`${scripture.translationId}:${scripture.label}:${index}`}
+                                        className="scripture-chip"
+                                    >
+                                        <div>
+                                            <strong>{scripture.label}</strong>
+                                            <div className="meta-copy">
+                                                {scripture.translationId.toUpperCase()}
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setSermonScriptures((current) =>
+                                                    current.filter(
+                                                        (_, itemIndex) =>
+                                                            itemIndex !== index,
+                                                    ),
+                                                )
+                                            }
+                                            disabled={
+                                                !canManageSermons ||
+                                                isUploadingSermon
+                                            }
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
                         <label className="form-field">
                             <span>Audio file</span>
                             <input
@@ -455,6 +567,9 @@ export function CongregationAdminPage() {
                                         <h3>{sermon.title}</h3>
                                         <p className="meta-copy">
                                             {sermon.speaker ?? "Unknown speaker"} | {formatDate(sermon.recordedOn)} | {sermon.transcriptionStatus}
+                                        </p>
+                                        <p className="meta-copy">
+                                            {formatScriptures(sermon.scriptures)}
                                         </p>
                                     </div>
                                     <button

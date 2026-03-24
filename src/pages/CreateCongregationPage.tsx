@@ -1,8 +1,10 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import * as congregationsApi from "@/api/congregations"
+import * as scriptureApi from "@/api/scripture"
 import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
+import type { BibleTranslation } from "@/types/api"
 
 export function CreateCongregationPage() {
     const navigate = useNavigate()
@@ -12,8 +14,17 @@ export function CreateCongregationPage() {
     const [location, setLocation] = useState("")
     const [website, setWebsite] = useState("")
     const [about, setAbout] = useState("")
+    const [translations, setTranslations] = useState<BibleTranslation[]>([])
+    const [defaultBibleTranslationId, setDefaultBibleTranslationId] = useState("")
     const [error, setError] = useState("")
     const [isSaving, setIsSaving] = useState(false)
+
+    useEffect(() => {
+        scriptureApi
+            .listBibleTranslations()
+            .then(setTranslations)
+            .catch(() => setTranslations([]))
+    }, [])
 
     async function handleSubmit(event: FormEvent) {
         event.preventDefault()
@@ -27,6 +38,7 @@ export function CreateCongregationPage() {
                 location: location || null,
                 website: website || null,
                 about: about || null,
+                defaultBibleTranslationId: defaultBibleTranslationId || null,
             })
             await refreshUser()
             navigate("/admin/congregation", { replace: true })
@@ -99,6 +111,24 @@ export function CreateCongregationPage() {
                                 placeholder="https://example.org"
                                 disabled={isSaving}
                             />
+                        </label>
+
+                        <label className="form-field">
+                            <span>Default Bible translation</span>
+                            <select
+                                value={defaultBibleTranslationId}
+                                onChange={(event) =>
+                                    setDefaultBibleTranslationId(event.target.value)
+                                }
+                                disabled={isSaving}
+                            >
+                                <option value="">Use system default</option>
+                                {translations.map((translation) => (
+                                    <option key={translation.id} value={translation.id}>
+                                        {translation.name}
+                                    </option>
+                                ))}
+                            </select>
                         </label>
 
                         <label className="form-field">
