@@ -376,6 +376,39 @@ fieldset legend {
     gap: 12px;
 }
 
+.scripture-panel,
+.scripture-block,
+.scripture-picker {
+    display: grid;
+    gap: 12px;
+}
+
+.picker-results,
+.scripture-chip-list {
+    display: grid;
+    gap: 8px;
+}
+
+.picker-result,
+.scripture-chip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border: var(--border);
+    padding: 10px 12px;
+    background: #fff;
+}
+
+.picker-result {
+    width: 100%;
+    text-align: left;
+}
+
+.picker-result.muted {
+    color: #666;
+}
+
 .admin-list-item {
     display: flex;
     justify-content: space-between;
