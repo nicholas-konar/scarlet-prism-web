@@ -7,6 +7,7 @@ import { ConversationList } from "@/components/ConversationList"
 import { SermonList } from "@/components/SermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
 import { ContextPanel } from "@/components/ContextPanel"
+import { ScriptureList } from "@/components/ScriptureList"
 import * as conversationApi from "@/api/conversations"
 import * as sermonsApi from "@/api/sermons"
 import * as scriptureApi from "@/api/scripture"
@@ -21,6 +22,7 @@ import type {
 } from "@/types/api"
 
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
+type LibrarySection = "conversations" | "sermons" | "scripture"
 
 function formatSermonMeta(sermon: Sermon | undefined): string | null {
     if (!sermon) return null
@@ -53,6 +55,10 @@ export function ConversationsPage() {
         user?.defaultModelId || DEFAULT_MODEL_ID,
     )
     const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
+    const [isContextOpen, setIsContextOpen] = useState(true)
+    const [isLibraryOpen, setIsLibraryOpen] = useState(false)
+    const [activeLibrarySection, setActiveLibrarySection] =
+        useState<LibrarySection>("sermons")
 
     const {
         streamingText,
@@ -124,6 +130,19 @@ export function ConversationsPage() {
             .then((res) => setSermons(res.data))
             .catch(() => setSermons([]))
     }, [currentCongregation])
+
+    useEffect(() => {
+        if (!isLibraryOpen) return
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setIsLibraryOpen(false)
+            }
+        }
+
+        window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+    }, [isLibraryOpen])
 
     // Load messages + resources when selected conversation changes
     useEffect(() => {
@@ -427,6 +446,12 @@ export function ConversationsPage() {
               }
           })
 
+    const libraryScriptureItems = scriptureContextItems.map((scripture) => ({
+        key: scripture.key,
+        label: scripture.label,
+        meta: scripture.source,
+    }))
+
     const conversationEvents: ConversationEvent[] = effectiveConversationId
         ? [
               ...allConversationSermons.flatMap((r) => {
@@ -471,6 +496,35 @@ export function ConversationsPage() {
           ]
         : pendingEvents
 
+    const hasContext = contextSermonItems.length > 0 || scriptureContextItems.length > 0
+
+    const librarySectionButtons: Array<{
+        id: LibrarySection
+        label: string
+        count: number
+    }> = [
+        {
+            id: "conversations",
+            label: "Conversations",
+            count: conversations.length,
+        },
+        {
+            id: "sermons",
+            label: "Sermons",
+            count: sermons.length,
+        },
+        {
+            id: "scripture",
+            label: "Scripture",
+            count: libraryScriptureItems.length,
+        },
+    ]
+
+    function openLibrary(section: LibrarySection = activeLibrarySection) {
+        setActiveLibrarySection(section)
+        setIsLibraryOpen(true)
+    }
+
     return (
         <div className="conversations-page">
             <SiteHeader
@@ -483,38 +537,65 @@ export function ConversationsPage() {
                 ]}
             />
 
-            <div className="main-layout">
-                <div className="sidebar">
-                    <SermonList
-                        sermons={sermons}
-                        activeSermons={activeSermons}
-                        pendingSermonIds={pendingSermonIds}
-                        conversationId={effectiveConversationId}
-                        eyebrow={currentCongregation?.name ?? null}
-                        onAttach={handleAttachSermon}
-                        onDetach={handleDetachSermon}
-                        onTogglePending={handleTogglePendingSermon}
-                        isDisabled={isStreaming}
-                    />
-                    <ConversationList
-                        conversations={conversations}
-                        selectedId={selectedConversationId}
-                        onSelect={handleSelectConversation}
-                        onNewConversation={handleNewConversation}
-                        isLoading={isLoadingConversations}
-                    />
-                </div>
-
-                <div className="conversation-stage">
-                    {apiError && (
-                        <div className="api-error-banner">API Error: {apiError}</div>
-                    )}
-
+            <div
+                className={`main-layout conversation-workspace${
+                    isContextOpen ? " context-open" : ""
+                }`}
+            >
+                {isContextOpen ? (
                     <ContextPanel
                         sermons={contextSermonItems}
                         scriptures={scriptureContextItems}
                         isPending={!effectiveConversationId}
+                        onClose={() => setIsContextOpen(false)}
                     />
+                ) : null}
+
+                <div className="conversation-stage">
+                    <div className="workspace-toolbar panel-shell">
+                        <div className="workspace-toolbar-main">
+                            <button
+                                type="button"
+                                className={`drawer-toggle${isContextOpen ? " active" : ""}`}
+                                onClick={() => setIsContextOpen((current) => !current)}
+                            >
+                                {isContextOpen ? "Hide context" : "Show context"}
+                            </button>
+                            <div className="workspace-context-summary">
+                                <span>{contextSermonItems.length} sermon{contextSermonItems.length === 1 ? "" : "s"}</span>
+                                <span>{scriptureContextItems.length} scripture{scriptureContextItems.length === 1 ? "" : "s"}</span>
+                                <span>{effectiveConversationId ? "live" : "pending"}</span>
+                            </div>
+                        </div>
+                        <div className="workspace-toolbar-actions">
+                            {librarySectionButtons.map((section) => (
+                                <button
+                                    key={section.id}
+                                    type="button"
+                                    className={`toolbar-chip${
+                                        activeLibrarySection === section.id
+                                            ? " active"
+                                            : ""
+                                    }`}
+                                    onClick={() => openLibrary(section.id)}
+                                >
+                                    {section.label}
+                                    <span>{section.count}</span>
+                                </button>
+                            ))}
+                            <button
+                                type="button"
+                                className="drawer-toggle library-launch"
+                                onClick={() => openLibrary()}
+                            >
+                                Open library
+                            </button>
+                        </div>
+                    </div>
+
+                    {apiError && (
+                        <div className="api-error-banner">API Error: {apiError}</div>
+                    )}
 
                     <ConversationWindow
                         conversationId={effectiveConversationId}
@@ -532,6 +613,93 @@ export function ConversationsPage() {
                     />
                 </div>
             </div>
+
+            {isLibraryOpen ? (
+                <div
+                    className="library-overlay"
+                    role="presentation"
+                    onClick={() => setIsLibraryOpen(false)}
+                >
+                    <aside
+                        className="library-drawer panel-shell"
+                        aria-label="Library"
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <div className="library-drawer-header">
+                            <div>
+                                <p className="panel-eyebrow">Workspace library</p>
+                                <h2 className="panel-title">Library</h2>
+                            </div>
+                            <button
+                                type="button"
+                                className="drawer-toggle drawer-dismiss"
+                                onClick={() => setIsLibraryOpen(false)}
+                            >
+                                Close
+                            </button>
+                        </div>
+
+                        <div className="library-section-tabs" role="tablist" aria-label="Library sections">
+                            {librarySectionButtons.map((section) => (
+                                <button
+                                    key={section.id}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={activeLibrarySection === section.id}
+                                    className={`library-section-tab${
+                                        activeLibrarySection === section.id
+                                            ? " active"
+                                            : ""
+                                    }`}
+                                    onClick={() => setActiveLibrarySection(section.id)}
+                                >
+                                    <span>{section.label}</span>
+                                    <span>{section.count}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="library-drawer-body">
+                            {activeLibrarySection === "conversations" ? (
+                                <ConversationList
+                                    conversations={conversations}
+                                    selectedId={selectedConversationId}
+                                    onSelect={(id) => {
+                                        handleSelectConversation(id)
+                                        setIsLibraryOpen(false)
+                                    }}
+                                    onNewConversation={() => {
+                                        handleNewConversation()
+                                        setIsLibraryOpen(false)
+                                    }}
+                                    isLoading={isLoadingConversations}
+                                />
+                            ) : null}
+
+                            {activeLibrarySection === "sermons" ? (
+                                <SermonList
+                                    sermons={sermons}
+                                    activeSermons={activeSermons}
+                                    pendingSermonIds={pendingSermonIds}
+                                    conversationId={effectiveConversationId}
+                                    eyebrow={currentCongregation?.name ?? null}
+                                    onAttach={handleAttachSermon}
+                                    onDetach={handleDetachSermon}
+                                    onTogglePending={handleTogglePendingSermon}
+                                    isDisabled={isStreaming}
+                                />
+                            ) : null}
+
+                            {activeLibrarySection === "scripture" ? (
+                                <ScriptureList
+                                    scriptures={libraryScriptureItems}
+                                    eyebrow={hasContext ? "Current references" : "Library"}
+                                />
+                            ) : null}
+                        </div>
+                    </aside>
+                </div>
+            ) : null}
         </div>
     )
 }

@@ -16,25 +16,45 @@ interface ContextPanelProps {
     sermons: ContextSermonItem[]
     scriptures: ContextScriptureItem[]
     isPending: boolean
+    onClose?: () => void
 }
 
 export function ContextPanel({
     sermons,
     scriptures,
     isPending,
+    onClose,
 }: ContextPanelProps) {
     const hasContext = sermons.length > 0 || scriptures.length > 0
 
     return (
-        <section className="context-panel" aria-label="Conversation context">
+        <aside className="context-panel panel-shell" aria-label="Conversation context">
             <div className="context-panel-header">
-                <div>
-                    <p className="context-panel-eyebrow">Workspace context</p>
-                    <h2>In Context</h2>
+                <div className="context-panel-heading">
+                    <div>
+                        <p className="context-panel-eyebrow">Workspace context</p>
+                        <h2>Context</h2>
+                    </div>
+                    <div className="context-summary-strip" aria-label="Context summary">
+                        <span>{sermons.length} sermon{sermons.length === 1 ? "" : "s"}</span>
+                        <span>{scriptures.length} scripture{scriptures.length === 1 ? "" : "s"}</span>
+                    </div>
                 </div>
-                <span className={`context-status${isPending ? " pending" : ""}`}>
-                    {isPending ? "pending" : "live"}
-                </span>
+                <div className="context-panel-actions">
+                    <span className={`context-status${isPending ? " pending" : ""}`}>
+                        {isPending ? "pending" : "live"}
+                    </span>
+                    {onClose ? (
+                        <button
+                            type="button"
+                            className="drawer-toggle drawer-dismiss"
+                            onClick={onClose}
+                            aria-label="Close context"
+                        >
+                            Hide
+                        </button>
+                    ) : null}
+                </div>
             </div>
 
             {!hasContext ? (
@@ -43,7 +63,7 @@ export function ContextPanel({
                     conversation.
                 </p>
             ) : (
-                <div className="context-grid">
+                <div className="context-column">
                     <section className="context-section" aria-label="Sermons in context">
                         <div className="context-section-header">
                             <h3>Sermons</h3>
@@ -114,6 +134,6 @@ export function ContextPanel({
                     </section>
                 </div>
             )}
-        </section>
+        </aside>
     )
 }
