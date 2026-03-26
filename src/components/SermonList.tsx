@@ -5,6 +5,7 @@ interface SermonListProps {
     activeSermons: ConversationSermon[]
     pendingSermonIds: string[]
     conversationId: string | null
+    eyebrow?: string | null
     onAttach: (sermon: Sermon) => Promise<void>
     onDetach: (conversationSermonId: string) => Promise<void>
     onTogglePending: (sermonId: string) => void
@@ -16,6 +17,7 @@ export function SermonList({
     activeSermons,
     pendingSermonIds,
     conversationId,
+    eyebrow,
     onAttach,
     onDetach,
     onTogglePending,
@@ -60,8 +62,8 @@ export function SermonList({
     return (
         <section className="sermon-list-panel panel-shell" aria-label="Sermon browser">
             <div className="panel-header">
-                <p className="panel-eyebrow">Sources</p>
-                <h2 className="panel-title">Sermon Browser</h2>
+                <p className="panel-eyebrow">{eyebrow ?? "Library"}</p>
+                <h2 className="panel-title">Sermons</h2>
             </div>
 
             <div className="list-items">

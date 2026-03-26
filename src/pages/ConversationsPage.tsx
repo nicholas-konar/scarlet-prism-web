@@ -490,6 +490,7 @@ export function ConversationsPage() {
                         activeSermons={activeSermons}
                         pendingSermonIds={pendingSermonIds}
                         conversationId={effectiveConversationId}
+                        eyebrow={currentCongregation?.name ?? null}
                         onAttach={handleAttachSermon}
                         onDetach={handleDetachSermon}
                         onTogglePending={handleTogglePendingSermon}
