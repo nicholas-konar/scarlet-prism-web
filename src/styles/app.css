@@ -1052,16 +1052,20 @@ fieldset legend {
 
 .context-item-action {
     flex-shrink: 0;
-    border: none;
+    border: 1px solid transparent;
     align-self: center;
-    padding: 0;
+    padding: 4px 6px;
     background: transparent;
     background-color: transparent;
     opacity: 0;
     pointer-events: none;
     transition:
         opacity 140ms ease,
-        color 140ms ease;
+        color 140ms ease,
+        border-color 140ms ease,
+        background-color 140ms ease,
+        transform 80ms ease,
+        box-shadow 80ms ease;
     font-size: 10px;
     line-height: 1;
     text-transform: uppercase;
@@ -1069,9 +1073,7 @@ fieldset legend {
     color: #6d6659;
     cursor: pointer;
     font-weight: normal;
-    text-decoration: underline;
-    text-decoration-color: transparent;
-    text-underline-offset: 0.18em;
+    text-decoration: none;
     appearance: none;
     -webkit-appearance: none;
 }
@@ -1084,11 +1086,15 @@ fieldset legend {
 
 .context-item-action:hover:not(:disabled),
 .context-item-action:focus-visible {
-    background: transparent;
-    background-color: transparent;
+    background: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: var(--line-soft);
     color: #575044;
     font-weight: normal;
-    text-decoration-color: currentColor;
+}
+
+.context-item-action:active:not(:disabled) {
+    transform: translateY(1px);
 }
 
 .context-empty,
