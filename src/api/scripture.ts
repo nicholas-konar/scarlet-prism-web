@@ -2,39 +2,12 @@ import { apiCall } from "./client"
 import type {
     BibleTranslation,
     ConversationScripture,
-    ScriptureBook,
-    ScriptureChapter,
     ScriptureCitationInput,
 } from "@/types/api"
 
 export async function listBibleTranslations(): Promise<BibleTranslation[]> {
     const response = await apiCall<{ data: BibleTranslation[] }>(
         "/scripture/translations",
-        { method: "GET" },
-    )
-
-    return response.data
-}
-
-export async function searchScriptureBooks(
-    query: string,
-): Promise<ScriptureBook[]> {
-    const params = new URLSearchParams()
-    if (query) params.set("query", query)
-
-    const response = await apiCall<{ data: ScriptureBook[] }>(
-        `/scripture/books${params.toString() ? `?${params.toString()}` : ""}`,
-        { method: "GET" },
-    )
-
-    return response.data
-}
-
-export async function listScriptureChapters(
-    bookId: string,
-): Promise<ScriptureChapter[]> {
-    const response = await apiCall<{ data: ScriptureChapter[] }>(
-        `/scripture/books/${bookId}/chapters`,
         { method: "GET" },
     )
 

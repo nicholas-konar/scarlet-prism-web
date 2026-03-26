@@ -491,7 +491,9 @@ fieldset legend {
 
 /* ===== Sermon List Panel ===== */
 
-.sermon-list-panel {
+.sermon-list-panel,
+.scripture-list-panel,
+.conversation-list {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -503,17 +505,6 @@ fieldset legend {
 }
 
 /* ===== Conversation List ===== */
-
-.conversation-list {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    border: var(--border);
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-    min-height: 0;
-}
 
 .list-items {
     flex: 1;
@@ -560,6 +551,10 @@ fieldset legend {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.list-item.static {
+    cursor: default;
 }
 
 .list-footer {

@@ -7,6 +7,7 @@ import { ScriptureCitationPicker, type PendingScriptureCitation } from "@/compon
 import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
 import { membershipHasPermission } from "@/lib/congregationPermissions"
+import { getEffectiveBibleTranslationId } from "@/lib/scripture"
 import type {
     BibleTranslation,
     CongregationMembership,
@@ -125,6 +126,10 @@ export function CongregationAdminPage() {
     const canEditProfile = membershipHasPermission(myMembership, "edit_profile")
     const canManageMembers = membershipHasPermission(myMembership, "manage_members")
     const canManageSermons = membershipHasPermission(myMembership, "manage_sermons")
+    const defaultTranslationId = getEffectiveBibleTranslationId({
+        congregationDefaultBibleTranslationId:
+            currentCongregation?.defaultBibleTranslationId,
+    })
 
     if (!currentCongregation) {
         return (
@@ -471,9 +476,7 @@ export function CongregationAdminPage() {
                         {translations.length > 0 && (
                             <ScriptureCitationPicker
                                 translations={translations}
-                                defaultTranslationId={
-                                    currentCongregation.effectiveBibleTranslationId
-                                }
+                                defaultTranslationId={defaultTranslationId}
                                 disabled={!canManageSermons || isUploadingSermon}
                                 onAdd={(citation) =>
                                     setSermonScriptures((current) => [

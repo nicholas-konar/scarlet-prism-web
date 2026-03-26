@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react"
-import * as scriptureApi from "@/api/scripture"
-import type {
-    BibleTranslation,
-    ScriptureBook,
-    ScriptureChapter,
-    ScriptureCitationInput,
-} from "@/types/api"
+import type { BibleTranslation, ScriptureCitationInput } from "@/types/api"
+import {
+    getScriptureBookName,
+    SCRIPTURE_BOOK_OPTIONS,
+} from "@/lib/scripture"
 
-export type PendingScriptureCitation = ScriptureCitationInput & {
+export type PendingScriptureCitation = Omit<
+    ScriptureCitationInput,
+    "translationId"
+> & {
+    translationId: string
     label: string
 }
 
@@ -19,17 +21,31 @@ type ScriptureCitationPickerProps = {
 }
 
 function formatCitationLabel(
-    bookName: string,
+    bookId: string,
     chapter: number,
     startVerse: number | null,
     endVerse: number | null,
 ): string {
+    const bookName = getScriptureBookName(bookId)
+
     if (startVerse === null) return `${bookName} ${chapter}`
     if (endVerse === null || endVerse === startVerse) {
         return `${bookName} ${chapter}:${startVerse}`
     }
 
     return `${bookName} ${chapter}:${startVerse}-${endVerse}`
+}
+
+function parsePositiveNumber(value: string): number | null {
+    if (!value.trim()) return null
+
+    const parsed = Number(value)
+
+    if (!Number.isInteger(parsed) || parsed < 1) {
+        return null
+    }
+
+    return parsed
 }
 
 export function ScriptureCitationPicker({
@@ -39,132 +55,66 @@ export function ScriptureCitationPicker({
     onAdd,
 }: ScriptureCitationPickerProps) {
     const [translationId, setTranslationId] = useState(defaultTranslationId)
-    const [query, setQuery] = useState("")
-    const [results, setResults] = useState<ScriptureBook[]>([])
-    const [selectedBook, setSelectedBook] = useState<ScriptureBook | null>(null)
-    const [chapters, setChapters] = useState<ScriptureChapter[]>([])
-    const [selectedChapter, setSelectedChapter] = useState<number | null>(null)
-    const [startVerse, setStartVerse] = useState<number | null>(null)
-    const [endVerse, setEndVerse] = useState<number | null>(null)
-    const [isLoadingBooks, setIsLoadingBooks] = useState(false)
-    const [isLoadingChapters, setIsLoadingChapters] = useState(false)
+    const [bookId, setBookId] = useState("")
+    const [chapterInput, setChapterInput] = useState("")
+    const [startVerseInput, setStartVerseInput] = useState("")
+    const [endVerseInput, setEndVerseInput] = useState("")
+    const [validationMessage, setValidationMessage] = useState<string | null>(null)
 
     useEffect(() => {
         setTranslationId(defaultTranslationId)
     }, [defaultTranslationId])
 
-    useEffect(() => {
-        if (!query.trim()) {
-            setResults([])
-            return
-        }
-
-        let cancelled = false
-        setIsLoadingBooks(true)
-
-        scriptureApi
-            .searchScriptureBooks(query)
-            .then((nextResults) => {
-                if (!cancelled) setResults(nextResults.slice(0, 8))
-            })
-            .catch(() => {
-                if (!cancelled) setResults([])
-            })
-            .finally(() => {
-                if (!cancelled) setIsLoadingBooks(false)
-            })
-
-        return () => {
-            cancelled = true
-        }
-    }, [query])
-
-    useEffect(() => {
-        if (!selectedBook) {
-            setChapters([])
-            setSelectedChapter(null)
-            setStartVerse(null)
-            setEndVerse(null)
-            return
-        }
-
-        let cancelled = false
-        setIsLoadingChapters(true)
-
-        scriptureApi
-            .listScriptureChapters(selectedBook.id)
-            .then((nextChapters) => {
-                if (!cancelled) setChapters(nextChapters)
-            })
-            .catch(() => {
-                if (!cancelled) setChapters([])
-            })
-            .finally(() => {
-                if (!cancelled) setIsLoadingChapters(false)
-            })
-
-        return () => {
-            cancelled = true
-        }
-    }, [selectedBook])
-
-    const selectedChapterMeta = useMemo(
-        () =>
-            chapters.find((chapter) => chapter.number === selectedChapter) ??
-            null,
-        [chapters, selectedChapter],
+    const chapter = useMemo(
+        () => parsePositiveNumber(chapterInput),
+        [chapterInput],
     )
-
-    const verseOptions = useMemo(() => {
-        if (!selectedChapterMeta) return []
-        return Array.from(
-            { length: selectedChapterMeta.verseCount },
-            (_, index) => index + 1,
-        )
-    }, [selectedChapterMeta])
-
-    const endVerseOptions = useMemo(
-        () =>
-            startVerse === null
-                ? verseOptions
-                : verseOptions.filter((verse) => verse >= startVerse),
-        [startVerse, verseOptions],
+    const startVerse = useMemo(
+        () => parsePositiveNumber(startVerseInput),
+        [startVerseInput],
+    )
+    const endVerse = useMemo(
+        () => parsePositiveNumber(endVerseInput),
+        [endVerseInput],
     )
 
     function resetSelection() {
-        setQuery("")
-        setResults([])
-        setSelectedBook(null)
-        setChapters([])
-        setSelectedChapter(null)
-        setStartVerse(null)
-        setEndVerse(null)
-    }
-
-    function handleSelectBook(book: ScriptureBook) {
-        setSelectedBook(book)
-        setQuery(book.name)
-        setResults([])
-        setSelectedChapter(null)
-        setStartVerse(null)
-        setEndVerse(null)
+        setBookId("")
+        setChapterInput("")
+        setStartVerseInput("")
+        setEndVerseInput("")
+        setValidationMessage(null)
     }
 
     function handleAddCitation() {
-        if (!selectedBook || !selectedChapter) return
+        if (!bookId || chapter === null) {
+            setValidationMessage("Select a book and enter a chapter.")
+            return
+        }
+
+        if (startVerse === null && endVerse !== null) {
+            setValidationMessage(
+                "Choose a start verse before adding an end verse.",
+            )
+            return
+        }
+
+        if (startVerse !== null && endVerse !== null && endVerse < startVerse) {
+            setValidationMessage(
+                "End verse must be greater than or equal to the start verse.",
+            )
+            return
+        }
+
+        setValidationMessage(null)
 
         onAdd({
             translationId,
-            bookId: selectedBook.id,
-            startChapter: selectedChapter,
+            bookId,
+            startChapter: chapter,
             startVerse,
-            endVerse: startVerse === null ? null : endVerse,
-            label: formatCitationLabel(
-                selectedBook.name,
-                selectedChapter,
-                startVerse,
-                startVerse === null ? null : endVerse,
-            ),
+            endVerse,
+            label: formatCitationLabel(bookId, chapter, startVerse, endVerse),
         })
 
         resetSelection()
@@ -177,9 +127,7 @@ export function ScriptureCitationPicker({
                     <span>Translation</span>
                     <select
                         value={translationId}
-                        onChange={(event) =>
-                            setTranslationId(event.target.value)
-                        }
+                        onChange={(event) => setTranslationId(event.target.value)}
                         disabled={disabled}
                     >
                         {translations.map((translation) => (
@@ -192,134 +140,87 @@ export function ScriptureCitationPicker({
 
                 <label className="form-field">
                     <span>Book</span>
+                    <select
+                        value={bookId}
+                        onChange={(event) => setBookId(event.target.value)}
+                        disabled={disabled}
+                    >
+                        <option value="">Select book</option>
+                        {SCRIPTURE_BOOK_OPTIONS.map((book) => (
+                            <option key={book.id} value={book.id}>
+                                {book.name}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+            </div>
+
+            <div className="split-fields">
+                <label className="form-field">
+                    <span>Chapter</span>
                     <input
-                        type="text"
-                        value={query}
+                        type="number"
+                        min="1"
+                        step="1"
+                        inputMode="numeric"
+                        value={chapterInput}
+                        onChange={(event) => setChapterInput(event.target.value)}
+                        placeholder="3"
+                        disabled={disabled}
+                    />
+                </label>
+
+                <label className="form-field">
+                    <span>Start verse</span>
+                    <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        inputMode="numeric"
+                        value={startVerseInput}
                         onChange={(event) => {
-                            setQuery(event.target.value)
-                            setSelectedBook(null)
-                            setSelectedChapter(null)
-                            setStartVerse(null)
-                            setEndVerse(null)
+                            setStartVerseInput(event.target.value)
+                            if (!event.target.value) {
+                                setEndVerseInput("")
+                            }
                         }}
-                        placeholder="Start typing a book"
+                        placeholder="Whole chapter"
                         disabled={disabled}
                     />
                 </label>
             </div>
 
-            {(results.length > 0 || isLoadingBooks) && (
-                <div className="picker-results">
-                    {isLoadingBooks ? (
-                        <div className="picker-result muted">Searching books…</div>
-                    ) : (
-                        results.map((book) => (
-                            <button
-                                key={book.id}
-                                type="button"
-                                className="picker-result"
-                                onClick={() => handleSelectBook(book)}
-                                disabled={disabled}
-                            >
-                                {book.name}
-                            </button>
-                        ))
-                    )}
-                </div>
-            )}
+            <label className="form-field">
+                <span>End verse</span>
+                <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    value={endVerseInput}
+                    onChange={(event) => setEndVerseInput(event.target.value)}
+                    placeholder="Single verse"
+                    disabled={disabled || !startVerseInput}
+                />
+            </label>
 
-            {selectedBook && (
-                <>
-                    <div className="split-fields">
-                        <label className="form-field">
-                            <span>Chapter</span>
-                            <select
-                                value={selectedChapter ?? ""}
-                                onChange={(event) => {
-                                    const nextChapter = Number(
-                                        event.target.value,
-                                    )
-                                    setSelectedChapter(
-                                        Number.isNaN(nextChapter)
-                                            ? null
-                                            : nextChapter,
-                                    )
-                                    setStartVerse(null)
-                                    setEndVerse(null)
-                                }}
-                                disabled={disabled || isLoadingChapters}
-                            >
-                                <option value="">Select chapter</option>
-                                {chapters.map((chapter) => (
-                                    <option
-                                        key={chapter.number}
-                                        value={chapter.number}
-                                    >
-                                        {chapter.number}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
+            <div className="action-row">
+                <button
+                    type="button"
+                    onClick={handleAddCitation}
+                    disabled={disabled}
+                >
+                    Add scripture
+                </button>
+                {(bookId || chapter !== null) && (
+                    <span className="status-copy">
+                        {formatCitationLabel(bookId || "Scripture", chapter ?? 0, startVerse, endVerse)}
+                    </span>
+                )}
+            </div>
 
-                        <label className="form-field">
-                            <span>Start verse</span>
-                            <select
-                                value={startVerse ?? ""}
-                                onChange={(event) => {
-                                    const nextValue = event.target.value
-                                    const nextVerse = nextValue
-                                        ? Number(nextValue)
-                                        : null
-                                    setStartVerse(nextVerse)
-                                    setEndVerse(null)
-                                }}
-                                disabled={disabled || !selectedChapterMeta}
-                            >
-                                <option value="">Whole chapter</option>
-                                {verseOptions.map((verse) => (
-                                    <option key={verse} value={verse}>
-                                        {verse}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
-
-                    <label className="form-field">
-                        <span>End verse</span>
-                        <select
-                            value={endVerse ?? ""}
-                            onChange={(event) =>
-                                setEndVerse(
-                                    event.target.value
-                                        ? Number(event.target.value)
-                                        : null,
-                                )
-                            }
-                            disabled={disabled || startVerse === null}
-                        >
-                            <option value="">Single verse</option>
-                            {endVerseOptions.map((verse) => (
-                                <option key={verse} value={verse}>
-                                    {verse}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-
-                    <div className="action-row">
-                        <button
-                            type="button"
-                            onClick={handleAddCitation}
-                            disabled={disabled || !selectedChapter}
-                        >
-                            Add scripture
-                        </button>
-                        <span className="status-copy">
-                            {selectedBook.name}
-                        </span>
-                    </div>
-                </>
+            {validationMessage && (
+                <p className="meta-copy">{validationMessage}</p>
             )}
         </div>
     )

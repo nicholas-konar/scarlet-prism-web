@@ -5,7 +5,6 @@ export interface User {
     email: string
     congregationId: string | null
     defaultBibleTranslationId: string | null
-    effectiveBibleTranslationId: string
     createdAt: string
     updatedAt: string
     defaultModelId?: string
@@ -52,7 +51,6 @@ export interface Congregation {
     website: string | null
     about: string | null
     defaultBibleTranslationId: string | null
-    effectiveBibleTranslationId: string
     createdAt: string
     updatedAt: string
 }
@@ -62,32 +60,19 @@ export interface BibleTranslation {
     name: string
     languageCode: string
     sortOrder: number
-    createdAt: string
-}
-
-export interface ScriptureBook {
-    id: string
-    name: string
-    testament: "O" | "N"
-    chapterCount: number
-    abbreviations: string[]
-}
-
-export interface ScriptureChapter {
-    number: number
-    verseCount: number
 }
 
 export interface ScriptureCitationInput {
-    translationId: string
+    translationId?: string | null
     bookId: string
     startChapter: number
     startVerse: number | null
     endVerse: number | null
 }
 
-export interface ScriptureCitation extends ScriptureCitationInput {
+export interface ScriptureCitation extends Omit<ScriptureCitationInput, "translationId"> {
     id: string
+    translationId: string
     label: string
     createdAt: string
     updatedAt: string
