@@ -24,15 +24,29 @@ import type {
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
 type LibrarySection = "conversations" | "sermons" | "scripture"
 
-function formatSermonMeta(sermon: Sermon | undefined): string | null {
-    if (!sermon) return null
+function formatSermonDate(value: string | null): string | null {
+    if (!value?.trim()) return null
 
-    const parts = [sermon.speaker, sermon.recordedOn]
-        .filter((value): value is string => Boolean(value?.trim()))
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
 
-    if (parts.length === 0) return null
+    const parts = new Intl.DateTimeFormat(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+    }).formatToParts(date)
 
-    return parts.join(" · ")
+    const weekday = parts.find((part) => part.type === "weekday")?.value
+    const month = parts.find((part) => part.type === "month")?.value
+    const day = parts.find((part) => part.type === "day")?.value
+    const year = parts.find((part) => part.type === "year")?.value
+
+    if (!weekday || !month || !day || !year) {
+        return value
+    }
+
+    return `${weekday} ${month} ${day}, ${year}`
 }
 
 export function ConversationsPage() {
@@ -431,7 +445,8 @@ export function ConversationsPage() {
               return {
                   key: item.id,
                   label: sermon?.title ?? item.sermonId,
-                  meta: formatSermonMeta(sermon),
+                  recordedOn: formatSermonDate(sermon?.recordedOn ?? null),
+                  speaker: sermon?.speaker,
                   onDetach: () => {
                       void handleDetachSermon(item.id)
                   },
@@ -443,7 +458,8 @@ export function ConversationsPage() {
               return {
                   key: sermonId,
                   label: sermon?.title ?? sermonId,
-                  meta: formatSermonMeta(sermon),
+                  recordedOn: formatSermonDate(sermon?.recordedOn ?? null),
+                  speaker: sermon?.speaker,
                   onDetach: () => handleTogglePendingSermon(sermonId),
               }
           })

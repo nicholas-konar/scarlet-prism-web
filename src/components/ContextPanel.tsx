@@ -1,7 +1,8 @@
 type ContextSermonItem = {
     key: string
     label: string
-    meta?: string | null
+    recordedOn?: string | null
+    speaker?: string | null
     onDetach?: () => void
 }
 
@@ -76,10 +77,15 @@ export function ContextPanel({
                                             <p className="context-item-label">
                                                 {sermon.label}
                                             </p>
-                                            {sermon.meta ? (
-                                                <p className="context-item-meta">
-                                                    {sermon.meta}
-                                                </p>
+                                            {sermon.recordedOn || sermon.speaker ? (
+                                                <div className="context-item-meta">
+                                                    {sermon.recordedOn ? (
+                                                        <p>{sermon.recordedOn}</p>
+                                                    ) : null}
+                                                    {sermon.speaker ? (
+                                                        <p>{sermon.speaker}</p>
+                                                    ) : null}
+                                                </div>
                                             ) : null}
                                         </div>
                                         {sermon.onDetach ? (
