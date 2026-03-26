@@ -5,8 +5,8 @@ import { useAuth } from "@/context/AuthContext"
 import { useConversationStream } from "@/hooks/useConversationStream"
 import { ConversationList } from "@/components/ConversationList"
 import { SermonList } from "@/components/SermonList"
-import { ScriptureList } from "@/components/ScriptureList"
 import { ConversationWindow } from "@/components/ConversationWindow"
+import { ContextPanel } from "@/components/ContextPanel"
 import * as conversationApi from "@/api/conversations"
 import * as sermonsApi from "@/api/sermons"
 import * as scriptureApi from "@/api/scripture"
@@ -21,6 +21,16 @@ import type {
 } from "@/types/api"
 
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
+
+function formatSermonMeta(sermon: Sermon | undefined): string | null {
+    if (!sermon) return null
+
+    const parts = [sermon.speaker, sermon.recordedOn].filter(Boolean)
+
+    if (parts.length === 0) return null
+
+    return parts.join(" · ")
+}
 
 export function ConversationsPage() {
     const { user, currentCongregation } = useAuth()
@@ -313,7 +323,14 @@ export function ConversationsPage() {
     )
 
     const scriptureContextItems = (() => {
-        const items = new Map<string, { label: string }>()
+        const items = new Map<
+            string,
+            {
+                label: string
+                sources: Set<string>
+                status: "active" | "pending"
+            }
+        >()
 
         const addCitation = (
             citation: Pick<
@@ -325,6 +342,8 @@ export function ConversationsPage() {
                 | "endVerse"
                 | "label"
             >,
+            source: string,
+            status: "active" | "pending",
         ) => {
             const key = [
                 citation.translationId,
@@ -335,27 +354,43 @@ export function ConversationsPage() {
             ].join(":")
 
             const existing = items.get(key)
-            if (existing) return
+            if (existing) {
+                existing.sources.add(source)
+                if (status === "active") {
+                    existing.status = "active"
+                }
+                return
+            }
 
             items.set(key, {
                 label: citation.label,
+                sources: new Set([source]),
+                status,
             })
         }
 
         if (effectiveConversationId) {
             activeScriptures.forEach((item) => {
-                if (item.citation) addCitation(item.citation)
+                if (item.citation) {
+                    addCitation(item.citation, "directly attached", "active")
+                }
             })
             activeSermons.forEach((item) => {
                 item.sermon?.scriptures.forEach((citation) =>
-                    addCitation(citation),
+                    addCitation(
+                        citation,
+                        item.sermon?.title
+                            ? `from sermon: ${item.sermon.title}`
+                            : "from attached sermon",
+                        "active",
+                    ),
                 )
             })
         } else {
             pendingSermonIds.forEach((sermonId) => {
                 const sermon = sermons.find((item) => item.id === sermonId)
                 sermon?.scriptures.forEach((citation) =>
-                    addCitation(citation),
+                    addCitation(citation, `from sermon: ${sermon.title}`, "pending"),
                 )
             })
         }
@@ -363,8 +398,34 @@ export function ConversationsPage() {
         return Array.from(items.entries()).map(([key, value]) => ({
             key,
             label: value.label,
+            source: Array.from(value.sources).join(" + "),
+            status: value.status,
         }))
     })()
+
+    const contextSermonItems = effectiveConversationId
+        ? activeSermons.map((item) => {
+              const sermon =
+                  item.sermon ??
+                  sermons.find((candidate) => candidate.id === item.sermonId)
+
+              return {
+                  key: item.id,
+                  label: sermon?.title ?? item.sermonId,
+                  meta: formatSermonMeta(sermon),
+                  status: "active" as const,
+              }
+          })
+        : pendingSermonIds.map((sermonId) => {
+              const sermon = sermons.find((item) => item.id === sermonId)
+
+              return {
+                  key: sermonId,
+                  label: sermon?.title ?? sermonId,
+                  meta: formatSermonMeta(sermon),
+                  status: "pending" as const,
+              }
+          })
 
     const conversationEvents: ConversationEvent[] = effectiveConversationId
         ? [
@@ -434,7 +495,6 @@ export function ConversationsPage() {
                         onTogglePending={handleTogglePendingSermon}
                         isDisabled={isStreaming}
                     />
-                    <ScriptureList scriptures={scriptureContextItems} />
                     <ConversationList
                         conversations={conversations}
                         selectedId={selectedConversationId}
@@ -444,24 +504,32 @@ export function ConversationsPage() {
                     />
                 </div>
 
-                {apiError && (
-                    <div className="api-error-banner">API Error: {apiError}</div>
-                )}
+                <div className="conversation-stage">
+                    {apiError && (
+                        <div className="api-error-banner">API Error: {apiError}</div>
+                    )}
 
-                <ConversationWindow
-                    conversationId={effectiveConversationId}
-                    messages={messages}
-                    events={conversationEvents}
-                    streamingText={streamingText}
-                    isStreaming={isStreaming}
-                    onSendMessage={handleSendMessage}
-                    isLoading={isLoadingMessages}
-                    selectedModel={selectedModel}
-                    onModelChange={setSelectedModel}
-                    streamError={streamError}
-                    lastUserMessageId={lastUserMessageId}
-                    onRetry={handleRetry}
-                />
+                    <ContextPanel
+                        sermons={contextSermonItems}
+                        scriptures={scriptureContextItems}
+                        isPending={!effectiveConversationId}
+                    />
+
+                    <ConversationWindow
+                        conversationId={effectiveConversationId}
+                        messages={messages}
+                        events={conversationEvents}
+                        streamingText={streamingText}
+                        isStreaming={isStreaming}
+                        onSendMessage={handleSendMessage}
+                        isLoading={isLoadingMessages}
+                        selectedModel={selectedModel}
+                        onModelChange={setSelectedModel}
+                        streamError={streamError}
+                        lastUserMessageId={lastUserMessageId}
+                        onRetry={handleRetry}
+                    />
+                </div>
             </div>
         </div>
     )
