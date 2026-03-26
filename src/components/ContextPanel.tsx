@@ -2,27 +2,24 @@ type ContextSermonItem = {
     key: string
     label: string
     meta?: string | null
-    status: "active" | "pending"
+    onDetach?: () => void
 }
 
 type ContextScriptureItem = {
     key: string
     label: string
     source: string
-    status: "active" | "pending"
 }
 
 interface ContextPanelProps {
     sermons: ContextSermonItem[]
     scriptures: ContextScriptureItem[]
-    isPending: boolean
     onClose?: () => void
 }
 
 export function ContextPanel({
     sermons,
     scriptures,
-    isPending,
     onClose,
 }: ContextPanelProps) {
     const hasContext = sermons.length > 0 || scriptures.length > 0
@@ -41,9 +38,6 @@ export function ContextPanel({
                     </div>
                 </div>
                 <div className="context-panel-actions">
-                    <span className={`context-status${isPending ? " pending" : ""}`}>
-                        {isPending ? "pending" : "live"}
-                    </span>
                     {onClose ? (
                         <button
                             type="button"
@@ -76,7 +70,7 @@ export function ContextPanel({
                                 {sermons.map((sermon) => (
                                     <article
                                         key={sermon.key}
-                                        className={`context-item ${sermon.status}`}
+                                        className="context-item"
                                     >
                                         <div className="context-item-main">
                                             <p className="context-item-label">
@@ -88,9 +82,15 @@ export function ContextPanel({
                                                 </p>
                                             ) : null}
                                         </div>
-                                        <span className="context-item-badge">
-                                            {sermon.status}
-                                        </span>
+                                        {sermon.onDetach ? (
+                                            <button
+                                                type="button"
+                                                className="context-item-action"
+                                                onClick={sermon.onDetach}
+                                            >
+                                                Detach
+                                            </button>
+                                        ) : null}
                                     </article>
                                 ))}
                             </div>
@@ -114,7 +114,7 @@ export function ContextPanel({
                                 {scriptures.map((scripture) => (
                                     <article
                                         key={scripture.key}
-                                        className={`context-item ${scripture.status}`}
+                                        className="context-item"
                                     >
                                         <div className="context-item-main">
                                             <p className="context-item-label">
@@ -124,9 +124,6 @@ export function ContextPanel({
                                                 {scripture.source}
                                             </p>
                                         </div>
-                                        <span className="context-item-badge">
-                                            {scripture.status}
-                                        </span>
                                     </article>
                                 ))}
                             </div>

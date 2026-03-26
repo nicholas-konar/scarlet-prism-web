@@ -27,7 +27,8 @@ type LibrarySection = "conversations" | "sermons" | "scripture"
 function formatSermonMeta(sermon: Sermon | undefined): string | null {
     if (!sermon) return null
 
-    const parts = [sermon.speaker, sermon.recordedOn].filter(Boolean)
+    const parts = [sermon.speaker, sermon.recordedOn]
+        .filter((value): value is string => Boolean(value?.trim()))
 
     if (parts.length === 0) return null
 
@@ -409,7 +410,7 @@ export function ConversationsPage() {
             pendingSermonIds.forEach((sermonId) => {
                 const sermon = sermons.find((item) => item.id === sermonId)
                 sermon?.scriptures.forEach((citation) =>
-                    addCitation(citation, `from sermon: ${sermon.title}`, "pending"),
+                    addCitation(citation, `from sermon: ${sermon.title}`, "active"),
                 )
             })
         }
@@ -418,7 +419,6 @@ export function ConversationsPage() {
             key,
             label: value.label,
             source: Array.from(value.sources).join(" + "),
-            status: value.status,
         }))
     })()
 
@@ -432,7 +432,9 @@ export function ConversationsPage() {
                   key: item.id,
                   label: sermon?.title ?? item.sermonId,
                   meta: formatSermonMeta(sermon),
-                  status: "active" as const,
+                  onDetach: () => {
+                      void handleDetachSermon(item.id)
+                  },
               }
           })
         : pendingSermonIds.map((sermonId) => {
@@ -442,7 +444,7 @@ export function ConversationsPage() {
                   key: sermonId,
                   label: sermon?.title ?? sermonId,
                   meta: formatSermonMeta(sermon),
-                  status: "pending" as const,
+                  onDetach: () => handleTogglePendingSermon(sermonId),
               }
           })
 
@@ -546,7 +548,6 @@ export function ConversationsPage() {
                     <ContextPanel
                         sermons={contextSermonItems}
                         scriptures={scriptureContextItems}
-                        isPending={!effectiveConversationId}
                         onClose={() => setIsContextOpen(false)}
                     />
                 ) : null}
@@ -564,7 +565,6 @@ export function ConversationsPage() {
                             <div className="workspace-context-summary">
                                 <span>{contextSermonItems.length} sermon{contextSermonItems.length === 1 ? "" : "s"}</span>
                                 <span>{scriptureContextItems.length} scripture{scriptureContextItems.length === 1 ? "" : "s"}</span>
-                                <span>{effectiveConversationId ? "live" : "pending"}</span>
                             </div>
                         </div>
                         <div className="workspace-toolbar-actions">

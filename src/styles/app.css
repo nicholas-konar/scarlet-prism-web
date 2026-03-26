@@ -972,21 +972,6 @@ fieldset legend {
     line-height: 1;
 }
 
-.context-status {
-    border: 1px solid var(--line-soft);
-    padding: 5px 8px;
-    font-size: 10px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    background: #fff;
-}
-
-.context-status.pending {
-    border-style: dashed;
-    color: #6d6659;
-}
-
 .context-summary-strip {
     display: flex;
     gap: 8px;
@@ -1037,6 +1022,7 @@ fieldset legend {
 .context-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 12px;
     padding: 10px 12px;
     border: 1px solid var(--line-soft);
@@ -1044,17 +1030,11 @@ fieldset legend {
     background: rgba(255, 255, 255, 0.9);
 }
 
-.context-item.pending {
-    border-style: dashed solid dashed solid;
-    border-color: var(--line-soft);
-    border-left: 3px dashed #6d6659;
-    background: color-mix(in srgb, var(--paper-tint) 82%, white);
-}
-
 .context-item-main {
     display: grid;
     gap: 4px;
     min-width: 0;
+    flex: 1;
 }
 
 .context-item-label {
@@ -1068,14 +1048,38 @@ fieldset legend {
     color: #666;
 }
 
-.context-item-badge {
+.context-item-action {
     flex-shrink: 0;
-    padding-top: 2px;
+    border: none;
+    align-self: center;
+    padding: 0;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity 140ms ease,
+        color 140ms ease;
     font-size: 10px;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: #6d6659;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.18em;
+}
+
+.context-item:hover .context-item-action,
+.context-item:focus-within .context-item-action {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.context-item-action:hover,
+.context-item-action:focus-visible {
+    color: #575044;
+    text-decoration-color: currentColor;
 }
 
 .context-empty,
