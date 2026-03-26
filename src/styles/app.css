@@ -1054,6 +1054,7 @@ fieldset legend {
     align-self: center;
     padding: 0;
     background: transparent;
+    background-color: transparent;
     opacity: 0;
     pointer-events: none;
     transition:
@@ -1065,9 +1066,12 @@ fieldset legend {
     letter-spacing: 0.12em;
     color: #6d6659;
     cursor: pointer;
+    font-weight: normal;
     text-decoration: underline;
     text-decoration-color: transparent;
     text-underline-offset: 0.18em;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 .context-item:hover .context-item-action,
@@ -1076,9 +1080,12 @@ fieldset legend {
     pointer-events: auto;
 }
 
-.context-item-action:hover,
+.context-item-action:hover:not(:disabled),
 .context-item-action:focus-visible {
+    background: transparent;
+    background-color: transparent;
     color: #575044;
+    font-weight: normal;
     text-decoration-color: currentColor;
 }
 
