@@ -4,6 +4,14 @@
 
 :root {
     --font-sans: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --paper: #fdfbf7;
+    --paper-tint: #f6f1e8;
+    --paper-tint-strong: #ece7dd;
+    --canvas: #fffefc;
+    --line-soft: #cfc6b8;
+    --line-faint: #e3ddd2;
+    --line-strong: #000;
+    --text-strong: #000;
 }
 
 * {
@@ -20,8 +28,8 @@ html {
 body {
     font-family: var(--font-sans);
     font-size: 17px;
-    background-color: #fff;
-    color: #000;
+    background-color: var(--canvas);
+    color: var(--text-strong);
     line-height: 1.5;
 }
 
@@ -30,13 +38,13 @@ textarea,
 button,
 select {
     font-family: var(--font-sans);
-    color: #000;
+    color: var(--text-strong);
     background-color: #fff;
 }
 
 button {
     cursor: pointer;
-    border: 1px solid #000;
+    border: 1px solid var(--line-soft);
     padding: 4px 8px;
     background-color: #fff;
 }
@@ -54,14 +62,14 @@ button:disabled {
 
 input,
 textarea {
-    border: 1px solid #000;
+    border: 1px solid var(--line-soft);
     padding: 4px 8px;
 }
 
 input:focus,
 textarea:focus {
     outline: none;
-    background-color: #f0f0f0;
+    background-color: var(--paper-tint);
 }
 
 a {
@@ -87,8 +95,8 @@ a:hover {
 
 .error-message {
     padding: 8px;
-    border: 1px solid #000;
+    border: 1px solid #dc2626;
     background-color: #fff;
-    color: #000;
+    color: #b91c1c;
     margin: 8px 0;
 }
