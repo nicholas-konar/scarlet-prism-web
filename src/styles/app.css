@@ -507,7 +507,7 @@ fieldset legend {
 
 .main-layout {
     display: grid;
-    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
     padding: 24px;
     flex: 1;
@@ -515,17 +515,101 @@ fieldset legend {
     align-items: stretch;
 }
 
-/* ===== Sidebar ===== */
-
-.sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow: hidden;
-    min-height: 0;
+.conversation-workspace {
+    position: relative;
 }
 
-/* ===== Sermon List Panel ===== */
+.conversation-workspace.context-open {
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+}
+
+/* ===== Workspace ===== */
+
+.workspace-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    border: var(--border);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 241, 232, 0.9) 100%);
+}
+
+.workspace-toolbar-main,
+.workspace-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.workspace-context-summary {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #6d6659;
+}
+
+.workspace-context-summary span,
+.toolbar-chip span:last-child {
+    border: 1px solid var(--line-soft);
+    padding: 5px 8px;
+    background: rgba(255, 255, 255, 0.84);
+}
+
+.toolbar-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #6d6659;
+}
+
+.toolbar-chip.active {
+    color: #000;
+}
+
+.drawer-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-soft);
+    padding: 9px 12px;
+    background: #fff;
+    font-size: 11px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.drawer-toggle.active,
+.drawer-toggle:hover:not(:disabled),
+.toolbar-chip:hover:not(:disabled) {
+    background: var(--paper-tint);
+    color: #000;
+    font-weight: normal;
+}
+
+.drawer-dismiss {
+    background: transparent;
+}
+
+.library-launch {
+    margin-left: 4px;
+}
+
+/* ===== List Panels ===== */
 
 .sermon-list-panel,
 .scripture-list-panel,
@@ -826,10 +910,11 @@ fieldset legend {
 
 .context-panel {
     border: var(--border);
-    padding: 16px;
     display: grid;
-    gap: 16px;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0;
     background: linear-gradient(180deg, var(--paper-tint) 0%, var(--paper) 72%);
+    overflow: hidden;
 }
 
 .context-panel-header {
@@ -837,6 +922,19 @@ fieldset legend {
     justify-content: space-between;
     gap: 16px;
     align-items: flex-start;
+    padding: 16px;
+    border-bottom: 1px solid var(--line-faint);
+}
+
+.context-panel-heading {
+    display: grid;
+    gap: 12px;
+}
+
+.context-panel-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
 }
 
 .context-panel-eyebrow {
@@ -868,10 +966,26 @@ fieldset legend {
     color: #6d6659;
 }
 
-.context-grid {
+.context-summary-strip {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.context-summary-strip span {
+    font-size: 10px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #6d6659;
+}
+
+.context-column {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    align-content: start;
+    gap: 20px;
+    padding: 16px;
+    overflow-y: auto;
 }
 
 .context-section {
@@ -950,6 +1064,85 @@ fieldset legend {
     color: #666;
 }
 
+.context-empty {
+    padding: 16px;
+}
+
+/* ===== Library Overlay ===== */
+
+.library-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    justify-content: flex-end;
+    padding: 108px 24px 24px;
+    background: rgba(16, 12, 8, 0.14);
+    backdrop-filter: blur(2px);
+}
+
+.library-drawer {
+    width: min(420px, 100%);
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    border: var(--border);
+    box-shadow: 0 28px 80px rgba(22, 15, 8, 0.18);
+    overflow: hidden;
+}
+
+.library-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px;
+    border-bottom: 1px solid var(--line-faint);
+    background: linear-gradient(180deg, var(--paper-tint) 0%, var(--paper) 88%);
+}
+
+.library-section-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--line-faint);
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.library-section-tab {
+    flex: 1;
+    display: inline-flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+    padding: 14px 0 12px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    font-size: 11px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #6d6659;
+}
+
+.library-section-tab.active {
+    border-bottom-color: #000;
+    color: #000;
+}
+
+.library-drawer-body {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.library-drawer-body .conversation-list,
+.library-drawer-body .sermon-list-panel,
+.library-drawer-body .scripture-list-panel {
+    height: 100%;
+    border: none;
+}
+
 @media (max-width: 900px) {
     .main-layout,
     .info-grid,
@@ -988,6 +1181,23 @@ fieldset legend {
     .app-content,
     .main-layout {
         padding: 16px;
+    }
+
+    .conversation-workspace.context-open {
+        grid-template-columns: 1fr;
+    }
+
+    .context-panel {
+        max-height: 45vh;
+    }
+
+    .workspace-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .library-overlay {
+        padding: 96px 16px 16px;
     }
 }
 
@@ -1061,17 +1271,12 @@ fieldset legend {
         grid-template-columns: 1fr;
     }
 
-    .sidebar {
-        display: flex;
-        overflow: visible;
-    }
-
     .conversation-stage {
         grid-template-rows: auto auto minmax(420px, 1fr);
     }
 
-    .context-grid {
-        grid-template-columns: 1fr;
+    .context-panel {
+        max-height: none;
     }
 
     .header {
@@ -1083,5 +1288,23 @@ fieldset legend {
     .header-right {
         width: 100%;
         justify-content: space-between;
+    }
+
+    .library-overlay {
+        padding: 88px 12px 12px;
+        background: rgba(16, 12, 8, 0.2);
+    }
+
+    .library-drawer {
+        width: 100%;
+    }
+
+    .library-section-tabs {
+        overflow-x: auto;
+    }
+
+    .library-section-tab {
+        min-width: 120px;
+        flex: 0 0 auto;
     }
 }
