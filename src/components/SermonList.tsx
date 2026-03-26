@@ -49,9 +49,17 @@ export function SermonList({
         return ""
     }
 
+    function getActionLabel(sermonId: string): string {
+        if (conversationId) {
+            return isSelected(sermonId) ? "remove" : "add"
+        }
+
+        return isSelected(sermonId) ? "pending" : "add"
+    }
+
     return (
         <fieldset className="sermon-list-panel">
-            <legend>Sermons</legend>
+            <legend>Sermon Browser</legend>
 
             <div className="list-items">
                 {sermons.length === 0 ? (
@@ -67,10 +75,17 @@ export function SermonList({
                                 disabled={isDisabled}
                                 onClick={() => handleClick(sermon)}
                             >
-                                <span className="indicator">{">"}</span>
-                                <span className="label">
-                                    {sermon.title}
-                                    {transcriptionSuffix(sermon.transcriptionStatus)}
+                                <span className="list-item-main">
+                                    <span className="label">
+                                        {sermon.title}
+                                        {transcriptionSuffix(sermon.transcriptionStatus)}
+                                    </span>
+                                    <span className="list-item-meta">
+                                        {sermon.speaker ?? ""}
+                                    </span>
+                                </span>
+                                <span className="list-item-action">
+                                    {getActionLabel(sermon.id)}
                                 </span>
                             </button>
                         )

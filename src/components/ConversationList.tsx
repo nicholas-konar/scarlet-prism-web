@@ -15,13 +15,24 @@ export function ConversationList({
     onNewConversation,
     isLoading,
 }: ConversationListProps) {
+    function formatConversationLabel(index: number): string {
+        return `Conversation ${String(index + 1).padStart(2, "0")}`
+    }
+
+    function formatConversationMeta(createdAt: string): string {
+        return new Intl.DateTimeFormat(undefined, {
+            month: "short",
+            day: "numeric",
+        }).format(new Date(createdAt))
+    }
+
     return (
         <fieldset className="conversation-list">
             <legend>Conversations</legend>
 
             <div className="list-items">
                 {conversations && conversations.length > 0 ? (
-                    conversations.map((conv) => (
+                    conversations.map((conv, index) => (
                         <button
                             key={conv.id}
                             className={`list-item ${
@@ -30,8 +41,17 @@ export function ConversationList({
                             onClick={() => onSelect(conv.id)}
                             disabled={isLoading}
                         >
-                            <span className="indicator">{">"}</span>
-                            <span className="label">{conv.id}</span>
+                            <span className="list-item-main">
+                                <span className="label">
+                                    {formatConversationLabel(index)}
+                                </span>
+                                <span className="list-item-meta">
+                                    {formatConversationMeta(conv.createdAt)}
+                                </span>
+                            </span>
+                            <span className="list-item-action">
+                                {selectedId === conv.id ? "open" : "view"}
+                            </span>
                         </button>
                     ))
                 ) : (
