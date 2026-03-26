@@ -30,9 +30,9 @@ export function MessageBubble({ message, showRetry, onRetry }: MessageBubbleProp
     }
 
     return (
-        <fieldset className="message-bubble assistant">
-            <legend>{message.modelId}</legend>
+        <div className="message-bubble assistant">
+            <div className="message-bubble-header">{message.modelId}</div>
             <div className="message-text">{message.text}</div>
-        </fieldset>
+        </div>
     )
 }

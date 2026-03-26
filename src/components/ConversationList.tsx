@@ -27,8 +27,11 @@ export function ConversationList({
     }
 
     return (
-        <fieldset className="conversation-list">
-            <legend>Conversations</legend>
+        <section className="conversation-list panel-shell" aria-label="Conversation history">
+            <div className="panel-header">
+                <p className="panel-eyebrow">History</p>
+                <h2 className="panel-title">Conversations</h2>
+            </div>
 
             <div className="list-items">
                 {conversations && conversations.length > 0 ? (
@@ -64,6 +67,6 @@ export function ConversationList({
                     [+ new conversation]
                 </button>
             </div>
-        </fieldset>
+        </section>
     )
 }

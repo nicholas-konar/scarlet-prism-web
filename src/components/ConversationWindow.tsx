@@ -62,8 +62,13 @@ export function ConversationWindow({
 
     return (
         <div className="conversation-window">
-            <fieldset className="messages-container">
-                <legend>{conversationTitle}</legend>
+            <section className="messages-container panel-shell" aria-label="Conversation thread">
+                <div className="panel-header panel-header-row">
+                    <div>
+                        <p className="panel-eyebrow">Thread</p>
+                        <h2 className="panel-title">{conversationTitle}</h2>
+                    </div>
+                </div>
                 {isEmpty ? (
                     <div className="empty-state">
                         Start a new conversation or select one from the left.
@@ -89,26 +94,26 @@ export function ConversationWindow({
                         )}
 
                         {streamError && (
-                            <fieldset className="message-bubble error">
-                                <legend>error</legend>
+                            <div className="message-bubble error">
+                                <div className="message-bubble-header">Error</div>
                                 <div className="message-text">{streamError}</div>
-                            </fieldset>
+                            </div>
                         )}
 
                         {streamingText && (
-                            <fieldset className="message-bubble assistant">
-                                <legend>{selectedModel}</legend>
+                            <div className="message-bubble assistant">
+                                <div className="message-bubble-header">{selectedModel}</div>
                                 <div className="message-text">
                                     {streamingText}
                                     <span className="cursor">▋</span>
                                 </div>
-                            </fieldset>
+                            </div>
                         )}
 
                         <div ref={messagesEndRef} />
                     </>
                 )}
-            </fieldset>
+            </section>
 
             <MessageInput
                 onSubmit={onSendMessage}

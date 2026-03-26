@@ -52,11 +52,16 @@ export function MessageInput({
                     disabled={isDisabled}
                 />
             </div>
-            <fieldset
+            <div
                 className="message-input-form"
                 onClick={() => textareaRef.current?.focus()}
+                role="group"
+                aria-label="Prompt composer"
             >
-                <legend>Prompt</legend>
+                <div className="panel-header">
+                    <p className="panel-eyebrow">Compose</p>
+                    <h2 className="panel-title">Prompt</h2>
+                </div>
                 <textarea
                     ref={textareaRef}
                     value={message}
@@ -69,7 +74,7 @@ export function MessageInput({
                 <button type="submit" disabled={isDisabled || !message.trim()}>
                     [send →]
                 </button>
-            </fieldset>
+            </div>
         </form>
     )
 }

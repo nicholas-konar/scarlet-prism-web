@@ -58,8 +58,11 @@ export function SermonList({
     }
 
     return (
-        <fieldset className="sermon-list-panel">
-            <legend>Sermon Browser</legend>
+        <section className="sermon-list-panel panel-shell" aria-label="Sermon browser">
+            <div className="panel-header">
+                <p className="panel-eyebrow">Sources</p>
+                <h2 className="panel-title">Sermon Browser</h2>
+            </div>
 
             <div className="list-items">
                 {sermons.length === 0 ? (
@@ -92,6 +95,6 @@ export function SermonList({
                     })
                 )}
             </div>
-        </fieldset>
+        </section>
     )
 }
