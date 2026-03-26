@@ -551,14 +551,6 @@ fieldset legend {
     box-shadow: inset 3px 0 0 #000;
 }
 
-.conversation-list .list-item.selected,
-.conversation-list .list-item.selected:hover:not(:disabled) {
-    background-color: #000;
-    color: #fff;
-    font-weight: 600;
-    box-shadow: none;
-}
-
 .list-item-main {
     display: grid;
     gap: 2px;
@@ -581,10 +573,6 @@ fieldset legend {
     min-height: 13px;
 }
 
-.conversation-list .list-item.selected .list-item-meta {
-    color: rgba(255, 255, 255, 0.72);
-}
-
 .list-item-action {
     flex-shrink: 0;
     padding-top: 2px;
@@ -593,10 +581,6 @@ fieldset legend {
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: #666;
-}
-
-.conversation-list .list-item.selected .list-item-action {
-    color: rgba(255, 255, 255, 0.72);
 }
 
 .list-item.static {
