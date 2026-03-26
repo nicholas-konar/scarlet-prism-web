@@ -23,6 +23,7 @@
 html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    height: 100%;
 }
 
 body {
@@ -31,6 +32,13 @@ body {
     background-color: var(--canvas);
     color: var(--text-strong);
     line-height: 1.5;
+    min-height: 100%;
+    height: 100%;
+}
+
+#root {
+    min-height: 100%;
+    height: 100%;
 }
 
 input,

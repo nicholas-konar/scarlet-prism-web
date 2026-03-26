@@ -69,50 +69,52 @@ export function ConversationWindow({
                         <h2 className="panel-title">{conversationTitle}</h2>
                     </div>
                 </div>
-                {isEmpty ? (
-                    <div className="empty-state">
-                        Start a new conversation or select one from the left.
-                    </div>
-                ) : (
-                    <>
-                        {items.map((item) =>
-                            item.kind === "event" ? (
-                                <div key={item.data.id} className="event-log-entry">
-                                    {item.data.text}
+                <div className="messages-scroll-area">
+                    {isEmpty ? (
+                        <div className="empty-state">
+                            Start a new conversation or select one from the left.
+                        </div>
+                    ) : (
+                        <>
+                            {items.map((item) =>
+                                item.kind === "event" ? (
+                                    <div key={item.data.id} className="event-log-entry">
+                                        {item.data.text}
+                                    </div>
+                                ) : (
+                                    <MessageBubble
+                                        key={item.data.id}
+                                        message={item.data}
+                                        showRetry={
+                                            item.data.id === lastUserMessageId &&
+                                            !!streamError
+                                        }
+                                        onRetry={onRetry}
+                                    />
+                                ),
+                            )}
+
+                            {streamError && (
+                                <div className="message-bubble error">
+                                    <div className="message-bubble-header">Error</div>
+                                    <div className="message-text">{streamError}</div>
                                 </div>
-                            ) : (
-                                <MessageBubble
-                                    key={item.data.id}
-                                    message={item.data}
-                                    showRetry={
-                                        item.data.id === lastUserMessageId &&
-                                        !!streamError
-                                    }
-                                    onRetry={onRetry}
-                                />
-                            ),
-                        )}
+                            )}
 
-                        {streamError && (
-                            <div className="message-bubble error">
-                                <div className="message-bubble-header">Error</div>
-                                <div className="message-text">{streamError}</div>
-                            </div>
-                        )}
-
-                        {streamingText && (
-                            <div className="message-bubble assistant">
-                                <div className="message-bubble-header">{selectedModel}</div>
-                                <div className="message-text">
-                                    {streamingText}
-                                    <span className="cursor">▋</span>
+                            {streamingText && (
+                                <div className="message-bubble assistant">
+                                    <div className="message-bubble-header">{selectedModel}</div>
+                                    <div className="message-text">
+                                        {streamingText}
+                                        <span className="cursor">▋</span>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        <div ref={messagesEndRef} />
-                    </>
-                )}
+                            <div ref={messagesEndRef} />
+                        </>
+                    )}
+                </div>
             </section>
 
             <MessageInput
