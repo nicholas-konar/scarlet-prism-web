@@ -3,11 +3,11 @@ import { useSearchParams } from "react-router-dom"
 import { SiteHeader } from "@/components/SiteHeader"
 import { useAuth } from "@/context/AuthContext"
 import { useConversationStream } from "@/hooks/useConversationStream"
-import { ConversationList } from "@/components/ConversationList"
-import { SermonList } from "@/components/SermonList"
+import { HistoryConversationList } from "@/components/HistoryConversationList"
+import { HistorySermonList } from "@/components/HistorySermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
 import { ContextPanel } from "@/components/ContextPanel"
-import { ScriptureList } from "@/components/ScriptureList"
+import { HistoryScriptureList } from "@/components/HistoryScriptureList"
 import {
     ScriptureCitationPicker,
     type PendingScriptureCitation,
@@ -29,7 +29,7 @@ import type {
 } from "@/types/api"
 
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
-type LibrarySection = "conversations" | "sermons" | "scripture"
+type HistorySection = "conversations" | "sermons" | "scripture"
 
 function formatSermonDate(value: string | null): string | null {
     if (!value?.trim()) return null
@@ -97,11 +97,11 @@ export function ConversationsPage() {
     )
     const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
     const [isContextOpen, setIsContextOpen] = useState(true)
-    const [isLibraryOpen, setIsLibraryOpen] = useState(false)
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false)
     const [isAddingSermon, setIsAddingSermon] = useState(false)
     const [isAddingScripture, setIsAddingScripture] = useState(false)
-    const [activeLibrarySection, setActiveLibrarySection] =
-        useState<LibrarySection>("sermons")
+    const [activeHistorySection, setActiveHistorySection] =
+        useState<HistorySection>("sermons")
 
     const {
         streamingText,
@@ -182,17 +182,17 @@ export function ConversationsPage() {
     }, [currentCongregation])
 
     useEffect(() => {
-        if (!isLibraryOpen) return
+        if (!isHistoryOpen) return
 
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
-                setIsLibraryOpen(false)
+                setIsHistoryOpen(false)
             }
         }
 
         window.addEventListener("keydown", handleKeyDown)
         return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [isLibraryOpen])
+    }, [isHistoryOpen])
 
     // Load messages + resources when selected conversation changes
     useEffect(() => {
@@ -647,7 +647,7 @@ export function ConversationsPage() {
               }
           })
 
-    const libraryScriptureItems = scriptureContextItems.map((scripture) => ({
+    const historyScriptureItems = scriptureContextItems.map((scripture) => ({
         key: scripture.key,
         label: scripture.label,
         meta: scripture.source,
@@ -709,8 +709,8 @@ export function ConversationsPage() {
             currentCongregation?.defaultBibleTranslationId,
     })
 
-    const librarySectionButtons: Array<{
-        id: LibrarySection
+    const historySectionButtons: Array<{
+        id: HistorySection
         label: string
         count: number
     }> = [
@@ -727,13 +727,13 @@ export function ConversationsPage() {
         {
             id: "scripture",
             label: "Scripture",
-            count: libraryScriptureItems.length,
+            count: historyScriptureItems.length,
         },
     ]
 
-    function openLibrary(section: LibrarySection = activeLibrarySection) {
-        setActiveLibrarySection(section)
-        setIsLibraryOpen(true)
+    function openHistory(section: HistorySection = activeHistorySection) {
+        setActiveHistorySection(section)
+        setIsHistoryOpen(true)
     }
 
     return (
@@ -852,16 +852,16 @@ export function ConversationsPage() {
                             </div>
                         </div>
                         <div className="workspace-toolbar-actions">
-                            {librarySectionButtons.map((section) => (
+                            {historySectionButtons.map((section) => (
                                 <button
                                     key={section.id}
                                     type="button"
                                     className={`toolbar-chip${
-                                        activeLibrarySection === section.id
+                                        activeHistorySection === section.id
                                             ? " active"
                                             : ""
                                     }`}
-                                    onClick={() => openLibrary(section.id)}
+                                    onClick={() => openHistory(section.id)}
                                 >
                                     {section.label}
                                     <span>{section.count}</span>
@@ -869,10 +869,10 @@ export function ConversationsPage() {
                             ))}
                             <button
                                 type="button"
-                                className="drawer-toggle library-launch"
-                                onClick={() => openLibrary()}
+                                className="drawer-toggle history-launch"
+                                onClick={() => openHistory()}
                             >
-                                Open library
+                                Open history
                             </button>
                         </div>
                     </div>
@@ -898,44 +898,44 @@ export function ConversationsPage() {
                 </div>
             </div>
 
-            {isLibraryOpen ? (
+            {isHistoryOpen ? (
                 <div
-                    className="library-overlay"
+                    className="history-overlay"
                     role="presentation"
-                    onClick={() => setIsLibraryOpen(false)}
+                    onClick={() => setIsHistoryOpen(false)}
                 >
                     <aside
-                        className="library-drawer panel-shell"
-                        aria-label="Library"
+                        className="history-drawer panel-shell"
+                        aria-label="History"
                         onClick={(event) => event.stopPropagation()}
                     >
-                        <div className="library-drawer-header">
+                        <div className="history-drawer-header">
                             <div>
-                                <p className="panel-eyebrow">Workspace library</p>
-                                <h2 className="panel-title">Library</h2>
+                                <p className="panel-eyebrow">Conversation history</p>
+                                <h2 className="panel-title">History</h2>
                             </div>
                             <button
                                 type="button"
                                 className="drawer-toggle drawer-dismiss"
-                                onClick={() => setIsLibraryOpen(false)}
+                                onClick={() => setIsHistoryOpen(false)}
                             >
                                 Close
                             </button>
                         </div>
 
-                        <div className="library-section-tabs" role="tablist" aria-label="Library sections">
-                            {librarySectionButtons.map((section) => (
+                        <div className="history-section-tabs" role="tablist" aria-label="History sections">
+                            {historySectionButtons.map((section) => (
                                 <button
                                     key={section.id}
                                     type="button"
                                     role="tab"
-                                    aria-selected={activeLibrarySection === section.id}
-                                    className={`library-section-tab${
-                                        activeLibrarySection === section.id
+                                    aria-selected={activeHistorySection === section.id}
+                                    className={`history-section-tab${
+                                        activeHistorySection === section.id
                                             ? " active"
                                             : ""
                                     }`}
-                                    onClick={() => setActiveLibrarySection(section.id)}
+                                    onClick={() => setActiveHistorySection(section.id)}
                                 >
                                     <span>{section.label}</span>
                                     <span>{section.count}</span>
@@ -943,25 +943,25 @@ export function ConversationsPage() {
                             ))}
                         </div>
 
-                        <div className="library-drawer-body">
-                            {activeLibrarySection === "conversations" ? (
-                                <ConversationList
+                        <div className="history-drawer-body">
+                            {activeHistorySection === "conversations" ? (
+                                <HistoryConversationList
                                     conversations={conversations}
                                     selectedId={selectedConversationId}
                                     onSelect={(id) => {
                                         handleSelectConversation(id)
-                                        setIsLibraryOpen(false)
+                                        setIsHistoryOpen(false)
                                     }}
                                     onNewConversation={() => {
                                         handleNewConversation()
-                                        setIsLibraryOpen(false)
+                                        setIsHistoryOpen(false)
                                     }}
                                     isLoading={isLoadingConversations}
                                 />
                             ) : null}
 
-                            {activeLibrarySection === "sermons" ? (
-                                <SermonList
+                            {activeHistorySection === "sermons" ? (
+                                <HistorySermonList
                                     sermons={sermons}
                                     activeSermons={activeSermons}
                                     pendingSermonIds={pendingSermonIds}
@@ -974,10 +974,10 @@ export function ConversationsPage() {
                                 />
                             ) : null}
 
-                            {activeLibrarySection === "scripture" ? (
-                                <ScriptureList
-                                    scriptures={libraryScriptureItems}
-                                    eyebrow={hasContext ? "Current references" : "Library"}
+                            {activeHistorySection === "scripture" ? (
+                                <HistoryScriptureList
+                                    scriptures={historyScriptureItems}
+                                    eyebrow={hasContext ? "Current references" : "History"}
                                 />
                             ) : null}
                         </div>

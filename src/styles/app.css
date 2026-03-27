@@ -691,7 +691,7 @@ fieldset legend {
     background: transparent;
 }
 
-.library-launch {
+.history-launch {
     margin-left: 4px;
 }
 
@@ -1266,9 +1266,9 @@ fieldset legend {
     padding: 16px;
 }
 
-/* ===== Library Overlay ===== */
+/* ===== History Overlay ===== */
 
-.library-overlay {
+.history-overlay {
     position: fixed;
     inset: 0;
     z-index: 30;
@@ -1279,7 +1279,7 @@ fieldset legend {
     backdrop-filter: blur(2px);
 }
 
-.library-drawer {
+.history-drawer {
     width: min(420px, 100%);
     height: 100%;
     display: grid;
@@ -1289,7 +1289,7 @@ fieldset legend {
     overflow: hidden;
 }
 
-.library-drawer-header {
+.history-drawer-header {
     display: flex;
     justify-content: space-between;
     gap: 16px;
@@ -1299,7 +1299,7 @@ fieldset legend {
     background: linear-gradient(180deg, var(--paper-tint) 0%, var(--paper) 88%);
 }
 
-.library-section-tabs {
+.history-section-tabs {
     display: flex;
     gap: 0;
     padding: 0 16px;
@@ -1307,7 +1307,7 @@ fieldset legend {
     background: rgba(255, 255, 255, 0.88);
 }
 
-.library-section-tab {
+.history-section-tab {
     flex: 1;
     display: inline-flex;
     justify-content: space-between;
@@ -1324,19 +1324,19 @@ fieldset legend {
     color: #6d6659;
 }
 
-.library-section-tab.active {
+.history-section-tab.active {
     border-bottom-color: #000;
     color: #000;
 }
 
-.library-drawer-body {
+.history-drawer-body {
     min-height: 0;
     overflow: hidden;
 }
 
-.library-drawer-body .conversation-list,
-.library-drawer-body .sermon-list-panel,
-.library-drawer-body .scripture-list-panel {
+.history-drawer-body .conversation-list,
+.history-drawer-body .sermon-list-panel,
+.history-drawer-body .scripture-list-panel {
     height: 100%;
     border: none;
 }
@@ -1396,7 +1396,7 @@ fieldset legend {
         flex-direction: column;
     }
 
-    .library-overlay {
+    .history-overlay {
         padding: 96px 16px 16px;
     }
 }
@@ -1492,20 +1492,20 @@ fieldset legend {
         justify-content: space-between;
     }
 
-    .library-overlay {
+    .history-overlay {
         padding: 88px 12px 12px;
         background: rgba(16, 12, 8, 0.2);
     }
 
-    .library-drawer {
+    .history-drawer {
         width: 100%;
     }
 
-    .library-section-tabs {
+    .history-section-tabs {
         overflow-x: auto;
     }
 
-    .library-section-tab {
+    .history-section-tab {
         min-width: 120px;
         flex: 0 0 auto;
     }
