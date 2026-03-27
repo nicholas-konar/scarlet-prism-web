@@ -64,8 +64,10 @@ export function ContextPanel({
             <div className="context-column">
                 <section className="context-section" aria-label="Sermons in context">
                     <div className="context-section-header">
-                        <h3>Sermons</h3>
-                        <span>{sermons.length}</span>
+                        <div className="context-section-heading">
+                            <h3>Sermons</h3>
+                            <span className="context-section-count">{sermons.length}</span>
+                        </div>
                     </div>
                     {sermons.length === 0 ? (
                         <p className="context-empty-inline">No sermons in context.</p>
@@ -111,7 +113,10 @@ export function ContextPanel({
                     aria-label="Scripture references in context"
                 >
                     <div className="context-section-header">
-                        <h3>Scripture</h3>
+                        <div className="context-section-heading">
+                            <h3>Scripture</h3>
+                            <span className="context-section-count">{scriptures.length}</span>
+                        </div>
                         <div className="context-section-actions">
                             {onToggleScripturePicker ? (
                                 <button
@@ -123,7 +128,6 @@ export function ContextPanel({
                                     {isAddingScripture ? "Cancel" : "Add scripture"}
                                 </button>
                             ) : null}
-                            <span>{scriptures.length}</span>
                         </div>
                     </div>
                     {isAddingScripture && scripturePicker ? (
