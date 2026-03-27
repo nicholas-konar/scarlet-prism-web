@@ -94,10 +94,6 @@ function getCitationKey(
     ].join(":")
 }
 
-function formatCountLabel(count: number, singular: string) {
-    return `${count} ${singular}${count === 1 ? "" : "s"}`
-}
-
 function getSermonDisplay(
     sermon: Sermon | null | undefined,
     fallbackLabel: string,
@@ -167,7 +163,7 @@ function buildLibraryScriptureItems({
                     items,
                     citation,
                     item.sermon?.title
-                        ? `from sermon: ${item.sermon.title}`
+                        ? `from ${item.sermon.title}`
                         : "from attached sermon",
                 )
             })
@@ -180,7 +176,7 @@ function buildLibraryScriptureItems({
         pendingSermonIds.forEach((sermonId) => {
             const sermon = sermons.find((item) => item.id === sermonId)
             sermon?.scriptures.forEach((citation) => {
-                addLibraryCitation(items, citation, `from sermon: ${sermon.title}`)
+                addLibraryCitation(items, citation, `from ${sermon.title}`)
             })
         })
     }
@@ -924,62 +920,13 @@ export function ConversationsPage() {
                 ) : null}
 
                 <div className="conversation-stage">
-                    <div className="workspace-toolbar panel-shell">
-                        <div className="workspace-toolbar-main">
-                            <button
-                                type="button"
-                                className={`drawer-toggle${isLibraryOpen ? " active" : ""}`}
-                                onClick={() => setIsLibraryOpen((current) => !current)}
-                            >
-                                {isLibraryOpen ? "Hide library" : "Show library"}
-                            </button>
-                            <div className="workspace-library-summary">
-                                <span>
-                                    {formatCountLabel(
-                                        librarySermonItems.length,
-                                        "sermon",
-                                    )}
-                                </span>
-                                <span>
-                                    {formatCountLabel(
-                                        libraryScriptureItems.length,
-                                        "scripture",
-                                    )}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="workspace-toolbar-actions">
-                            {historySectionButtons.map((section) => (
-                                <button
-                                    key={section.id}
-                                    type="button"
-                                    className={`toolbar-chip${
-                                        activeHistorySection === section.id
-                                            ? " active"
-                                            : ""
-                                    }`}
-                                    onClick={() => openHistory(section.id)}
-                                >
-                                    {section.label}
-                                    <span>{section.count}</span>
-                                </button>
-                            ))}
-                            <button
-                                type="button"
-                                className="drawer-toggle history-launch"
-                                onClick={() => openHistory()}
-                            >
-                                Open history
-                            </button>
-                        </div>
-                    </div>
-
                     {apiError && (
                         <div className="api-error-banner">API Error: {apiError}</div>
                     )}
 
                     <ConversationWindow
                         conversationId={effectiveConversationId}
+                        isLibraryOpen={isLibraryOpen}
                         messages={messages}
                         events={conversationEvents}
                         streamingText={streamingText}
@@ -990,7 +937,11 @@ export function ConversationsPage() {
                         onModelChange={setSelectedModel}
                         streamError={streamError}
                         lastUserMessageId={lastUserMessageId}
+                        onOpenHistory={() => openHistory()}
                         onRetry={handleRetry}
+                        onToggleLibrary={() =>
+                            setIsLibraryOpen((current) => !current)
+                        }
                     />
                 </div>
             </div>

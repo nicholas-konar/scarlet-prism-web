@@ -5,6 +5,7 @@ import { MessageInput } from "./MessageInput"
 
 interface ConversationWindowProps {
     conversationId: string | null
+    isLibraryOpen: boolean
     messages: Message[]
     events: ConversationEvent[]
     streamingText: string
@@ -19,11 +20,14 @@ interface ConversationWindowProps {
     onModelChange: (model: string) => void
     streamError: string | null
     lastUserMessageId: string | null
+    onOpenHistory: () => void
     onRetry: () => Promise<void>
+    onToggleLibrary: () => void
 }
 
 export function ConversationWindow({
     conversationId,
+    isLibraryOpen,
     messages,
     events,
     streamingText,
@@ -34,7 +38,9 @@ export function ConversationWindow({
     onModelChange,
     streamError,
     lastUserMessageId,
+    onOpenHistory,
     onRetry,
+    onToggleLibrary,
 }: ConversationWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -64,9 +70,27 @@ export function ConversationWindow({
         <div className="conversation-window">
             <section className="messages-container panel-shell" aria-label="Conversation thread">
                 <div className="panel-header panel-header-row">
-                    <div>
+                    <div className="conversation-window-header-copy">
                         <p className="panel-eyebrow">Thread</p>
                         <h2 className="panel-title">{conversationTitle}</h2>
+                        <div className="conversation-window-header-library-row">
+                            <button
+                                type="button"
+                                className={`drawer-toggle${isLibraryOpen ? " active" : ""}`}
+                                onClick={onToggleLibrary}
+                            >
+                                {isLibraryOpen ? "Close library" : "Open library"}
+                            </button>
+                            <p className="conversation-window-header-note">
+                                Add study materials to your library so the AI can use them in this
+                                conversation.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="conversation-window-header-actions">
+                        <button type="button" className="drawer-toggle" onClick={onOpenHistory}>
+                            Open history
+                        </button>
                     </div>
                 </div>
                 <div className="messages-scroll-area">

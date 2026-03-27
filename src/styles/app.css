@@ -611,61 +611,6 @@ fieldset legend {
 
 /* ===== Workspace ===== */
 
-.workspace-toolbar {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: center;
-    padding: 14px 16px;
-    border: var(--border);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 241, 232, 0.9) 100%);
-}
-
-.workspace-toolbar-main,
-.workspace-toolbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.workspace-library-summary {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-size: 11px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #6d6659;
-}
-
-.workspace-library-summary span,
-.toolbar-chip span:last-child {
-    border: 1px solid var(--line-soft);
-    padding: 5px 8px;
-    background: rgba(255, 255, 255, 0.84);
-}
-
-.toolbar-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0;
-    border: none;
-    background: transparent;
-    font-size: 11px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #6d6659;
-}
-
-.toolbar-chip.active {
-    color: #000;
-}
-
 .drawer-toggle {
     display: inline-flex;
     align-items: center;
@@ -680,8 +625,7 @@ fieldset legend {
 }
 
 .drawer-toggle.active,
-.drawer-toggle:hover:not(:disabled),
-.toolbar-chip:hover:not(:disabled) {
+.drawer-toggle:hover:not(:disabled) {
     background: var(--paper-tint);
     color: #000;
     font-weight: normal;
@@ -689,10 +633,6 @@ fieldset legend {
 
 .drawer-dismiss {
     background: transparent;
-}
-
-.history-launch {
-    margin-left: 4px;
 }
 
 /* ===== List Panels ===== */
@@ -841,6 +781,39 @@ fieldset legend {
     border: var(--border);
     margin: 0;
     height: 100%;
+}
+
+.conversation-window .panel-header {
+    gap: 16px;
+}
+
+.conversation-window-header-copy {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.conversation-window-header-library-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.conversation-window-header-note {
+    max-width: 52ch;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #6d6659;
+}
+
+.conversation-window-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
 .empty-state {
@@ -1388,11 +1361,6 @@ fieldset legend {
         max-height: 45vh;
     }
 
-    .workspace-toolbar {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
     .history-overlay {
         padding: 96px 16px 16px;
     }
@@ -1487,6 +1455,25 @@ fieldset legend {
     .header-right {
         width: 100%;
         justify-content: space-between;
+    }
+
+    .conversation-window .panel-header-row {
+        flex-direction: column;
+    }
+
+    .conversation-window-header-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .conversation-window-header-library-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .conversation-window-header-actions .drawer-toggle {
+        flex: 1 1 0;
     }
 
     .history-overlay {
