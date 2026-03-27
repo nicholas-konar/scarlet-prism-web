@@ -1,3 +1,5 @@
+import { SCRIPTURE_VERSE_COUNTS } from "./scriptureMetadata"
+
 export const SYSTEM_DEFAULT_BIBLE_TRANSLATION_ID = "esv"
 
 export type ScriptureBookOption = {
@@ -80,6 +82,23 @@ const scriptureBookNames = new Map(
 
 export function getScriptureBookName(bookId: string): string {
     return scriptureBookNames.get(bookId) ?? bookId
+}
+
+export function getScriptureChapterOptions(bookId: string): number[] {
+    const verseCounts = SCRIPTURE_VERSE_COUNTS[bookId]
+    if (!verseCounts) return []
+
+    return verseCounts.map((_, index) => index + 1)
+}
+
+export function getScriptureVerseOptions(
+    bookId: string,
+    chapter: number,
+): number[] {
+    const verseCount = SCRIPTURE_VERSE_COUNTS[bookId]?.[chapter - 1]
+    if (!verseCount) return []
+
+    return Array.from({ length: verseCount }, (_, index) => index + 1)
 }
 
 export function getEffectiveBibleTranslationId(args: {

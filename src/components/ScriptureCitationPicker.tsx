@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import type { BibleTranslation, ScriptureCitationInput } from "@/types/api"
 import {
     getScriptureBookName,
+    getScriptureChapterOptions,
+    getScriptureVerseOptions,
     SCRIPTURE_BOOK_OPTIONS,
 } from "@/lib/scripture"
 
@@ -77,6 +79,18 @@ export function ScriptureCitationPicker({
         () => parsePositiveNumber(endVerseInput),
         [endVerseInput],
     )
+    const chapterOptions = useMemo(
+        () => (bookId ? getScriptureChapterOptions(bookId) : []),
+        [bookId],
+    )
+    const verseOptions = useMemo(
+        () => (bookId && chapter ? getScriptureVerseOptions(bookId, chapter) : []),
+        [bookId, chapter],
+    )
+    const endVerseOptions = useMemo(() => {
+        if (!startVerse) return verseOptions
+        return verseOptions.filter((verse) => verse >= startVerse)
+    }, [startVerse, verseOptions])
 
     function resetSelection() {
         setBookId("")
@@ -127,7 +141,13 @@ export function ScriptureCitationPicker({
                     <span>Book</span>
                     <select
                         value={bookId}
-                        onChange={(event) => setBookId(event.target.value)}
+                        onChange={(event) => {
+                            setBookId(event.target.value)
+                            setChapterInput("")
+                            setStartVerseInput("")
+                            setEndVerseInput("")
+                            setValidationMessage(null)
+                        }}
                         disabled={disabled}
                     >
                         <option value="">Select book</option>
@@ -140,51 +160,66 @@ export function ScriptureCitationPicker({
                 </label>
                 <label className="form-field">
                     <span>Chapter</span>
-                    <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        inputMode="numeric"
+                    <select
                         value={chapterInput}
-                        onChange={(event) => setChapterInput(event.target.value)}
-                        placeholder="3"
-                        disabled={disabled}
-                    />
+                        onChange={(event) => {
+                            setChapterInput(event.target.value)
+                            setStartVerseInput("")
+                            setEndVerseInput("")
+                            setValidationMessage(null)
+                        }}
+                        disabled={disabled || !bookId}
+                    >
+                        <option value="">Select chapter</option>
+                        {chapterOptions.map((chapterOption) => (
+                            <option key={chapterOption} value={chapterOption}>
+                                {chapterOption}
+                            </option>
+                        ))}
+                    </select>
                 </label>
             </div>
 
             <div className="scripture-picker-row scripture-picker-row--verses">
                 <label className="form-field">
                     <span>Start verse</span>
-                    <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        inputMode="numeric"
+                    <select
                         value={startVerseInput}
                         onChange={(event) => {
                             setStartVerseInput(event.target.value)
                             if (!event.target.value) {
                                 setEndVerseInput("")
                             }
+                            setValidationMessage(null)
                         }}
-                        placeholder="Optional"
-                        disabled={disabled}
-                    />
+                        disabled={disabled || !chapter}
+                    >
+                        <option value="">Optional</option>
+                        {verseOptions.map((verseOption) => (
+                            <option key={verseOption} value={verseOption}>
+                                {verseOption}
+                            </option>
+                        ))}
+                    </select>
                 </label>
 
                 <label className="form-field">
                     <span>End verse</span>
-                    <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        inputMode="numeric"
+                    <select
                         value={endVerseInput}
-                        onChange={(event) => setEndVerseInput(event.target.value)}
-                        placeholder="Optional"
+                        onChange={(event) => {
+                            setEndVerseInput(event.target.value)
+                            setValidationMessage(null)
+                        }}
                         disabled={disabled || !startVerseInput}
-                    />
+                    >
+                        <option value="">Optional</option>
+                        {endVerseOptions.map((verseOption) => (
+                            <option key={verseOption} value={verseOption}>
+                                {verseOption}
+                            </option>
+                        ))}
+                    </select>
                 </label>
             </div>
 
