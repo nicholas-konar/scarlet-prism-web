@@ -548,7 +548,7 @@ export function ConversationsPage() {
         if (effectiveConversationId) {
             activeScriptures.forEach((item) => {
                 if (item.citation) {
-                    addCitation(item.citation, "user", item.id)
+                    addCitation(item.citation, "from you", item.id)
                 }
             })
             activeSermons.forEach((item) => {
@@ -563,7 +563,7 @@ export function ConversationsPage() {
             })
         } else {
             pendingUserScriptures.forEach((citation) => {
-                addCitation(citation, "user", getCitationKey(citation))
+                addCitation(citation, "from you", getCitationKey(citation))
             })
             pendingSermonIds.forEach((sermonId) => {
                 const sermon = sermons.find((item) => item.id === sermonId)
