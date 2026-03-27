@@ -1,18 +1,13 @@
 import { useRef, useState, useEffect } from "react"
-import { ModelSelector } from "./ModelSelector"
 
 interface MessageInputProps {
     onSubmit: (message: string) => Promise<void>
     isDisabled: boolean
-    selectedModel: string
-    onModelChange: (model: string) => void
 }
 
 export function MessageInput({
     onSubmit,
     isDisabled,
-    selectedModel,
-    onModelChange,
 }: MessageInputProps) {
     const [message, setMessage] = useState("")
     const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -45,13 +40,6 @@ export function MessageInput({
 
     return (
         <form onSubmit={handleSubmit} className="message-input-form-wrapper">
-            <div className="selectors-row">
-                <ModelSelector
-                    selectedModel={selectedModel}
-                    onModelChange={onModelChange}
-                    disabled={isDisabled}
-                />
-            </div>
             <div
                 className="message-input-form"
                 onClick={() => textareaRef.current?.focus()}

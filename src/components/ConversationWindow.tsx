@@ -24,7 +24,6 @@ interface ConversationWindowProps {
     ) => Promise<void>
     isLoading: boolean
     selectedModel: string
-    onModelChange: (model: string) => void
     streamError: string | null
     lastUserMessageId: string | null
     onOpenHistory: () => void
@@ -43,7 +42,6 @@ export function ConversationWindow({
     onSendMessage,
     isLoading,
     selectedModel,
-    onModelChange,
     streamError,
     lastUserMessageId,
     onOpenHistory,
@@ -197,20 +195,22 @@ export function ConversationWindow({
                             )}
 
                             {streamError && (
-                                <div className="message-bubble error">
-                                    <div className="message-bubble-header">Error</div>
+                                <fieldset className="message-bubble error">
+                                    <legend className="message-bubble-legend">Error</legend>
                                     <div className="message-text">{streamError}</div>
-                                </div>
+                                </fieldset>
                             )}
 
                             {streamingText && (
-                                <div className="message-bubble assistant">
-                                    <div className="message-bubble-header">{selectedModel}</div>
+                                <fieldset className="message-bubble assistant">
+                                    <legend className="message-bubble-legend">
+                                        {selectedModel}
+                                    </legend>
                                     <div className="message-text">
                                         {streamingText}
                                         <span className="cursor">▋</span>
                                     </div>
-                                </div>
+                                </fieldset>
                             )}
 
                             <div ref={messagesEndRef} />
@@ -222,8 +222,6 @@ export function ConversationWindow({
             <MessageInput
                 onSubmit={onSendMessage}
                 isDisabled={isStreaming || isLoading}
-                selectedModel={selectedModel}
-                onModelChange={onModelChange}
             />
         </div>
     )
