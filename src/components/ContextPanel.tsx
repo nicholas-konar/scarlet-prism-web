@@ -42,7 +42,7 @@ export function ContextPanel({
                     {onClose ? (
                         <button
                             type="button"
-                            className="drawer-toggle drawer-dismiss context-panel-close"
+                            className="ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
                             onClick={onClose}
                             aria-label="Close context"
                         >
@@ -91,7 +91,7 @@ export function ContextPanel({
                                         {sermon.onDetach ? (
                                             <button
                                                 type="button"
-                                                className="context-item-action"
+                                                className="ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal context-item-action"
                                                 onClick={sermon.onDetach}
                                             >
                                                 Detach

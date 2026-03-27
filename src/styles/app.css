@@ -55,6 +55,86 @@ fieldset legend {
     font-weight: 600;
 }
 
+/* ===== Buttons ===== */
+
+.ui-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-soft);
+    padding: 9px 12px;
+    background: #fff;
+    background-color: #fff;
+    color: var(--text-strong);
+    font-weight: normal;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition:
+        color 140ms ease,
+        border-color 140ms ease,
+        background-color 140ms ease,
+        transform 80ms ease;
+}
+
+.ui-button--caps {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.ui-button--compact {
+    padding: 4px 6px;
+    font-size: 10px;
+    color: #6d6659;
+}
+
+.ui-button--subtle {
+    background: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #6d6659;
+}
+
+.ui-button--ghost {
+    border-color: transparent;
+    background: transparent;
+    background-color: transparent;
+    color: #6d6659;
+}
+
+.ui-button--hover-tint {
+    transition:
+        color 140ms ease,
+        border-color 140ms ease,
+        background-color 300ms ease,
+        transform 80ms ease;
+}
+
+.ui-button--hover-tint:hover:not(:disabled),
+.ui-button--hover-tint:focus-visible {
+    background: color-mix(in srgb, var(--paper-tint) 50%, white);
+    background-color: color-mix(in srgb, var(--paper-tint) 50%, white);
+    border-color: var(--line-soft);
+    color: #575044;
+}
+
+.ui-button--ghost.ui-button--hover-tint:hover:not(:disabled),
+.ui-button--ghost.ui-button--hover-tint:focus-visible {
+    background: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.ui-button--press:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.ui-button--reveal {
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* ===== Auth Pages ===== */
 
 .auth-page {
@@ -611,30 +691,6 @@ fieldset legend {
     background: transparent;
 }
 
-.context-panel-close {
-    padding: 4px 6px;
-    background: rgba(255, 255, 255, 0.9);
-    background-color: rgba(255, 255, 255, 0.9);
-    transition:
-        color 140ms ease,
-        border-color 140ms ease,
-        background-color 300ms ease,
-        transform 80ms ease;
-    color: #6d6659;
-}
-
-.context-panel-close:hover:not(:disabled),
-.context-panel-close:focus-visible {
-    background: color-mix(in srgb, var(--paper-tint) 50%, white);
-    background-color: color-mix(in srgb, var(--paper-tint) 50%, white);
-    border-color: var(--line-soft);
-    color: #575044;
-}
-
-.context-panel-close:active:not(:disabled) {
-    transform: translateY(1px);
-}
-
 .library-launch {
     margin-left: 4px;
 }
@@ -1076,49 +1132,14 @@ fieldset legend {
 
 .context-item-action {
     flex-shrink: 0;
-    border: 1px solid transparent;
     align-self: center;
-    padding: 4px 6px;
-    background: transparent;
-    background-color: transparent;
-    opacity: 0;
-    pointer-events: none;
-    transition:
-        opacity 140ms ease,
-        color 140ms ease,
-        border-color 140ms ease,
-        background-color 140ms ease,
-        transform 80ms ease,
-        box-shadow 80ms ease;
-    font-size: 10px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #6d6659;
-    cursor: pointer;
-    font-weight: normal;
-    text-decoration: none;
-    appearance: none;
-    -webkit-appearance: none;
+    transition: opacity 140ms ease;
 }
 
-.context-item:hover .context-item-action,
-.context-item:focus-within .context-item-action {
+.context-item:hover .ui-button--reveal,
+.context-item:focus-within .ui-button--reveal {
     opacity: 1;
     pointer-events: auto;
-}
-
-.context-item-action:hover:not(:disabled),
-.context-item-action:focus-visible {
-    background: rgba(255, 255, 255, 0.9);
-    background-color: rgba(255, 255, 255, 0.9);
-    border-color: var(--line-soft);
-    color: #575044;
-    font-weight: normal;
-}
-
-.context-item-action:active:not(:disabled) {
-    transform: translateY(1px);
 }
 
 .context-empty,
