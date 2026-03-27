@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-type LibrarySermonItem = {
+export type LibrarySermonItem = {
     key: string
     label: string
     recordedOn?: string | null
@@ -8,7 +8,7 @@ type LibrarySermonItem = {
     onDetach?: () => void
 }
 
-type LibraryScriptureItem = {
+export type LibraryScriptureItem = {
     key: string
     label: string
     source: string
@@ -27,6 +27,126 @@ interface LibraryPanelProps {
     scripturePicker?: ReactNode
     onToggleScripturePicker?: () => void
     onClose?: () => void
+}
+
+const PANEL_ACTION_BUTTON_CLASS =
+    "ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
+
+const ITEM_ACTION_BUTTON_CLASS =
+    "ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal library-item-action"
+
+function formatCountLabel(count: number, singular: string) {
+    return `${count} ${singular}${count === 1 ? "" : "s"}`
+}
+
+function PanelActionButton({
+    label,
+    onClick,
+    disabled,
+}: {
+    label: string
+    onClick: () => void
+    disabled?: boolean
+}) {
+    return (
+        <button
+            type="button"
+            className={PANEL_ACTION_BUTTON_CLASS}
+            onClick={onClick}
+            disabled={disabled}
+        >
+            {label}
+        </button>
+    )
+}
+
+function ItemActionButton({
+    label,
+    onClick,
+}: {
+    label: string
+    onClick: () => void
+}) {
+    return (
+        <button
+            type="button"
+            className={ITEM_ACTION_BUTTON_CLASS}
+            onClick={onClick}
+        >
+            {label}
+        </button>
+    )
+}
+
+function LibrarySectionHeader({
+    title,
+    count,
+    actionLabel,
+    onAction,
+    actionDisabled,
+}: {
+    title: string
+    count: number
+    actionLabel?: string
+    onAction?: () => void
+    actionDisabled?: boolean
+}) {
+    return (
+        <div className="library-section-header">
+            <div className="library-section-heading">
+                <h3>{title}</h3>
+                <span className="library-section-count">{count}</span>
+            </div>
+            <div className="library-section-actions">
+                {actionLabel && onAction ? (
+                    <PanelActionButton
+                        label={actionLabel}
+                        onClick={onAction}
+                        disabled={actionDisabled}
+                    />
+                ) : null}
+            </div>
+        </div>
+    )
+}
+
+function SermonLibraryItem({ sermon }: { sermon: LibrarySermonItem }) {
+    const hasMeta = sermon.recordedOn || sermon.speaker
+
+    return (
+        <article className="library-item">
+            <div className="library-item-main">
+                <p className="library-item-label">{sermon.label}</p>
+                {hasMeta ? (
+                    <div className="library-item-meta">
+                        {sermon.recordedOn ? <p>{sermon.recordedOn}</p> : null}
+                        {sermon.speaker ? <p>{sermon.speaker}</p> : null}
+                    </div>
+                ) : null}
+            </div>
+            {sermon.onDetach ? (
+                <ItemActionButton label="Detach" onClick={sermon.onDetach} />
+            ) : null}
+        </article>
+    )
+}
+
+function ScriptureLibraryItem({
+    scripture,
+}: {
+    scripture: LibraryScriptureItem
+}) {
+    return (
+        <article className="library-item">
+            <div className="library-item-main">
+                <p className="library-item-label">{scripture.label}</p>
+                <p className="library-item-meta">{scripture.source}</p>
+            </div>
+            {scripture.onDetach ? (
+                <ItemActionButton label="Detach" onClick={scripture.onDetach} />
+            ) : null}
+        </article>
+    )
 }
 
 export function LibraryPanel({
@@ -51,17 +171,17 @@ export function LibraryPanel({
                         <h2>Library</h2>
                     </div>
                     <div className="library-summary-strip" aria-label="Library summary">
-                        <span>{sermons.length} sermon{sermons.length === 1 ? "" : "s"}</span>
-                        <span>{scriptures.length} scripture{scriptures.length === 1 ? "" : "s"}</span>
+                        <span>{formatCountLabel(sermons.length, "sermon")}</span>
+                        <span>{formatCountLabel(scriptures.length, "scripture")}</span>
                     </div>
                 </div>
                 <div className="library-panel-actions">
                     {onClose ? (
                         <button
                             type="button"
-                            className="ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
+                            className={PANEL_ACTION_BUTTON_CLASS}
                             onClick={onClose}
-                            aria-label="Close context"
+                            aria-label="Minimize library"
                         >
                             Minimize
                         </button>
@@ -71,63 +191,22 @@ export function LibraryPanel({
 
             <div className="library-column">
                 <section className="library-section" aria-label="Sermons in library">
-                    <div className="library-section-header">
-                        <div className="library-section-heading">
-                            <h3>Sermons</h3>
-                            <span className="library-section-count">{sermons.length}</span>
-                        </div>
-                        <div className="library-section-actions">
-                            {onToggleSermonPicker ? (
-                                <button
-                                    type="button"
-                                    className="ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
-                                    onClick={onToggleSermonPicker}
-                                    disabled={!canAddSermon}
-                                >
-                                    {isAddingSermon ? "Cancel" : "Add sermon"}
-                                </button>
-                            ) : null}
-                        </div>
-                    </div>
+                    <LibrarySectionHeader
+                        title="Sermons"
+                        count={sermons.length}
+                        actionLabel={isAddingSermon ? "Cancel" : "Add sermon"}
+                        onAction={onToggleSermonPicker}
+                        actionDisabled={!canAddSermon}
+                    />
                     {isAddingSermon && sermonPicker ? (
-                        <div className="library-inline-picker">
-                            {sermonPicker}
-                        </div>
+                        <div className="library-inline-picker">{sermonPicker}</div>
                     ) : null}
                     {sermons.length === 0 ? (
                         <p className="library-empty-inline">No sermons in library.</p>
                     ) : (
                         <div className="library-stack">
                             {sermons.map((sermon) => (
-                                <article
-                                    key={sermon.key}
-                                    className="library-item"
-                                >
-                                    <div className="library-item-main">
-                                        <p className="library-item-label">
-                                            {sermon.label}
-                                        </p>
-                                        {sermon.recordedOn || sermon.speaker ? (
-                                            <div className="library-item-meta">
-                                                {sermon.recordedOn ? (
-                                                    <p>{sermon.recordedOn}</p>
-                                                ) : null}
-                                                {sermon.speaker ? (
-                                                    <p>{sermon.speaker}</p>
-                                                ) : null}
-                                            </div>
-                                        ) : null}
-                                    </div>
-                                    {sermon.onDetach ? (
-                                        <button
-                                            type="button"
-                                            className="ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal library-item-action"
-                                            onClick={sermon.onDetach}
-                                        >
-                                            Detach
-                                        </button>
-                                    ) : null}
-                                </article>
+                                <SermonLibraryItem key={sermon.key} sermon={sermon} />
                             ))}
                         </div>
                     )}
@@ -137,24 +216,15 @@ export function LibraryPanel({
                     className="library-section"
                     aria-label="Scripture references in library"
                 >
-                    <div className="library-section-header">
-                        <div className="library-section-heading">
-                            <h3>Scripture</h3>
-                            <span className="library-section-count">{scriptures.length}</span>
-                        </div>
-                        <div className="library-section-actions">
-                            {onToggleScripturePicker ? (
-                                <button
-                                    type="button"
-                                    className="ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
-                                    onClick={onToggleScripturePicker}
-                                    disabled={!canAddScripture}
-                                >
-                                    {isAddingScripture ? "Cancel" : "Add scripture"}
-                                </button>
-                            ) : null}
-                        </div>
-                    </div>
+                    <LibrarySectionHeader
+                        title="Scripture"
+                        count={scriptures.length}
+                        actionLabel={
+                            isAddingScripture ? "Cancel" : "Add scripture"
+                        }
+                        onAction={onToggleScripturePicker}
+                        actionDisabled={!canAddScripture}
+                    />
                     {isAddingScripture && scripturePicker ? (
                         <div className="library-inline-picker library-scripture-picker">
                             {scripturePicker}
@@ -162,33 +232,16 @@ export function LibraryPanel({
                     ) : null}
                     {scriptures.length === 0 ? (
                         <p className="library-empty-inline">
-                            Add scripture directly or attach sermons to build the library.
+                            Add scripture directly or attach sermons to build the
+                            library.
                         </p>
                     ) : (
                         <div className="library-stack">
                             {scriptures.map((scripture) => (
-                                <article
+                                <ScriptureLibraryItem
                                     key={scripture.key}
-                                    className="library-item"
-                                >
-                                    <div className="library-item-main">
-                                        <p className="library-item-label">
-                                            {scripture.label}
-                                        </p>
-                                        <p className="library-item-meta">
-                                            {scripture.source}
-                                        </p>
-                                    </div>
-                                    {scripture.onDetach ? (
-                                        <button
-                                            type="button"
-                                            className="ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal library-item-action"
-                                            onClick={scripture.onDetach}
-                                        >
-                                            Detach
-                                        </button>
-                                    ) : null}
-                                </article>
+                                    scripture={scripture}
+                                />
                             ))}
                         </div>
                     )}

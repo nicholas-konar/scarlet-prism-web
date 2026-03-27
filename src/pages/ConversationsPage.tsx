@@ -6,7 +6,11 @@ import { useConversationStream } from "@/hooks/useConversationStream"
 import { HistoryConversationList } from "@/components/HistoryConversationList"
 import { HistorySermonList } from "@/components/HistorySermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
-import { LibraryPanel } from "@/components/LibraryPanel"
+import {
+    LibraryPanel,
+    type LibraryScriptureItem,
+    type LibrarySermonItem,
+} from "@/components/LibraryPanel"
 import { HistoryScriptureList } from "@/components/HistoryScriptureList"
 import {
     ScriptureCitationPicker,
@@ -30,6 +34,25 @@ import type {
 
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
 type HistorySection = "conversations" | "sermons" | "scripture"
+type HistorySectionButton = {
+    id: HistorySection
+    label: string
+    count: number
+}
+type LibraryCitation = Pick<
+    ScriptureCitation,
+    | "translationId"
+    | "bookId"
+    | "startChapter"
+    | "startVerse"
+    | "endVerse"
+    | "label"
+>
+type LibraryCitationEntry = {
+    label: string
+    sources: Set<string>
+    userScriptureIds: string[]
+}
 
 function formatSermonDate(value: string | null): string | null {
     if (!value?.trim()) return null
@@ -69,6 +92,187 @@ function getCitationKey(
         citation.startVerse ?? "*",
         citation.endVerse ?? "*",
     ].join(":")
+}
+
+function formatCountLabel(count: number, singular: string) {
+    return `${count} ${singular}${count === 1 ? "" : "s"}`
+}
+
+function getSermonDisplay(
+    sermon: Sermon | null | undefined,
+    fallbackLabel: string,
+) {
+    return {
+        label: sermon?.title ?? fallbackLabel,
+        recordedOn: formatSermonDate(sermon?.recordedOn ?? null),
+        speaker: sermon?.speaker ?? null,
+    }
+}
+
+function addLibraryCitation(
+    items: Map<string, LibraryCitationEntry>,
+    citation: LibraryCitation,
+    source: string,
+    userScriptureId?: string,
+) {
+    const key = getCitationKey(citation)
+    const existing = items.get(key)
+
+    if (existing) {
+        existing.sources.add(source)
+        if (userScriptureId) {
+            existing.userScriptureIds.push(userScriptureId)
+        }
+        return
+    }
+
+    items.set(key, {
+        label: citation.label,
+        sources: new Set([source]),
+        userScriptureIds: userScriptureId ? [userScriptureId] : [],
+    })
+}
+
+function buildLibraryScriptureItems({
+    effectiveConversationId,
+    activeScriptures,
+    activeSermons,
+    pendingUserScriptures,
+    pendingSermonIds,
+    sermons,
+    onDetachUserScripture,
+}: {
+    effectiveConversationId: string | null
+    activeScriptures: ConversationScripture[]
+    activeSermons: ConversationSermon[]
+    pendingUserScriptures: PendingScriptureCitation[]
+    pendingSermonIds: string[]
+    sermons: Sermon[]
+    onDetachUserScripture: (
+        scriptureKey: string,
+        conversationScriptureId?: string,
+    ) => Promise<void>
+}): LibraryScriptureItem[] {
+    const items = new Map<string, LibraryCitationEntry>()
+
+    if (effectiveConversationId) {
+        activeScriptures.forEach((item) => {
+            if (!item.citation) return
+            addLibraryCitation(items, item.citation, "from you", item.id)
+        })
+
+        activeSermons.forEach((item) => {
+            item.sermon?.scriptures.forEach((citation) => {
+                addLibraryCitation(
+                    items,
+                    citation,
+                    item.sermon?.title
+                        ? `from sermon: ${item.sermon.title}`
+                        : "from attached sermon",
+                )
+            })
+        })
+    } else {
+        pendingUserScriptures.forEach((citation) => {
+            addLibraryCitation(items, citation, "from you", getCitationKey(citation))
+        })
+
+        pendingSermonIds.forEach((sermonId) => {
+            const sermon = sermons.find((item) => item.id === sermonId)
+            sermon?.scriptures.forEach((citation) => {
+                addLibraryCitation(items, citation, `from sermon: ${sermon.title}`)
+            })
+        })
+    }
+
+    return Array.from(items.entries()).map(([key, value]) => ({
+        key,
+        label: value.label,
+        source: Array.from(value.sources).join(" + "),
+        onDetach:
+            value.userScriptureIds.length > 0
+                ? () => {
+                      void onDetachUserScripture(
+                          key,
+                          effectiveConversationId
+                              ? value.userScriptureIds[0]
+                              : undefined,
+                      )
+                  }
+                : undefined,
+    }))
+}
+
+function buildLibrarySermonItems({
+    effectiveConversationId,
+    activeSermons,
+    pendingSermonIds,
+    sermons,
+    onDetachSermon,
+    onTogglePendingSermon,
+}: {
+    effectiveConversationId: string | null
+    activeSermons: ConversationSermon[]
+    pendingSermonIds: string[]
+    sermons: Sermon[]
+    onDetachSermon: (conversationSermonId: string) => Promise<void>
+    onTogglePendingSermon: (sermonId: string) => void
+}): LibrarySermonItem[] {
+    if (effectiveConversationId) {
+        return activeSermons.map((item) => {
+            const sermon =
+                item.sermon ??
+                sermons.find((candidate) => candidate.id === item.sermonId)
+            const sermonDisplay = getSermonDisplay(sermon, item.sermonId)
+
+            return {
+                key: item.id,
+                ...sermonDisplay,
+                onDetach: () => {
+                    void onDetachSermon(item.id)
+                },
+            }
+        })
+    }
+
+    return pendingSermonIds.map((sermonId) => {
+        const sermon = sermons.find((item) => item.id === sermonId)
+        const sermonDisplay = getSermonDisplay(sermon, sermonId)
+
+        return {
+            key: sermonId,
+            ...sermonDisplay,
+            onDetach: () => onTogglePendingSermon(sermonId),
+        }
+    })
+}
+
+function buildHistorySectionButtons({
+    conversationsCount,
+    sermonsCount,
+    scriptureCount,
+}: {
+    conversationsCount: number
+    sermonsCount: number
+    scriptureCount: number
+}): HistorySectionButton[] {
+    return [
+        {
+            id: "conversations",
+            label: "Conversations",
+            count: conversationsCount,
+        },
+        {
+            id: "sermons",
+            label: "Sermons",
+            count: sermonsCount,
+        },
+        {
+            id: "scripture",
+            label: "Scripture",
+            count: scriptureCount,
+        },
+    ]
 }
 
 export function ConversationsPage() {
@@ -114,6 +318,19 @@ export function ConversationsPage() {
 
     // The effective conversation ID — either from URL or newly created via streaming
     const effectiveConversationId = selectedConversationId || newConversationId || null
+
+    const resetLibraryDraftState = () => {
+        setPendingSermonIds([])
+        setPendingUserScriptures([])
+        setPendingEvents([])
+        setIsAddingSermon(false)
+        setIsAddingScripture(false)
+    }
+
+    const closeLibraryPickers = () => {
+        setIsAddingSermon(false)
+        setIsAddingScripture(false)
+    }
 
     const fetchMessages = useCallback(async (conversationId: string) => {
         const response = await conversationApi.getConversationMessages(conversationId)
@@ -264,11 +481,7 @@ export function ConversationsPage() {
         if (newConversationId) {
             fetchConversationSermons(newConversationId)
             fetchConversationScriptures(newConversationId)
-            setPendingSermonIds([])
-            setPendingUserScriptures([])
-            setPendingEvents([])
-            setIsAddingSermon(false)
-            setIsAddingScripture(false)
+            resetLibraryDraftState()
         }
     }, [
         newConversationId,
@@ -278,13 +491,9 @@ export function ConversationsPage() {
 
     const handleSelectConversation = (id: string) => {
         resetStream()
-        setPendingSermonIds([])
-        setPendingUserScriptures([])
-        setPendingEvents([])
+        resetLibraryDraftState()
         setAllConversationSermons([])
         setAllConversationScriptures([])
-        setIsAddingSermon(false)
-        setIsAddingScripture(false)
         setSearchParams({ id })
     }
 
@@ -293,12 +502,18 @@ export function ConversationsPage() {
         setMessages([])
         setAllConversationSermons([])
         setAllConversationScriptures([])
-        setPendingSermonIds([])
-        setPendingUserScriptures([])
-        setPendingEvents([])
-        setIsAddingSermon(false)
-        setIsAddingScripture(false)
+        resetLibraryDraftState()
         setSearchParams({})
+    }
+
+    const handleToggleSermonPicker = () => {
+        setIsAddingSermon((current) => !current)
+        setIsAddingScripture(false)
+    }
+
+    const handleToggleScripturePicker = () => {
+        setIsAddingScripture((current) => !current)
+        setIsAddingSermon(false)
     }
 
     const handleTogglePendingSermon = (sermonId: string) => {
@@ -405,22 +620,22 @@ export function ConversationsPage() {
                 (item) => item.sermonId === sermon.id,
             )
             if (alreadyAttached) {
-                setIsAddingSermon(false)
+                closeLibraryPickers()
                 return
             }
 
             await handleAttachSermon(sermon)
-            setIsAddingSermon(false)
+            closeLibraryPickers()
             return
         }
 
         if (pendingSermonIds.includes(sermon.id)) {
-            setIsAddingSermon(false)
+            closeLibraryPickers()
             return
         }
 
         handleTogglePendingSermon(sermon.id)
-        setIsAddingSermon(false)
+        closeLibraryPickers()
     }
 
     const handleDetachSermon = async (conversationSermonId: string) => {
@@ -445,7 +660,7 @@ export function ConversationsPage() {
                     item.citation && getCitationKey(item.citation) === citationKey,
             )
             if (alreadyAttached) {
-                setIsAddingScripture(false)
+                closeLibraryPickers()
                 return
             }
 
@@ -458,7 +673,7 @@ export function ConversationsPage() {
                     endVerse: citation.endVerse,
                 })
                 await fetchConversationScriptures(effectiveConversationId)
-                setIsAddingScripture(false)
+                closeLibraryPickers()
             } catch (err) {
                 console.error("Failed to attach scripture:", err)
             }
@@ -470,7 +685,7 @@ export function ConversationsPage() {
             (item) => getCitationKey(item) === citationKey,
         )
         if (alreadyPending) {
-            setIsAddingScripture(false)
+            closeLibraryPickers()
             return
         }
 
@@ -482,7 +697,7 @@ export function ConversationsPage() {
 
         setPendingUserScriptures((prev) => [...prev, citation])
         setPendingEvents((prev) => [...prev, pendingEvent])
-        setIsAddingScripture(false)
+        closeLibraryPickers()
     }
 
     const handleDetachUserScripture = async (
@@ -532,120 +747,24 @@ export function ConversationsPage() {
         (item) => !item.removedAt,
     )
 
-    const libraryScriptureItems = (() => {
-        const items = new Map<
-            string,
-            {
-                label: string
-                sources: Set<string>
-                userScriptureIds: string[]
-            }
-        >()
+    const libraryScriptureItems = buildLibraryScriptureItems({
+        effectiveConversationId,
+        activeScriptures,
+        activeSermons,
+        pendingUserScriptures,
+        pendingSermonIds,
+        sermons,
+        onDetachUserScripture: handleDetachUserScripture,
+    })
 
-        const addCitation = (
-            citation: Pick<
-                ScriptureCitation,
-                | "translationId"
-                | "bookId"
-                | "startChapter"
-                | "startVerse"
-                | "endVerse"
-                | "label"
-            >,
-            source: string,
-            userScriptureId?: string,
-        ) => {
-            const key = getCitationKey(citation)
-
-            const existing = items.get(key)
-            if (existing) {
-                existing.sources.add(source)
-                if (userScriptureId) {
-                    existing.userScriptureIds.push(userScriptureId)
-                }
-                return
-            }
-
-            items.set(key, {
-                label: citation.label,
-                sources: new Set([source]),
-                userScriptureIds: userScriptureId ? [userScriptureId] : [],
-            })
-        }
-
-        if (effectiveConversationId) {
-            activeScriptures.forEach((item) => {
-                if (item.citation) {
-                    addCitation(item.citation, "from you", item.id)
-                }
-            })
-            activeSermons.forEach((item) => {
-                item.sermon?.scriptures.forEach((citation) =>
-                    addCitation(
-                        citation,
-                        item.sermon?.title
-                            ? `from sermon: ${item.sermon.title}`
-                            : "from attached sermon",
-                    ),
-                )
-            })
-        } else {
-            pendingUserScriptures.forEach((citation) => {
-                addCitation(citation, "from you", getCitationKey(citation))
-            })
-            pendingSermonIds.forEach((sermonId) => {
-                const sermon = sermons.find((item) => item.id === sermonId)
-                sermon?.scriptures.forEach((citation) =>
-                    addCitation(citation, `from sermon: ${sermon.title}`),
-                )
-            })
-        }
-
-        return Array.from(items.entries()).map(([key, value]) => ({
-            key,
-            label: value.label,
-            source: Array.from(value.sources).join(" + "),
-            onDetach:
-                value.userScriptureIds.length > 0
-                    ? () => {
-                          void handleDetachUserScripture(
-                              key,
-                              effectiveConversationId
-                                  ? value.userScriptureIds[0]
-                                  : undefined,
-                          )
-                      }
-                    : undefined,
-        }))
-    })()
-
-    const librarySermonItems = effectiveConversationId
-        ? activeSermons.map((item) => {
-              const sermon =
-                  item.sermon ??
-                  sermons.find((candidate) => candidate.id === item.sermonId)
-
-              return {
-                  key: item.id,
-                  label: sermon?.title ?? item.sermonId,
-                  recordedOn: formatSermonDate(sermon?.recordedOn ?? null),
-                  speaker: sermon?.speaker,
-                  onDetach: () => {
-                      void handleDetachSermon(item.id)
-                  },
-              }
-          })
-        : pendingSermonIds.map((sermonId) => {
-              const sermon = sermons.find((item) => item.id === sermonId)
-
-              return {
-                  key: sermonId,
-                  label: sermon?.title ?? sermonId,
-                  recordedOn: formatSermonDate(sermon?.recordedOn ?? null),
-                  speaker: sermon?.speaker,
-                  onDetach: () => handleTogglePendingSermon(sermonId),
-              }
-          })
+    const librarySermonItems = buildLibrarySermonItems({
+        effectiveConversationId,
+        activeSermons,
+        pendingSermonIds,
+        sermons,
+        onDetachSermon: handleDetachSermon,
+        onTogglePendingSermon: handleTogglePendingSermon,
+    })
 
     const historyScriptureItems = libraryScriptureItems.map((scripture) => ({
         key: scripture.key,
@@ -657,6 +776,47 @@ export function ConversationsPage() {
             ? !activeSermons.some((item) => item.sermonId === sermon.id)
             : !pendingSermonIds.includes(sermon.id),
     )
+
+    const librarySermonPicker =
+        availableSermons.length === 0 ? (
+            <p className="library-empty-inline">No more sermons available to add.</p>
+        ) : (
+            <div className="library-picker-list">
+                {availableSermons.map((sermon) => {
+                    const sermonDisplay = getSermonDisplay(sermon, sermon.id)
+
+                    return (
+                        <button
+                            key={sermon.id}
+                            type="button"
+                            className="library-picker-item"
+                            onClick={() => {
+                                void handleAddSermonToContext(sermon)
+                            }}
+                            disabled={isStreaming}
+                        >
+                            <span className="library-picker-item-main">
+                                <span className="library-item-label">
+                                    {sermonDisplay.label}
+                                </span>
+                                {(sermonDisplay.recordedOn ||
+                                    sermonDisplay.speaker) && (
+                                    <span className="library-item-meta">
+                                        {sermonDisplay.recordedOn ? (
+                                            <span>{sermonDisplay.recordedOn}</span>
+                                        ) : null}
+                                        {sermonDisplay.speaker ? (
+                                            <span>{sermonDisplay.speaker}</span>
+                                        ) : null}
+                                    </span>
+                                )}
+                            </span>
+                            <span className="library-picker-item-action">Add</span>
+                        </button>
+                    )
+                })}
+            </div>
+        )
 
     const conversationEvents: ConversationEvent[] = effectiveConversationId
         ? [
@@ -710,27 +870,11 @@ export function ConversationsPage() {
             currentCongregation?.defaultBibleTranslationId,
     })
 
-    const historySectionButtons: Array<{
-        id: HistorySection
-        label: string
-        count: number
-    }> = [
-        {
-            id: "conversations",
-            label: "Conversations",
-            count: conversations.length,
-        },
-        {
-            id: "sermons",
-            label: "Sermons",
-            count: sermons.length,
-        },
-        {
-            id: "scripture",
-            label: "Scripture",
-            count: historyScriptureItems.length,
-        },
-    ]
+    const historySectionButtons = buildHistorySectionButtons({
+        conversationsCount: conversations.length,
+        sermonsCount: sermons.length,
+        scriptureCount: historyScriptureItems.length,
+    })
 
     function openHistory(section: HistorySection = activeHistorySection) {
         setActiveHistorySection(section)
@@ -760,63 +904,8 @@ export function ConversationsPage() {
                         scriptures={libraryScriptureItems}
                         isAddingSermon={isAddingSermon}
                         canAddSermon={sermons.length > 0 && !isStreaming}
-                        sermonPicker={
-                            availableSermons.length === 0 ? (
-                                <p className="library-empty-inline">
-                                    No more sermons available to add.
-                                </p>
-                            ) : (
-                                <div className="library-picker-list">
-                                    {availableSermons.map((sermon) => (
-                                        (() => {
-                                            const recordedOn = formatSermonDate(
-                                                sermon.recordedOn,
-                                            )
-
-                                            return (
-                                                <button
-                                                    key={sermon.id}
-                                                    type="button"
-                                                    className="library-picker-item"
-                                                    onClick={() => {
-                                                        void handleAddSermonToContext(
-                                                            sermon,
-                                                        )
-                                                    }}
-                                                    disabled={isStreaming}
-                                                >
-                                                    <span className="library-picker-item-main">
-                                                        <span className="library-item-label">
-                                                            {sermon.title}
-                                                        </span>
-                                                        {(recordedOn ||
-                                                            sermon.speaker) && (
-                                                            <span className="library-item-meta">
-                                                                {recordedOn ? (
-                                                                    <span>{recordedOn}</span>
-                                                                ) : null}
-                                                                {sermon.speaker ? (
-                                                                    <span>
-                                                                        {sermon.speaker}
-                                                                    </span>
-                                                                ) : null}
-                                                            </span>
-                                                        )}
-                                                    </span>
-                                                    <span className="library-picker-item-action">
-                                                        Add
-                                                    </span>
-                                                </button>
-                                            )
-                                        })()
-                                    ))}
-                                </div>
-                            )
-                        }
-                        onToggleSermonPicker={() => {
-                            setIsAddingSermon((current) => !current)
-                            setIsAddingScripture(false)
-                        }}
+                        sermonPicker={librarySermonPicker}
+                        onToggleSermonPicker={handleToggleSermonPicker}
                         isAddingScripture={isAddingScripture}
                         canAddScripture={translations.length > 0 && !isStreaming}
                         scripturePicker={
@@ -829,10 +918,7 @@ export function ConversationsPage() {
                                 }}
                             />
                         }
-                        onToggleScripturePicker={() => {
-                            setIsAddingScripture((current) => !current)
-                            setIsAddingSermon(false)
-                        }}
+                        onToggleScripturePicker={handleToggleScripturePicker}
                         onClose={() => setIsLibraryOpen(false)}
                     />
                 ) : null}
@@ -848,8 +934,18 @@ export function ConversationsPage() {
                                 {isLibraryOpen ? "Hide library" : "Show library"}
                             </button>
                             <div className="workspace-library-summary">
-                                <span>{librarySermonItems.length} sermon{librarySermonItems.length === 1 ? "" : "s"}</span>
-                                <span>{libraryScriptureItems.length} scripture{libraryScriptureItems.length === 1 ? "" : "s"}</span>
+                                <span>
+                                    {formatCountLabel(
+                                        librarySermonItems.length,
+                                        "sermon",
+                                    )}
+                                </span>
+                                <span>
+                                    {formatCountLabel(
+                                        libraryScriptureItems.length,
+                                        "scripture",
+                                    )}
+                                </span>
                             </div>
                         </div>
                         <div className="workspace-toolbar-actions">
