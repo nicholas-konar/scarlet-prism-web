@@ -82,8 +82,10 @@ export function ConversationWindow({
                                 {isLibraryOpen ? "Close library" : "Open library"}
                             </button>
                             <p className="conversation-window-header-note">
-                                Add study materials to your library so the AI can use them in this
-                                conversation.
+                                <span>Add study materials to your library</span>
+                                <span className="conversation-window-header-note-line">
+                                    for the AI to use in this conversation.
+                                </span>
                             </p>
                         </div>
                     </div>

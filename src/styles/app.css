@@ -32,7 +32,7 @@ fieldset legend {
     gap: 6px;
     padding: 14px 16px 12px;
     border-bottom: 1px solid var(--line-faint);
-    background: linear-gradient(180deg, var(--paper-tint) 0%, var(--paper) 88%);
+    background: linear-gradient(0deg, var(--paper-tint) 0%, var(--paper) 88%);
 }
 
 .panel-header-row {
@@ -624,7 +624,12 @@ fieldset legend {
     letter-spacing: 0.12em;
 }
 
-.drawer-toggle.active,
+.drawer-toggle.active {
+    background: #fff;
+    color: #000;
+    font-weight: normal;
+}
+
 .drawer-toggle:hover:not(:disabled) {
     background: var(--paper-tint);
     color: #000;
@@ -801,10 +806,14 @@ fieldset legend {
 }
 
 .conversation-window-header-note {
-    max-width: 52ch;
+    max-width: 44ch;
     font-size: 12px;
     line-height: 1.45;
     color: #6d6659;
+}
+
+.conversation-window-header-note-line {
+    display: block;
 }
 
 .conversation-window-header-actions {
