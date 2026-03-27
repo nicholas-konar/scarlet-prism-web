@@ -6,7 +6,7 @@ import { useConversationStream } from "@/hooks/useConversationStream"
 import { HistoryConversationList } from "@/components/HistoryConversationList"
 import { HistorySermonList } from "@/components/HistorySermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
-import { ContextPanel } from "@/components/ContextPanel"
+import { LibraryPanel } from "@/components/LibraryPanel"
 import { HistoryScriptureList } from "@/components/HistoryScriptureList"
 import {
     ScriptureCitationPicker,
@@ -96,7 +96,7 @@ export function ConversationsPage() {
         user?.defaultModelId || DEFAULT_MODEL_ID,
     )
     const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
-    const [isContextOpen, setIsContextOpen] = useState(true)
+    const [isLibraryOpen, setIsLibraryOpen] = useState(true)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
     const [isAddingSermon, setIsAddingSermon] = useState(false)
     const [isAddingScripture, setIsAddingScripture] = useState(false)
@@ -532,7 +532,7 @@ export function ConversationsPage() {
         (item) => !item.removedAt,
     )
 
-    const scriptureContextItems = (() => {
+    const libraryScriptureItems = (() => {
         const items = new Map<
             string,
             {
@@ -619,7 +619,7 @@ export function ConversationsPage() {
         }))
     })()
 
-    const contextSermonItems = effectiveConversationId
+    const librarySermonItems = effectiveConversationId
         ? activeSermons.map((item) => {
               const sermon =
                   item.sermon ??
@@ -647,7 +647,7 @@ export function ConversationsPage() {
               }
           })
 
-    const historyScriptureItems = scriptureContextItems.map((scripture) => ({
+    const historyScriptureItems = libraryScriptureItems.map((scripture) => ({
         key: scripture.key,
         label: scripture.label,
         meta: scripture.source,
@@ -702,7 +702,8 @@ export function ConversationsPage() {
           ]
         : pendingEvents
 
-    const hasContext = contextSermonItems.length > 0 || scriptureContextItems.length > 0
+    const hasLibraryContent =
+        librarySermonItems.length > 0 || libraryScriptureItems.length > 0
     const defaultTranslationId = getEffectiveBibleTranslationId({
         userDefaultBibleTranslationId: user?.defaultBibleTranslationId,
         congregationDefaultBibleTranslationId:
@@ -750,22 +751,22 @@ export function ConversationsPage() {
 
             <div
                 className={`main-layout conversation-workspace${
-                    isContextOpen ? " context-open" : ""
+                    isLibraryOpen ? " library-open" : ""
                 }`}
             >
-                {isContextOpen ? (
-                    <ContextPanel
-                        sermons={contextSermonItems}
-                        scriptures={scriptureContextItems}
+                {isLibraryOpen ? (
+                    <LibraryPanel
+                        sermons={librarySermonItems}
+                        scriptures={libraryScriptureItems}
                         isAddingSermon={isAddingSermon}
                         canAddSermon={sermons.length > 0 && !isStreaming}
                         sermonPicker={
                             availableSermons.length === 0 ? (
-                                <p className="context-empty-inline">
+                                <p className="library-empty-inline">
                                     No more sermons available to add.
                                 </p>
                             ) : (
-                                <div className="context-picker-list">
+                                <div className="library-picker-list">
                                     {availableSermons.map((sermon) => (
                                         (() => {
                                             const recordedOn = formatSermonDate(
@@ -776,7 +777,7 @@ export function ConversationsPage() {
                                                 <button
                                                     key={sermon.id}
                                                     type="button"
-                                                    className="context-picker-item"
+                                                    className="library-picker-item"
                                                     onClick={() => {
                                                         void handleAddSermonToContext(
                                                             sermon,
@@ -784,13 +785,13 @@ export function ConversationsPage() {
                                                     }}
                                                     disabled={isStreaming}
                                                 >
-                                                    <span className="context-picker-item-main">
-                                                        <span className="context-item-label">
+                                                    <span className="library-picker-item-main">
+                                                        <span className="library-item-label">
                                                             {sermon.title}
                                                         </span>
                                                         {(recordedOn ||
                                                             sermon.speaker) && (
-                                                            <span className="context-item-meta">
+                                                            <span className="library-item-meta">
                                                                 {recordedOn ? (
                                                                     <span>{recordedOn}</span>
                                                                 ) : null}
@@ -802,7 +803,7 @@ export function ConversationsPage() {
                                                             </span>
                                                         )}
                                                     </span>
-                                                    <span className="context-picker-item-action">
+                                                    <span className="library-picker-item-action">
                                                         Add
                                                     </span>
                                                 </button>
@@ -832,7 +833,7 @@ export function ConversationsPage() {
                             setIsAddingScripture((current) => !current)
                             setIsAddingSermon(false)
                         }}
-                        onClose={() => setIsContextOpen(false)}
+                        onClose={() => setIsLibraryOpen(false)}
                     />
                 ) : null}
 
@@ -841,14 +842,14 @@ export function ConversationsPage() {
                         <div className="workspace-toolbar-main">
                             <button
                                 type="button"
-                                className={`drawer-toggle${isContextOpen ? " active" : ""}`}
-                                onClick={() => setIsContextOpen((current) => !current)}
+                                className={`drawer-toggle${isLibraryOpen ? " active" : ""}`}
+                                onClick={() => setIsLibraryOpen((current) => !current)}
                             >
-                                {isContextOpen ? "Hide context" : "Show context"}
+                                {isLibraryOpen ? "Hide library" : "Show library"}
                             </button>
-                            <div className="workspace-context-summary">
-                                <span>{contextSermonItems.length} sermon{contextSermonItems.length === 1 ? "" : "s"}</span>
-                                <span>{scriptureContextItems.length} scripture{scriptureContextItems.length === 1 ? "" : "s"}</span>
+                            <div className="workspace-library-summary">
+                                <span>{librarySermonItems.length} sermon{librarySermonItems.length === 1 ? "" : "s"}</span>
+                                <span>{libraryScriptureItems.length} scripture{libraryScriptureItems.length === 1 ? "" : "s"}</span>
                             </div>
                         </div>
                         <div className="workspace-toolbar-actions">
@@ -977,7 +978,7 @@ export function ConversationsPage() {
                             {activeHistorySection === "scripture" ? (
                                 <HistoryScriptureList
                                     scriptures={historyScriptureItems}
-                                    eyebrow={hasContext ? "Current references" : "History"}
+                                    eyebrow={hasLibraryContent ? "Current references" : "History"}
                                 />
                             ) : null}
                         </div>

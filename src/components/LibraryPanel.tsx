@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-type ContextSermonItem = {
+type LibrarySermonItem = {
     key: string
     label: string
     recordedOn?: string | null
@@ -8,16 +8,16 @@ type ContextSermonItem = {
     onDetach?: () => void
 }
 
-type ContextScriptureItem = {
+type LibraryScriptureItem = {
     key: string
     label: string
     source: string
     onDetach?: () => void
 }
 
-interface ContextPanelProps {
-    sermons: ContextSermonItem[]
-    scriptures: ContextScriptureItem[]
+interface LibraryPanelProps {
+    sermons: LibrarySermonItem[]
+    scriptures: LibraryScriptureItem[]
     isAddingSermon?: boolean
     canAddSermon?: boolean
     sermonPicker?: ReactNode
@@ -29,7 +29,7 @@ interface ContextPanelProps {
     onClose?: () => void
 }
 
-export function ContextPanel({
+export function LibraryPanel({
     sermons,
     scriptures,
     isAddingSermon,
@@ -41,21 +41,21 @@ export function ContextPanel({
     scripturePicker,
     onToggleScripturePicker,
     onClose,
-}: ContextPanelProps) {
+}: LibraryPanelProps) {
     return (
-        <aside className="context-panel panel-shell" aria-label="Conversation context">
-            <div className="context-panel-header">
-                <div className="context-panel-heading">
+        <aside className="library-panel panel-shell" aria-label="Conversation library">
+            <div className="library-panel-header">
+                <div className="library-panel-heading">
                     <div>
-                        <p className="context-panel-eyebrow">Study material</p>
-                        <h2>Resources</h2>
+                        <p className="library-panel-eyebrow">Study material</p>
+                        <h2>Library</h2>
                     </div>
-                    <div className="context-summary-strip" aria-label="Context summary">
+                    <div className="library-summary-strip" aria-label="Library summary">
                         <span>{sermons.length} sermon{sermons.length === 1 ? "" : "s"}</span>
                         <span>{scriptures.length} scripture{scriptures.length === 1 ? "" : "s"}</span>
                     </div>
                 </div>
-                <div className="context-panel-actions">
+                <div className="library-panel-actions">
                     {onClose ? (
                         <button
                             type="button"
@@ -69,14 +69,14 @@ export function ContextPanel({
                 </div>
             </div>
 
-            <div className="context-column">
-                <section className="context-section" aria-label="Sermons in context">
-                    <div className="context-section-header">
-                        <div className="context-section-heading">
+            <div className="library-column">
+                <section className="library-section" aria-label="Sermons in library">
+                    <div className="library-section-header">
+                        <div className="library-section-heading">
                             <h3>Sermons</h3>
-                            <span className="context-section-count">{sermons.length}</span>
+                            <span className="library-section-count">{sermons.length}</span>
                         </div>
-                        <div className="context-section-actions">
+                        <div className="library-section-actions">
                             {onToggleSermonPicker ? (
                                 <button
                                     type="button"
@@ -90,25 +90,25 @@ export function ContextPanel({
                         </div>
                     </div>
                     {isAddingSermon && sermonPicker ? (
-                        <div className="context-inline-picker">
+                        <div className="library-inline-picker">
                             {sermonPicker}
                         </div>
                     ) : null}
                     {sermons.length === 0 ? (
-                        <p className="context-empty-inline">No sermons in context.</p>
+                        <p className="library-empty-inline">No sermons in library.</p>
                     ) : (
-                        <div className="context-stack">
+                        <div className="library-stack">
                             {sermons.map((sermon) => (
                                 <article
                                     key={sermon.key}
-                                    className="context-item"
+                                    className="library-item"
                                 >
-                                    <div className="context-item-main">
-                                        <p className="context-item-label">
+                                    <div className="library-item-main">
+                                        <p className="library-item-label">
                                             {sermon.label}
                                         </p>
                                         {sermon.recordedOn || sermon.speaker ? (
-                                            <div className="context-item-meta">
+                                            <div className="library-item-meta">
                                                 {sermon.recordedOn ? (
                                                     <p>{sermon.recordedOn}</p>
                                                 ) : null}
@@ -121,7 +121,7 @@ export function ContextPanel({
                                     {sermon.onDetach ? (
                                         <button
                                             type="button"
-                                            className="ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal context-item-action"
+                                            className="ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal library-item-action"
                                             onClick={sermon.onDetach}
                                         >
                                             Detach
@@ -134,15 +134,15 @@ export function ContextPanel({
                 </section>
 
                 <section
-                    className="context-section"
-                    aria-label="Scripture references in context"
+                    className="library-section"
+                    aria-label="Scripture references in library"
                 >
-                    <div className="context-section-header">
-                        <div className="context-section-heading">
+                    <div className="library-section-header">
+                        <div className="library-section-heading">
                             <h3>Scripture</h3>
-                            <span className="context-section-count">{scriptures.length}</span>
+                            <span className="library-section-count">{scriptures.length}</span>
                         </div>
-                        <div className="context-section-actions">
+                        <div className="library-section-actions">
                             {onToggleScripturePicker ? (
                                 <button
                                     type="button"
@@ -156,33 +156,33 @@ export function ContextPanel({
                         </div>
                     </div>
                     {isAddingScripture && scripturePicker ? (
-                        <div className="context-inline-picker context-scripture-picker">
+                        <div className="library-inline-picker library-scripture-picker">
                             {scripturePicker}
                         </div>
                     ) : null}
                     {scriptures.length === 0 ? (
-                        <p className="context-empty-inline">
-                            Add scripture directly or attach sermons to build context.
+                        <p className="library-empty-inline">
+                            Add scripture directly or attach sermons to build the library.
                         </p>
                     ) : (
-                        <div className="context-stack">
+                        <div className="library-stack">
                             {scriptures.map((scripture) => (
                                 <article
                                     key={scripture.key}
-                                    className="context-item"
+                                    className="library-item"
                                 >
-                                    <div className="context-item-main">
-                                        <p className="context-item-label">
+                                    <div className="library-item-main">
+                                        <p className="library-item-label">
                                             {scripture.label}
                                         </p>
-                                        <p className="context-item-meta">
+                                        <p className="library-item-meta">
                                             {scripture.source}
                                         </p>
                                     </div>
                                     {scripture.onDetach ? (
                                         <button
                                             type="button"
-                                            className="ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal context-item-action"
+                                            className="ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal library-item-action"
                                             onClick={scripture.onDetach}
                                         >
                                             Detach
