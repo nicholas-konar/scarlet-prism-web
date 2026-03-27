@@ -167,7 +167,7 @@ export function LibraryPanel({
             <div className="library-panel-header">
                 <div className="library-panel-heading">
                     <div>
-                        <p className="library-panel-eyebrow">Study material</p>
+                        <p className="library-panel-eyebrow">Active study material</p>
                         <h2>Library</h2>
                     </div>
                     <div className="library-summary-strip" aria-label="Library summary">
@@ -181,9 +181,9 @@ export function LibraryPanel({
                             type="button"
                             className={PANEL_ACTION_BUTTON_CLASS}
                             onClick={onClose}
-                            aria-label="Minimize library"
+                            aria-label="Close library"
                         >
-                            Minimize
+                            Close
                         </button>
                     ) : null}
                 </div>
@@ -202,7 +202,7 @@ export function LibraryPanel({
                         <div className="library-inline-picker">{sermonPicker}</div>
                     ) : null}
                     {sermons.length === 0 ? (
-                        <p className="library-empty-inline">No sermons in library.</p>
+                        <p className="library-empty-inline">No active sermons in library.</p>
                     ) : (
                         <div className="library-stack">
                             {sermons.map((sermon) => (
