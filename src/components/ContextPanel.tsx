@@ -18,6 +18,10 @@ type ContextScriptureItem = {
 interface ContextPanelProps {
     sermons: ContextSermonItem[]
     scriptures: ContextScriptureItem[]
+    isAddingSermon?: boolean
+    canAddSermon?: boolean
+    sermonPicker?: ReactNode
+    onToggleSermonPicker?: () => void
     isAddingScripture?: boolean
     canAddScripture?: boolean
     scripturePicker?: ReactNode
@@ -28,6 +32,10 @@ interface ContextPanelProps {
 export function ContextPanel({
     sermons,
     scriptures,
+    isAddingSermon,
+    canAddSermon,
+    sermonPicker,
+    onToggleSermonPicker,
     isAddingScripture,
     canAddScripture,
     scripturePicker,
@@ -68,7 +76,24 @@ export function ContextPanel({
                             <h3>Sermons</h3>
                             <span className="context-section-count">{sermons.length}</span>
                         </div>
+                        <div className="context-section-actions">
+                            {onToggleSermonPicker ? (
+                                <button
+                                    type="button"
+                                    className="ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
+                                    onClick={onToggleSermonPicker}
+                                    disabled={!canAddSermon}
+                                >
+                                    {isAddingSermon ? "Cancel" : "Add sermon"}
+                                </button>
+                            ) : null}
+                        </div>
                     </div>
+                    {isAddingSermon && sermonPicker ? (
+                        <div className="context-inline-picker">
+                            {sermonPicker}
+                        </div>
+                    ) : null}
                     {sermons.length === 0 ? (
                         <p className="context-empty-inline">No sermons in context.</p>
                     ) : (
@@ -131,7 +156,7 @@ export function ContextPanel({
                         </div>
                     </div>
                     {isAddingScripture && scripturePicker ? (
-                        <div className="context-scripture-picker">
+                        <div className="context-inline-picker context-scripture-picker">
                             {scripturePicker}
                         </div>
                     ) : null}

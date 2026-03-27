@@ -98,6 +98,7 @@ export function ConversationsPage() {
     const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
     const [isContextOpen, setIsContextOpen] = useState(true)
     const [isLibraryOpen, setIsLibraryOpen] = useState(false)
+    const [isAddingSermon, setIsAddingSermon] = useState(false)
     const [isAddingScripture, setIsAddingScripture] = useState(false)
     const [activeLibrarySection, setActiveLibrarySection] =
         useState<LibrarySection>("sermons")
@@ -266,6 +267,7 @@ export function ConversationsPage() {
             setPendingSermonIds([])
             setPendingUserScriptures([])
             setPendingEvents([])
+            setIsAddingSermon(false)
             setIsAddingScripture(false)
         }
     }, [
@@ -281,6 +283,7 @@ export function ConversationsPage() {
         setPendingEvents([])
         setAllConversationSermons([])
         setAllConversationScriptures([])
+        setIsAddingSermon(false)
         setIsAddingScripture(false)
         setSearchParams({ id })
     }
@@ -293,6 +296,7 @@ export function ConversationsPage() {
         setPendingSermonIds([])
         setPendingUserScriptures([])
         setPendingEvents([])
+        setIsAddingSermon(false)
         setIsAddingScripture(false)
         setSearchParams({})
     }
@@ -393,6 +397,30 @@ export function ConversationsPage() {
         } catch (err) {
             console.error("Failed to attach sermon:", err)
         }
+    }
+
+    const handleAddSermonToContext = async (sermon: Sermon) => {
+        if (effectiveConversationId) {
+            const alreadyAttached = activeSermons.some(
+                (item) => item.sermonId === sermon.id,
+            )
+            if (alreadyAttached) {
+                setIsAddingSermon(false)
+                return
+            }
+
+            await handleAttachSermon(sermon)
+            setIsAddingSermon(false)
+            return
+        }
+
+        if (pendingSermonIds.includes(sermon.id)) {
+            setIsAddingSermon(false)
+            return
+        }
+
+        handleTogglePendingSermon(sermon.id)
+        setIsAddingSermon(false)
     }
 
     const handleDetachSermon = async (conversationSermonId: string) => {
@@ -624,6 +652,11 @@ export function ConversationsPage() {
         label: scripture.label,
         meta: scripture.source,
     }))
+    const availableSermons = sermons.filter((sermon) =>
+        effectiveConversationId
+            ? !activeSermons.some((item) => item.sermonId === sermon.id)
+            : !pendingSermonIds.includes(sermon.id),
+    )
 
     const conversationEvents: ConversationEvent[] = effectiveConversationId
         ? [
@@ -724,6 +757,65 @@ export function ConversationsPage() {
                     <ContextPanel
                         sermons={contextSermonItems}
                         scriptures={scriptureContextItems}
+                        isAddingSermon={isAddingSermon}
+                        canAddSermon={sermons.length > 0 && !isStreaming}
+                        sermonPicker={
+                            availableSermons.length === 0 ? (
+                                <p className="context-empty-inline">
+                                    No more sermons available to add.
+                                </p>
+                            ) : (
+                                <div className="context-picker-list">
+                                    {availableSermons.map((sermon) => (
+                                        (() => {
+                                            const recordedOn = formatSermonDate(
+                                                sermon.recordedOn,
+                                            )
+
+                                            return (
+                                                <button
+                                                    key={sermon.id}
+                                                    type="button"
+                                                    className="context-picker-item"
+                                                    onClick={() => {
+                                                        void handleAddSermonToContext(
+                                                            sermon,
+                                                        )
+                                                    }}
+                                                    disabled={isStreaming}
+                                                >
+                                                    <span className="context-picker-item-main">
+                                                        <span className="context-item-label">
+                                                            {sermon.title}
+                                                        </span>
+                                                        {(recordedOn ||
+                                                            sermon.speaker) && (
+                                                            <span className="context-item-meta">
+                                                                {recordedOn ? (
+                                                                    <span>{recordedOn}</span>
+                                                                ) : null}
+                                                                {sermon.speaker ? (
+                                                                    <span>
+                                                                        {sermon.speaker}
+                                                                    </span>
+                                                                ) : null}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                    <span className="context-picker-item-action">
+                                                        Add
+                                                    </span>
+                                                </button>
+                                            )
+                                        })()
+                                    ))}
+                                </div>
+                            )
+                        }
+                        onToggleSermonPicker={() => {
+                            setIsAddingSermon((current) => !current)
+                            setIsAddingScripture(false)
+                        }}
                         isAddingScripture={isAddingScripture}
                         canAddScripture={translations.length > 0 && !isStreaming}
                         scripturePicker={
@@ -736,9 +828,10 @@ export function ConversationsPage() {
                                 }}
                             />
                         }
-                        onToggleScripturePicker={() =>
+                        onToggleScripturePicker={() => {
                             setIsAddingScripture((current) => !current)
-                        }
+                            setIsAddingSermon(false)
+                        }}
                         onClose={() => setIsContextOpen(false)}
                     />
                 ) : null}
