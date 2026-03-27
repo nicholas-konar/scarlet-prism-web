@@ -1,10 +1,13 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { Message, ConversationEvent } from "@/types/api"
 import { MessageBubble } from "./MessageBubble"
 import { MessageInput } from "./MessageInput"
 
+const NEW_CONVERSATION_PLACEHOLDER = "New Conversation"
+
 interface ConversationWindowProps {
     conversationId: string | null
+    conversationTitle?: string | null
     isLibraryOpen: boolean
     messages: Message[]
     events: ConversationEvent[]
@@ -27,6 +30,7 @@ interface ConversationWindowProps {
 
 export function ConversationWindow({
     conversationId,
+    conversationTitle,
     isLibraryOpen,
     messages,
     events,
@@ -43,18 +47,82 @@ export function ConversationWindow({
     onToggleLibrary,
 }: ConversationWindowProps) {
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const titleAnimationFrameRef = useRef<number | null>(null)
+    const hasInitializedTitleRef = useRef(false)
+    const previousResolvedTitleRef = useRef(NEW_CONVERSATION_PLACEHOLDER)
+    const resolvedConversationTitle =
+        conversationTitle?.trim() || conversationId || NEW_CONVERSATION_PLACEHOLDER
+    const [displayedConversationTitle, setDisplayedConversationTitle] = useState(
+        resolvedConversationTitle,
+    )
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "auto" })
     }, [messages, events, streamingText])
 
-    const conversationTitle = conversationId || "New Conversation"
     const isEmpty =
         !conversationId &&
         messages.length === 0 &&
         events.length === 0 &&
         !streamingText &&
         !streamError
+
+    useEffect(() => {
+        if (titleAnimationFrameRef.current !== null) {
+            window.clearInterval(titleAnimationFrameRef.current)
+            titleAnimationFrameRef.current = null
+        }
+
+        const previousResolvedTitle = previousResolvedTitleRef.current
+        const titleArrivedForExistingConversation =
+            !!conversationTitle?.trim() && previousResolvedTitle === conversationId
+
+        if (!hasInitializedTitleRef.current) {
+            setDisplayedConversationTitle(resolvedConversationTitle)
+            hasInitializedTitleRef.current = true
+            previousResolvedTitleRef.current = resolvedConversationTitle
+            return
+        }
+
+        if (resolvedConversationTitle === NEW_CONVERSATION_PLACEHOLDER) {
+            setDisplayedConversationTitle(NEW_CONVERSATION_PLACEHOLDER)
+            previousResolvedTitleRef.current = NEW_CONVERSATION_PLACEHOLDER
+            return
+        }
+
+        const shouldAnimateTitle =
+            previousResolvedTitle === NEW_CONVERSATION_PLACEHOLDER ||
+            titleArrivedForExistingConversation
+
+        if (!shouldAnimateTitle) {
+            setDisplayedConversationTitle(resolvedConversationTitle)
+            previousResolvedTitleRef.current = resolvedConversationTitle
+            return
+        }
+
+        let index = 0
+        setDisplayedConversationTitle("")
+        titleAnimationFrameRef.current = window.setInterval(() => {
+            index += 1
+            setDisplayedConversationTitle(resolvedConversationTitle.slice(0, index))
+
+            if (index >= resolvedConversationTitle.length) {
+                if (titleAnimationFrameRef.current !== null) {
+                    window.clearInterval(titleAnimationFrameRef.current)
+                    titleAnimationFrameRef.current = null
+                }
+            }
+        }, 24)
+
+        previousResolvedTitleRef.current = resolvedConversationTitle
+
+        return () => {
+            if (titleAnimationFrameRef.current !== null) {
+                window.clearInterval(titleAnimationFrameRef.current)
+                titleAnimationFrameRef.current = null
+            }
+        }
+    }, [conversationId, conversationTitle, resolvedConversationTitle])
 
     // Merge messages and events into a single chronological list
     type Item =
@@ -71,8 +139,8 @@ export function ConversationWindow({
             <section className="messages-container panel-shell" aria-label="Conversation thread">
                 <div className="panel-header panel-header-row">
                     <div className="conversation-window-header-copy">
-                        <p className="panel-eyebrow">Thread</p>
-                        <h2 className="panel-title">{conversationTitle}</h2>
+                        <p className="panel-eyebrow">Bible study</p>
+                        <h2 className="panel-title">{displayedConversationTitle}</h2>
                         <div className="conversation-window-header-library-row">
                             <button
                                 type="button"

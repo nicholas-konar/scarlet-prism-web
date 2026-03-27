@@ -6,6 +6,7 @@ interface UseConversationStreamResult {
     streamingText: string
     isStreaming: boolean
     conversationId: string | null
+    conversationTitle: string | null
     sendMessage: (
         prompt: string,
         modelId: string,
@@ -24,11 +25,13 @@ export function useConversationStream(): UseConversationStreamResult {
     const [streamingText, setStreamingText] = useState("")
     const [isStreaming, setIsStreaming] = useState(false)
     const [conversationId, setConversationId] = useState<string | null>(null)
+    const [conversationTitle, setConversationTitle] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
 
     const reset = useCallback(() => {
         setStreamingText("")
         setConversationId(null)
+        setConversationTitle(null)
         setError(null)
     }, [])
 
@@ -68,9 +71,15 @@ export function useConversationStream(): UseConversationStreamResult {
                             if (event.conversationId && event.message) {
                                 currentConversationId = event.conversationId
                                 setConversationId(event.conversationId)
+                                if (typeof event.conversationTitle === "string") {
+                                    setConversationTitle(event.conversationTitle)
+                                }
                                 if (onMessageReceived) {
                                     onMessageReceived(event.message)
                                 }
+                            }
+                            else if (typeof event.conversationTitle === "string") {
+                                setConversationTitle(event.conversationTitle)
                             }
                             // AI response chunk
                             else if (event.delta) {
@@ -104,6 +113,7 @@ export function useConversationStream(): UseConversationStreamResult {
         streamingText,
         isStreaming,
         conversationId,
+        conversationTitle,
         sendMessage,
         error,
         reset,

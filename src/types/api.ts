@@ -39,6 +39,7 @@ export interface Message {
 export interface Conversation {
     id: string
     userId: string
+    conversationTitle?: string | null
     createdAt: string
     updatedAt: string
 }

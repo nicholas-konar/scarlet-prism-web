@@ -15,7 +15,14 @@ export function HistoryConversationList({
     onNewConversation,
     isLoading,
 }: ConversationListProps) {
-    function formatConversationLabel(index: number): string {
+    function formatConversationLabel(
+        conversation: Conversation,
+        index: number,
+    ): string {
+        if (conversation.conversationTitle?.trim()) {
+            return conversation.conversationTitle
+        }
+
         return `Conversation ${String(index + 1).padStart(2, "0")}`
     }
 
@@ -46,7 +53,7 @@ export function HistoryConversationList({
                         >
                             <span className="list-item-main">
                                 <span className="label">
-                                    {formatConversationLabel(index)}
+                                    {formatConversationLabel(conv, index)}
                                 </span>
                                 <span className="list-item-meta">
                                     {formatConversationMeta(conv.createdAt)}

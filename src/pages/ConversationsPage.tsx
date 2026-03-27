@@ -307,6 +307,7 @@ export function ConversationsPage() {
         streamingText,
         isStreaming,
         conversationId: newConversationId,
+        conversationTitle: streamedConversationTitle,
         sendMessage,
         reset: resetStream,
         error: streamError,
@@ -314,6 +315,12 @@ export function ConversationsPage() {
 
     // The effective conversation ID — either from URL or newly created via streaming
     const effectiveConversationId = selectedConversationId || newConversationId || null
+    const selectedConversation =
+        conversations.find((conversation) => conversation.id === selectedConversationId) ?? null
+    const effectiveConversationTitle =
+        selectedConversation?.conversationTitle?.trim() ||
+        (!selectedConversationId ? streamedConversationTitle?.trim() : null) ||
+        effectiveConversationId
 
     const resetLibraryDraftState = () => {
         setPendingSermonIds([])
@@ -463,13 +470,35 @@ export function ConversationsPage() {
                 const newConv: Conversation = {
                     id: newConversationId,
                     userId: user!.id,
+                    conversationTitle: streamedConversationTitle ?? null,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                 }
                 setConversations([newConv, ...conversations])
             }
         }
-    }, [newConversationId, selectedConversationId, conversations, user])
+    }, [
+        newConversationId,
+        selectedConversationId,
+        conversations,
+        streamedConversationTitle,
+        user,
+    ])
+
+    useEffect(() => {
+        if (!effectiveConversationId || !streamedConversationTitle?.trim()) return
+
+        setConversations((current) =>
+            current.map((conversation) =>
+                conversation.id === effectiveConversationId
+                    ? {
+                          ...conversation,
+                          conversationTitle: streamedConversationTitle,
+                      }
+                    : conversation,
+            ),
+        )
+    }, [effectiveConversationId, streamedConversationTitle])
 
     // Once a new conversation is confirmed server-side, fetch full sermon history
     // so the sidebar and event log reflect the sermons that were just attached
@@ -926,6 +955,7 @@ export function ConversationsPage() {
 
                     <ConversationWindow
                         conversationId={effectiveConversationId}
+                        conversationTitle={effectiveConversationTitle}
                         isLibraryOpen={isLibraryOpen}
                         messages={messages}
                         events={conversationEvents}
