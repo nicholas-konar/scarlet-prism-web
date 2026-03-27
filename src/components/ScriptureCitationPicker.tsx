@@ -122,22 +122,7 @@ export function ScriptureCitationPicker({
 
     return (
         <div className="scripture-picker">
-            <div className="split-fields">
-                <label className="form-field">
-                    <span>Translation</span>
-                    <select
-                        value={translationId}
-                        onChange={(event) => setTranslationId(event.target.value)}
-                        disabled={disabled}
-                    >
-                        {translations.map((translation) => (
-                            <option key={translation.id} value={translation.id}>
-                                {translation.name}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-
+            <div className="scripture-picker-row scripture-picker-row--book">
                 <label className="form-field">
                     <span>Book</span>
                     <select
@@ -153,9 +138,6 @@ export function ScriptureCitationPicker({
                         ))}
                     </select>
                 </label>
-            </div>
-
-            <div className="split-fields">
                 <label className="form-field">
                     <span>Chapter</span>
                     <input
@@ -169,7 +151,9 @@ export function ScriptureCitationPicker({
                         disabled={disabled}
                     />
                 </label>
+            </div>
 
+            <div className="scripture-picker-row scripture-picker-row--verses">
                 <label className="form-field">
                     <span>Start verse</span>
                     <input
@@ -184,29 +168,45 @@ export function ScriptureCitationPicker({
                                 setEndVerseInput("")
                             }
                         }}
-                        placeholder="Whole chapter"
+                        placeholder="Optional"
                         disabled={disabled}
+                    />
+                </label>
+
+                <label className="form-field">
+                    <span>End verse</span>
+                    <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        inputMode="numeric"
+                        value={endVerseInput}
+                        onChange={(event) => setEndVerseInput(event.target.value)}
+                        placeholder="Optional"
+                        disabled={disabled || !startVerseInput}
                     />
                 </label>
             </div>
 
             <label className="form-field">
-                <span>End verse</span>
-                <input
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputMode="numeric"
-                    value={endVerseInput}
-                    onChange={(event) => setEndVerseInput(event.target.value)}
-                    placeholder="Single verse"
-                    disabled={disabled || !startVerseInput}
-                />
+                <span>Translation</span>
+                <select
+                    value={translationId}
+                    onChange={(event) => setTranslationId(event.target.value)}
+                    disabled={disabled}
+                >
+                    {translations.map((translation) => (
+                        <option key={translation.id} value={translation.id}>
+                            {translation.name}
+                        </option>
+                    ))}
+                </select>
             </label>
 
             <div className="action-row">
                 <button
                     type="button"
+                    className="ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
                     onClick={handleAddCitation}
                     disabled={disabled}
                 >

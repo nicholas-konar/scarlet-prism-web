@@ -1089,11 +1089,57 @@ fieldset legend {
 }
 
 .context-section-header h3,
-.context-section-header span {
+.context-section-header > span,
+.context-section-actions > span {
     font-size: 11px;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.12em;
+}
+
+.context-section-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.context-scripture-picker {
+    border: 1px solid #c7bdaf;
+    padding: 12px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 241, 232, 0.56) 100%);
+}
+
+.context-scripture-picker .scripture-picker {
+    gap: 10px;
+}
+
+.context-scripture-picker .scripture-picker-row {
+    display: grid;
+    gap: 12px;
+}
+
+.context-scripture-picker .scripture-picker-row--book {
+    grid-template-columns: minmax(0, 1.5fr) minmax(88px, 0.7fr);
+}
+
+.context-scripture-picker .scripture-picker-row--verses {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.context-scripture-picker .form-field {
+    min-width: 0;
+    font-size: 11px;
+}
+
+.context-scripture-picker .form-field span {
+    font-weight: 500;
+}
+
+.context-scripture-picker .form-field select,
+.context-scripture-picker .form-field input {
+    width: 100%;
+    min-width: 0;
 }
 
 .context-stack {
@@ -1234,6 +1280,8 @@ fieldset legend {
     .main-layout,
     .info-grid,
     .split-fields,
+    .context-scripture-picker .scripture-picker-row--book,
+    .context-scripture-picker .scripture-picker-row--verses,
     .admin-layout {
         grid-template-columns: 1fr;
     }

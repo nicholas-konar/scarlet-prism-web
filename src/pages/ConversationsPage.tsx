@@ -8,10 +8,16 @@ import { SermonList } from "@/components/SermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
 import { ContextPanel } from "@/components/ContextPanel"
 import { ScriptureList } from "@/components/ScriptureList"
+import {
+    ScriptureCitationPicker,
+    type PendingScriptureCitation,
+} from "@/components/ScriptureCitationPicker"
 import * as conversationApi from "@/api/conversations"
 import * as sermonsApi from "@/api/sermons"
 import * as scriptureApi from "@/api/scripture"
+import { getEffectiveBibleTranslationId } from "@/lib/scripture"
 import type {
+    BibleTranslation,
     Conversation,
     Message,
     Sermon,
@@ -19,6 +25,7 @@ import type {
     ConversationEvent,
     ConversationScripture,
     ScriptureCitation,
+    ScriptureCitationInput,
 } from "@/types/api"
 
 const DEFAULT_MODEL_ID = "gpt-4.1-nano"
@@ -49,6 +56,21 @@ function formatSermonDate(value: string | null): string | null {
     return `${weekday} ${month} ${day}, ${year}`
 }
 
+function getCitationKey(
+    citation: Pick<
+        ScriptureCitationInput,
+        "translationId" | "bookId" | "startChapter" | "startVerse" | "endVerse"
+    >,
+): string {
+    return [
+        citation.translationId ?? "*",
+        citation.bookId,
+        citation.startChapter,
+        citation.startVerse ?? "*",
+        citation.endVerse ?? "*",
+    ].join(":")
+}
+
 export function ConversationsPage() {
     const { user, currentCongregation } = useAuth()
     const [searchParams, setSearchParams] = useSearchParams()
@@ -57,11 +79,15 @@ export function ConversationsPage() {
     const [conversations, setConversations] = useState<Conversation[]>([])
     const [messages, setMessages] = useState<Message[]>([])
     const [sermons, setSermons] = useState<Sermon[]>([])
+    const [translations, setTranslations] = useState<BibleTranslation[]>([])
     const [allConversationSermons, setAllConversationSermons] = useState<ConversationSermon[]>([])
     const [allConversationScriptures, setAllConversationScriptures] = useState<
         ConversationScripture[]
     >([])
     const [pendingSermonIds, setPendingSermonIds] = useState<string[]>([])
+    const [pendingUserScriptures, setPendingUserScriptures] = useState<
+        PendingScriptureCitation[]
+    >([])
     const [pendingEvents, setPendingEvents] = useState<ConversationEvent[]>([])
     const [isLoadingConversations, setIsLoadingConversations] = useState(true)
     const [isLoadingMessages, setIsLoadingMessages] = useState(false)
@@ -72,6 +98,7 @@ export function ConversationsPage() {
     const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
     const [isContextOpen, setIsContextOpen] = useState(true)
     const [isLibraryOpen, setIsLibraryOpen] = useState(false)
+    const [isAddingScripture, setIsAddingScripture] = useState(false)
     const [activeLibrarySection, setActiveLibrarySection] =
         useState<LibrarySection>("sermons")
 
@@ -136,6 +163,13 @@ export function ConversationsPage() {
     }, [])
 
     useEffect(() => {
+        scriptureApi
+            .listBibleTranslations()
+            .then(setTranslations)
+            .catch(() => setTranslations([]))
+    }, [])
+
+    useEffect(() => {
         if (!currentCongregation) {
             setSermons([])
             return
@@ -165,6 +199,7 @@ export function ConversationsPage() {
             if (!isStreaming && !streamError) {
                 setMessages([])
                 setAllConversationSermons([])
+                setAllConversationScriptures([])
             }
             return
         }
@@ -229,7 +264,9 @@ export function ConversationsPage() {
             fetchConversationSermons(newConversationId)
             fetchConversationScriptures(newConversationId)
             setPendingSermonIds([])
+            setPendingUserScriptures([])
             setPendingEvents([])
+            setIsAddingScripture(false)
         }
     }, [
         newConversationId,
@@ -240,9 +277,11 @@ export function ConversationsPage() {
     const handleSelectConversation = (id: string) => {
         resetStream()
         setPendingSermonIds([])
+        setPendingUserScriptures([])
         setPendingEvents([])
         setAllConversationSermons([])
         setAllConversationScriptures([])
+        setIsAddingScripture(false)
         setSearchParams({ id })
     }
 
@@ -252,7 +291,9 @@ export function ConversationsPage() {
         setAllConversationSermons([])
         setAllConversationScriptures([])
         setPendingSermonIds([])
+        setPendingUserScriptures([])
         setPendingEvents([])
+        setIsAddingScripture(false)
         setSearchParams({})
     }
 
@@ -314,7 +355,23 @@ export function ConversationsPage() {
                 isRetry,
                 retryMessageId,
                 isNewConversation && pendingSermonIds.length > 0 ? pendingSermonIds : undefined,
-                undefined,
+                isNewConversation && pendingUserScriptures.length > 0
+                    ? pendingUserScriptures.map(
+                          ({
+                              translationId,
+                              bookId,
+                              startChapter,
+                              startVerse,
+                              endVerse,
+                          }) => ({
+                              translationId,
+                              bookId,
+                              startChapter,
+                              startVerse,
+                              endVerse,
+                          }),
+                      )
+                    : undefined,
             )
         } catch (err) {
             console.error("Failed to send message:", err)
@@ -351,6 +408,97 @@ export function ConversationsPage() {
         }
     }
 
+    const handleAddUserScripture = async (citation: PendingScriptureCitation) => {
+        const citationKey = getCitationKey(citation)
+
+        if (effectiveConversationId) {
+            const alreadyAttached = activeScriptures.some(
+                (item) =>
+                    item.citation && getCitationKey(item.citation) === citationKey,
+            )
+            if (alreadyAttached) {
+                setIsAddingScripture(false)
+                return
+            }
+
+            try {
+                await scriptureApi.attachScripture(effectiveConversationId, {
+                    translationId: citation.translationId,
+                    bookId: citation.bookId,
+                    startChapter: citation.startChapter,
+                    startVerse: citation.startVerse,
+                    endVerse: citation.endVerse,
+                })
+                await fetchConversationScriptures(effectiveConversationId)
+                setIsAddingScripture(false)
+            } catch (err) {
+                console.error("Failed to attach scripture:", err)
+            }
+
+            return
+        }
+
+        const alreadyPending = pendingUserScriptures.some(
+            (item) => getCitationKey(item) === citationKey,
+        )
+        if (alreadyPending) {
+            setIsAddingScripture(false)
+            return
+        }
+
+        const pendingEvent: ConversationEvent = {
+            id: `pending-scripture-${citationKey}-${Date.now()}`,
+            text: `Added scripture "${citation.label}" to new conversation`,
+            createdAt: new Date().toISOString(),
+        }
+
+        setPendingUserScriptures((prev) => [...prev, citation])
+        setPendingEvents((prev) => [...prev, pendingEvent])
+        setIsAddingScripture(false)
+    }
+
+    const handleDetachUserScripture = async (
+        scriptureKey: string,
+        conversationScriptureId?: string,
+    ) => {
+        if (effectiveConversationId && conversationScriptureId) {
+            try {
+                await scriptureApi.detachScripture(
+                    effectiveConversationId,
+                    conversationScriptureId,
+                )
+                const removedAt = new Date().toISOString()
+                setAllConversationScriptures((prev) =>
+                    prev.map((item) =>
+                        item.id === conversationScriptureId
+                            ? { ...item, removedAt }
+                            : item,
+                    ),
+                )
+            } catch (err) {
+                console.error("Failed to detach scripture:", err)
+            }
+
+            return
+        }
+
+        const removed = pendingUserScriptures.find(
+            (item) => getCitationKey(item) === scriptureKey,
+        )
+        if (!removed) return
+
+        const pendingEvent: ConversationEvent = {
+            id: `pending-scripture-remove-${scriptureKey}-${Date.now()}`,
+            text: `Removed scripture "${removed.label}" from new conversation`,
+            createdAt: new Date().toISOString(),
+        }
+
+        setPendingUserScriptures((prev) =>
+            prev.filter((item) => getCitationKey(item) !== scriptureKey),
+        )
+        setPendingEvents((prev) => [...prev, pendingEvent])
+    }
+
     const activeSermons = allConversationSermons.filter((r) => !r.removedAt)
     const activeScriptures = allConversationScriptures.filter(
         (item) => !item.removedAt,
@@ -362,7 +510,7 @@ export function ConversationsPage() {
             {
                 label: string
                 sources: Set<string>
-                status: "active" | "pending"
+                userScriptureIds: string[]
             }
         >()
 
@@ -377,21 +525,15 @@ export function ConversationsPage() {
                 | "label"
             >,
             source: string,
-            status: "active" | "pending",
+            userScriptureId?: string,
         ) => {
-            const key = [
-                citation.translationId,
-                citation.bookId,
-                citation.startChapter,
-                citation.startVerse ?? "*",
-                citation.endVerse ?? "*",
-            ].join(":")
+            const key = getCitationKey(citation)
 
             const existing = items.get(key)
             if (existing) {
                 existing.sources.add(source)
-                if (status === "active") {
-                    existing.status = "active"
+                if (userScriptureId) {
+                    existing.userScriptureIds.push(userScriptureId)
                 }
                 return
             }
@@ -399,14 +541,14 @@ export function ConversationsPage() {
             items.set(key, {
                 label: citation.label,
                 sources: new Set([source]),
-                status,
+                userScriptureIds: userScriptureId ? [userScriptureId] : [],
             })
         }
 
         if (effectiveConversationId) {
             activeScriptures.forEach((item) => {
                 if (item.citation) {
-                    addCitation(item.citation, "directly attached", "active")
+                    addCitation(item.citation, "user", item.id)
                 }
             })
             activeSermons.forEach((item) => {
@@ -416,15 +558,17 @@ export function ConversationsPage() {
                         item.sermon?.title
                             ? `from sermon: ${item.sermon.title}`
                             : "from attached sermon",
-                        "active",
                     ),
                 )
             })
         } else {
+            pendingUserScriptures.forEach((citation) => {
+                addCitation(citation, "user", getCitationKey(citation))
+            })
             pendingSermonIds.forEach((sermonId) => {
                 const sermon = sermons.find((item) => item.id === sermonId)
                 sermon?.scriptures.forEach((citation) =>
-                    addCitation(citation, `from sermon: ${sermon.title}`, "active"),
+                    addCitation(citation, `from sermon: ${sermon.title}`),
                 )
             })
         }
@@ -433,6 +577,17 @@ export function ConversationsPage() {
             key,
             label: value.label,
             source: Array.from(value.sources).join(" + "),
+            onDetach:
+                value.userScriptureIds.length > 0
+                    ? () => {
+                          void handleDetachUserScripture(
+                              key,
+                              effectiveConversationId
+                                  ? value.userScriptureIds[0]
+                                  : undefined,
+                          )
+                      }
+                    : undefined,
         }))
     })()
 
@@ -515,6 +670,11 @@ export function ConversationsPage() {
         : pendingEvents
 
     const hasContext = contextSermonItems.length > 0 || scriptureContextItems.length > 0
+    const defaultTranslationId = getEffectiveBibleTranslationId({
+        userDefaultBibleTranslationId: user?.defaultBibleTranslationId,
+        congregationDefaultBibleTranslationId:
+            currentCongregation?.defaultBibleTranslationId,
+    })
 
     const librarySectionButtons: Array<{
         id: LibrarySection
@@ -564,6 +724,21 @@ export function ConversationsPage() {
                     <ContextPanel
                         sermons={contextSermonItems}
                         scriptures={scriptureContextItems}
+                        isAddingScripture={isAddingScripture}
+                        canAddScripture={translations.length > 0 && !isStreaming}
+                        scripturePicker={
+                            <ScriptureCitationPicker
+                                translations={translations}
+                                defaultTranslationId={defaultTranslationId}
+                                disabled={isStreaming}
+                                onAdd={(citation) => {
+                                    void handleAddUserScripture(citation)
+                                }}
+                            />
+                        }
+                        onToggleScripturePicker={() =>
+                            setIsAddingScripture((current) => !current)
+                        }
                         onClose={() => setIsContextOpen(false)}
                     />
                 ) : null}
