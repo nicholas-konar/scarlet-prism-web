@@ -6,6 +6,14 @@
     --text-xs: 12px;
     --text-sm: 13px;
     --text-md: 15px;
+    --surface-paper-rich-dark:
+        radial-gradient(140% 120% at 50% 0%, rgba(232, 215, 189, 0.11) 0%, rgba(232, 215, 189, 0) 48%),
+        linear-gradient(180deg, #53483d 0%, #41382f 42%, #342d26 100%);
+    --surface-paper-rich-medium:
+        radial-gradient(140% 120% at 50% 0%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 52%),
+        linear-gradient(180deg, rgba(244, 237, 226, 0.98) 0%, rgba(235, 225, 210, 0.98) 100%);
+    --surface-paper-rich-light:
+        linear-gradient(0deg, rgba(246, 241, 232, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
 }
 
 /* ===== Fieldset Legend ===== */
@@ -32,7 +40,7 @@ fieldset legend {
     gap: 6px;
     padding: 14px 16px 12px;
     border-bottom: 1px solid var(--line-faint);
-    background: linear-gradient(0deg, var(--paper-tint) 0%, var(--paper) 88%);
+    background: var(--surface-paper-rich-light);
 }
 
 .panel-header-row {
@@ -868,9 +876,7 @@ fieldset legend {
     border-radius: 8px;
     padding: 0 12px 12px;
     width: min(100%, 80%);
-    background:
-        radial-gradient(140% 120% at 50% 0%, rgba(232, 215, 189, 0.11) 0%, rgba(232, 215, 189, 0) 48%),
-        linear-gradient(180deg, #53483d 0%, #41382f 42%, #342d26 100%);
+    background: var(--surface-paper-rich-dark);
     color: #1d1a16;
 }
 
@@ -920,9 +926,7 @@ fieldset legend {
 }
 
 .message-bubble.user .message-text {
-    background:
-        radial-gradient(140% 120% at 50% 0%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 52%),
-        linear-gradient(180deg, rgba(244, 237, 226, 0.98) 0%, rgba(235, 225, 210, 0.98) 100%);
+    background: var(--surface-paper-rich-medium);
     color: #231d16;
     border: 1px solid #cfc2b0;
     border-radius: 8px;
@@ -1012,8 +1016,7 @@ fieldset legend {
     align-items: flex-start;
     padding: 16px;
     border-bottom: 1px solid var(--line-faint);
-    background:
-        linear-gradient(0deg, rgba(246, 241, 232, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
+    background: var(--surface-paper-rich-light);
 }
 
 .library-panel-heading {
@@ -1280,7 +1283,7 @@ fieldset legend {
     align-items: flex-start;
     padding: 16px;
     border-bottom: 1px solid var(--line-faint);
-    background: linear-gradient(180deg, var(--paper-tint) 0%, var(--paper) 88%);
+    background: var(--surface-paper-rich-light);
 }
 
 .history-section-tabs {
