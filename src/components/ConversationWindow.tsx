@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import type { Message, ConversationEvent } from "@/types/api"
+import {
+    PANEL_ACTION_BUTTON_CLASS,
+    WORKSPACE_ACTION_BUTTON_CLASS,
+} from "./buttonClassNames"
 import { MessageBubble } from "./MessageBubble"
 import { MessageInput } from "./MessageInput"
 
@@ -144,7 +148,7 @@ export function ConversationWindow({
                         <div className="conversation-window-header-library-row">
                             <button
                                 type="button"
-                                className={`drawer-toggle${isLibraryOpen ? " active" : ""}`}
+                                className={WORKSPACE_ACTION_BUTTON_CLASS}
                                 onClick={onToggleLibrary}
                             >
                                 {isLibraryOpen ? "Close library" : "Open library"}
@@ -158,7 +162,11 @@ export function ConversationWindow({
                         </div>
                     </div>
                     <div className="conversation-window-header-actions">
-                        <button type="button" className="drawer-toggle" onClick={onOpenHistory}>
+                        <button
+                            type="button"
+                            className={PANEL_ACTION_BUTTON_CLASS}
+                            onClick={onOpenHistory}
+                        >
                             Open history
                         </button>
                     </div>

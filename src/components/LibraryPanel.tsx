@@ -1,4 +1,8 @@
 import type { ReactNode } from "react"
+import {
+    ITEM_ACTION_BUTTON_CLASS,
+    PANEL_ACTION_BUTTON_CLASS,
+} from "./buttonClassNames"
 
 export type LibrarySermonItem = {
     key: string
@@ -28,12 +32,6 @@ interface LibraryPanelProps {
     onToggleScripturePicker?: () => void
     onClose?: () => void
 }
-
-const PANEL_ACTION_BUTTON_CLASS =
-    "ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
-
-const ITEM_ACTION_BUTTON_CLASS =
-    "ui-button ui-button--caps ui-button--compact ui-button--ghost ui-button--hover-tint ui-button--press ui-button--reveal library-item-action"
 
 function formatCountLabel(count: number, singular: string) {
     return `${count} ${singular}${count === 1 ? "" : "s"}`

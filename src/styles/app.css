@@ -91,6 +91,15 @@ fieldset legend {
     color: #6d6659;
 }
 
+.ui-button--workspace-action {
+    padding: 9px 12px;
+    font-size: 11px;
+    line-height: 1;
+    background: #fff;
+    background-color: #fff;
+    color: #000;
+}
+
 .ui-button--subtle {
     background: rgba(255, 255, 255, 0.9);
     background-color: rgba(255, 255, 255, 0.9);
@@ -106,10 +115,10 @@ fieldset legend {
 
 .ui-button--hover-tint {
     transition:
-        color 140ms ease,
-        border-color 140ms ease,
+        color 300ms ease,
+        border-color 300ms ease,
         background-color 300ms ease,
-        transform 80ms ease;
+        transform 300ms ease;
 }
 
 .ui-button--hover-tint:hover:not(:disabled),
@@ -610,35 +619,6 @@ fieldset legend {
 }
 
 /* ===== Workspace ===== */
-
-.drawer-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--line-soft);
-    padding: 9px 12px;
-    background: #fff;
-    font-size: 11px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-}
-
-.drawer-toggle.active {
-    background: #fff;
-    color: #000;
-    font-weight: normal;
-}
-
-.drawer-toggle:hover:not(:disabled) {
-    background: var(--paper-tint);
-    color: #000;
-    font-weight: normal;
-}
-
-.drawer-dismiss {
-    background: transparent;
-}
 
 /* ===== List Panels ===== */
 
@@ -1481,7 +1461,7 @@ fieldset legend {
         gap: 10px;
     }
 
-    .conversation-window-header-actions .drawer-toggle {
+    .conversation-window-header-actions .ui-button {
         flex: 1 1 0;
     }
 

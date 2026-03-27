@@ -6,6 +6,7 @@ import { useConversationStream } from "@/hooks/useConversationStream"
 import { HistoryConversationList } from "@/components/HistoryConversationList"
 import { HistorySermonList } from "@/components/HistorySermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
+import { PANEL_ACTION_BUTTON_CLASS } from "@/components/buttonClassNames"
 import {
     LibraryPanel,
     type LibraryScriptureItem,
@@ -994,7 +995,7 @@ export function ConversationsPage() {
                             </div>
                             <button
                                 type="button"
-                                className="drawer-toggle drawer-dismiss"
+                                className={PANEL_ACTION_BUTTON_CLASS}
                                 onClick={() => setIsHistoryOpen(false)}
                             >
                                 Close

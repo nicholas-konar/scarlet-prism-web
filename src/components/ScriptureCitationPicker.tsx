@@ -6,6 +6,7 @@ import {
     getScriptureVerseOptions,
     SCRIPTURE_BOOK_OPTIONS,
 } from "@/lib/scripture"
+import { PANEL_ACTION_BUTTON_CLASS } from "./buttonClassNames"
 
 export type PendingScriptureCitation = Omit<
     ScriptureCitationInput,
@@ -241,7 +242,7 @@ export function ScriptureCitationPicker({
             <div className="action-row">
                 <button
                     type="button"
-                    className="ui-button ui-button--caps ui-button--compact ui-button--subtle ui-button--hover-tint ui-button--press"
+                    className={PANEL_ACTION_BUTTON_CLASS}
                     onClick={handleAddCitation}
                     disabled={disabled}
                 >
