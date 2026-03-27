@@ -819,7 +819,25 @@ fieldset legend {
     color: #666;
     min-height: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    gap: 0.2em;
+    flex-wrap: wrap;
+}
+
+.empty-state-link {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #4f473b;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.14em;
+}
+
+.empty-state-link:hover:not(:disabled) {
+    background: transparent;
+    color: #1d1a16;
+    font-weight: normal;
 }
 
 .messages-scroll-area {

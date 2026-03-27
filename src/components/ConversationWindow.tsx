@@ -172,7 +172,14 @@ export function ConversationWindow({
                 <div className="messages-scroll-area">
                     {isEmpty ? (
                         <div className="empty-state">
-                            Start a new conversation or select one from the left.
+                            <span>Start a new conversation or select one </span>
+                            <button
+                                type="button"
+                                className="empty-state-link"
+                                onClick={onOpenHistory}
+                            >
+                                from history.
+                            </button>
                         </div>
                     ) : (
                         <>
