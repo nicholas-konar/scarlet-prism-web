@@ -1014,7 +1014,7 @@ fieldset legend {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     gap: 0;
-    background: linear-gradient(180deg, var(--paper-tint) 0%, var(--paper) 72%);
+    background: #fff;
     overflow: hidden;
 }
 
@@ -1025,6 +1025,8 @@ fieldset legend {
     align-items: flex-start;
     padding: 16px;
     border-bottom: 1px solid var(--line-faint);
+    background:
+        linear-gradient(0deg, rgba(246, 241, 232, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
 }
 
 .context-panel-heading {
@@ -1105,9 +1107,9 @@ fieldset legend {
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border: 1px solid var(--line-soft);
+    border: 1px solid #c7bdaf;
     border-left: 3px solid #000;
-    background: rgba(255, 255, 255, 0.9);
+    background: color-mix(in srgb, var(--paper-tint) 38%, white);
 }
 
 .context-item-main {
