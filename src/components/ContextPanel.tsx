@@ -47,8 +47,8 @@ export function ContextPanel({
             <div className="context-panel-header">
                 <div className="context-panel-heading">
                     <div>
-                        <p className="context-panel-eyebrow">Workspace context</p>
-                        <h2>Context</h2>
+                        <p className="context-panel-eyebrow">Study material</p>
+                        <h2>Resources</h2>
                     </div>
                     <div className="context-summary-strip" aria-label="Context summary">
                         <span>{sermons.length} sermon{sermons.length === 1 ? "" : "s"}</span>
