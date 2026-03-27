@@ -141,7 +141,7 @@ export function ConversationWindow({
             <section className="messages-container panel-shell" aria-label="Conversation thread">
                 <div className="panel-header panel-header-row">
                     <div className="conversation-window-header-copy">
-                        <p className="panel-eyebrow">Bible study</p>
+                        <p className="panel-eyebrow">Bible study • sermon analysis</p>
                         <h2 className="panel-title">{displayedConversationTitle}</h2>
                         <div className="conversation-window-header-library-row">
                             <button
