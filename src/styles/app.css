@@ -611,6 +611,30 @@ fieldset legend {
     background: transparent;
 }
 
+.context-panel-close {
+    padding: 4px 6px;
+    background: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 0.9);
+    transition:
+        color 140ms ease,
+        border-color 140ms ease,
+        background-color 300ms ease,
+        transform 80ms ease;
+    color: #6d6659;
+}
+
+.context-panel-close:hover:not(:disabled),
+.context-panel-close:focus-visible {
+    background: color-mix(in srgb, var(--paper-tint) 50%, white);
+    background-color: color-mix(in srgb, var(--paper-tint) 50%, white);
+    border-color: var(--line-soft);
+    color: #575044;
+}
+
+.context-panel-close:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
 .library-launch {
     margin-left: 4px;
 }

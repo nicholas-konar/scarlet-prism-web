@@ -42,11 +42,11 @@ export function ContextPanel({
                     {onClose ? (
                         <button
                             type="button"
-                            className="drawer-toggle drawer-dismiss"
+                            className="drawer-toggle drawer-dismiss context-panel-close"
                             onClick={onClose}
                             aria-label="Close context"
                         >
-                            Hide
+                            Minimize
                         </button>
                     ) : null}
                 </div>
