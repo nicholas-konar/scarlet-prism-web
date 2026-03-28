@@ -14,6 +14,17 @@
         linear-gradient(180deg, rgba(244, 237, 226, 0.98) 0%, rgba(235, 225, 210, 0.98) 100%);
     --surface-paper-rich-light:
         linear-gradient(0deg, rgba(246, 241, 232, 0.92) 0%, rgba(255, 255, 255, 0.96) 100%);
+    --surface-workspace-shell-background:
+        radial-gradient(120% 140% at 50% 0%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 46%),
+        var(--surface-paper-rich-medium);
+    --surface-workspace-shell-border: rgba(120, 104, 81, 0.28);
+    --surface-workspace-shell-border-focus: #b8a482;
+    --shadow-workspace-shell:
+        inset 0 1px 0 rgba(255, 255, 255, 0.52),
+        0 -12px 28px rgba(82, 63, 35, 0.08);
+    --shadow-workspace-shell-focus:
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        0 -16px 34px rgba(82, 63, 35, 0.12);
 }
 
 /* ===== Fieldset Legend ===== */
@@ -231,6 +242,55 @@ fieldset legend {
     flex-direction: column;
     height: 100vh;
     background-color: var(--canvas);
+}
+
+.conversation-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    flex-shrink: 0;
+    padding: 12px 24px 10px;
+    border-bottom: 1px solid rgba(120, 104, 81, 0.16);
+    background: var(--surface-workspace-shell-background);
+}
+
+.conversation-toolbar-primary,
+.conversation-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.conversation-toolbar-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.conversation-toolbar-context {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.conversation-toolbar-label {
+    margin: 0;
+    font-size: 10px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #6d6659;
+}
+
+.conversation-toolbar-title {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.15;
+    color: #231d16;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .header {
@@ -763,26 +823,12 @@ fieldset legend {
 
 .conversation-window {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
     overflow: hidden;
     min-height: 0;
-    gap: 18px;
+    gap: 16px;
     height: 100%;
     flex: 1;
-}
-
-.conversation-window-header {
-    display: grid;
-    gap: 12px;
-    padding: 6px 0 0;
-    flex-shrink: 0;
-}
-
-.conversation-window-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
 }
 
 .messages-container {
@@ -794,51 +840,17 @@ fieldset legend {
     background: transparent;
 }
 
-.conversation-window-header-copy {
-    display: grid;
-    gap: 10px;
-    min-width: 0;
-}
-
-.conversation-window-header-library-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.conversation-window-header-note {
-    max-width: 42ch;
-    font-size: 12px;
-    line-height: 1.45;
-    color: #6d6659;
-}
-
-.conversation-window-header-note-line {
-    display: block;
-}
-
-.conversation-window-header-actions {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    gap: 8px;
-    flex-wrap: wrap;
-    flex-shrink: 0;
-    padding-top: 2px;
-}
-
 .empty-state {
-    padding: 48px 0 72px;
+    padding: 56px 0 80px;
     font-size: 12px;
     color: #666;
     min-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.2em;
-    flex-wrap: wrap;
     text-align: center;
+    max-width: 34ch;
+    margin: 0 auto;
 }
 
 .empty-state-link {
@@ -1468,16 +1480,12 @@ fieldset legend {
 .message-input-form {
     display: grid;
     gap: 10px;
-    border: 1px solid rgba(120, 104, 81, 0.28);
+    border: 1px solid var(--surface-workspace-shell-border);
     margin: 0;
     padding: 12px;
     cursor: text;
-    background:
-        radial-gradient(120% 140% at 50% 0%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 46%),
-        var(--surface-paper-rich-medium);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.52),
-        0 -12px 28px rgba(82, 63, 35, 0.08);
+    background: var(--surface-workspace-shell-background);
+    box-shadow: var(--shadow-workspace-shell);
     transition:
         border-color 220ms ease,
         box-shadow 220ms ease,
@@ -1485,10 +1493,8 @@ fieldset legend {
 }
 
 .message-input-form:focus-within {
-    border-color: #b8a482;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.72),
-        0 -16px 34px rgba(82, 63, 35, 0.12);
+    border-color: var(--surface-workspace-shell-border-focus);
+    box-shadow: var(--shadow-workspace-shell-focus);
     transform: translateY(-1px);
 }
 
@@ -1623,12 +1629,23 @@ fieldset legend {
         justify-content: space-between;
     }
 
-    .conversation-window-header-row {
+    .conversation-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 16px 10px;
+    }
+
+    .conversation-toolbar-primary,
+    .conversation-toolbar-actions {
+        width: 100%;
+    }
+
+    .conversation-toolbar-primary {
+        align-items: flex-start;
         flex-direction: column;
     }
 
-    .conversation-window-header-actions {
-        width: 100%;
+    .conversation-toolbar-actions {
         justify-content: stretch;
     }
 
@@ -1650,18 +1667,8 @@ fieldset legend {
         width: 100%;
     }
 
-    .conversation-window-header-library-row {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 10px;
-    }
-
     .empty-state {
-        padding: 28px 0 44px;
-    }
-
-    .conversation-window-header-actions .ui-button {
-        flex: 1 1 0;
+        padding: 36px 0 52px;
     }
 
     .history-overlay {

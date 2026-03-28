@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom"
-import { SiteHeader } from "@/components/SiteHeader"
+import { Link, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { useConversationStream } from "@/hooks/useConversationStream"
 import { HistoryConversationList } from "@/components/HistoryConversationList"
 import { HistorySermonList } from "@/components/HistorySermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
-import { PANEL_ACTION_BUTTON_CLASS } from "@/components/buttonClassNames"
+import {
+    PANEL_ACTION_BUTTON_CLASS,
+    WORKSPACE_ACTION_BUTTON_CLASS,
+} from "@/components/buttonClassNames"
 import {
     LibraryPanel,
     type LibraryScriptureItem,
@@ -909,15 +911,52 @@ export function ConversationsPage() {
 
     return (
         <div className="conversations-page">
-            <SiteHeader
-                title="Conversations"
-                links={[
-                    { label: "Home", to: "/" },
-                    ...(currentCongregation
-                        ? [{ label: "Admin", to: "/admin/congregation" }]
-                        : []),
-                ]}
-            />
+            <div className="conversation-toolbar">
+                <div className="conversation-toolbar-primary">
+                    <button
+                        type="button"
+                        className={WORKSPACE_ACTION_BUTTON_CLASS}
+                        onClick={() => setIsLibraryOpen((current) => !current)}
+                    >
+                        {isLibraryOpen ? "Close library" : "Open library"}
+                    </button>
+                    <div className="conversation-toolbar-context">
+                        <p className="conversation-toolbar-label">
+                            Bible study • sermon analysis
+                        </p>
+                        <p className="conversation-toolbar-title">
+                            {effectiveConversationTitle?.trim() ||
+                                effectiveConversationId ||
+                                "New Conversation"}
+                        </p>
+                    </div>
+                </div>
+                <div className="conversation-toolbar-actions">
+                    {currentCongregation ? (
+                        <span className="congregation-name">
+                            {currentCongregation.name}
+                        </span>
+                    ) : null}
+                    <Link className="header-control" to="/">
+                        Home
+                    </Link>
+                    {currentCongregation ? (
+                        <Link
+                            className="header-control"
+                            to="/admin/congregation"
+                        >
+                            Admin
+                        </Link>
+                    ) : null}
+                    <button
+                        type="button"
+                        className={PANEL_ACTION_BUTTON_CLASS}
+                        onClick={() => openHistory()}
+                    >
+                        Open history
+                    </button>
+                </div>
+            </div>
 
             <div
                 className={`main-layout conversation-workspace${
@@ -955,9 +994,6 @@ export function ConversationsPage() {
                     )}
 
                     <ConversationWindow
-                        conversationId={effectiveConversationId}
-                        conversationTitle={effectiveConversationTitle}
-                        isLibraryOpen={isLibraryOpen}
                         messages={messages}
                         events={conversationEvents}
                         streamingText={streamingText}
@@ -968,11 +1004,7 @@ export function ConversationsPage() {
                         onModelChange={setSelectedModel}
                         streamError={streamError}
                         lastUserMessageId={lastUserMessageId}
-                        onOpenHistory={() => openHistory()}
                         onRetry={handleRetry}
-                        onToggleLibrary={() =>
-                            setIsLibraryOpen((current) => !current)
-                        }
                     />
                 </div>
             </div>
