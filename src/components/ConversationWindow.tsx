@@ -1,7 +1,27 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import type { Message, ConversationEvent } from "@/types/api"
 import { MessageBubble } from "./MessageBubble"
 import { MessageInput } from "./MessageInput"
+
+type ThreadItem =
+    | { kind: "message"; data: Message }
+    | { kind: "event"; data: ConversationEvent }
+
+function buildThreadItems(
+    messages: Message[],
+    events: ConversationEvent[],
+): ThreadItem[] {
+    return [
+        ...messages.map((message) => ({
+            kind: "message" as const,
+            data: message,
+        })),
+        ...events.map((event) => ({
+            kind: "event" as const,
+            data: event,
+        })),
+    ].sort((a, b) => a.data.createdAt.localeCompare(b.data.createdAt))
+}
 
 interface ConversationWindowProps {
     messages: Message[]
@@ -43,20 +63,18 @@ export function ConversationWindow({
     const isEmpty =
         messages.length === 0 && events.length === 0 && !streamingText && !streamError
 
-    // Merge messages and events into a single chronological list
-    type Item =
-        | { kind: "message"; data: (typeof messages)[0] }
-        | { kind: "event"; data: (typeof events)[0] }
-
-    const items: Item[] = [
-        ...messages.map((m) => ({ kind: "message" as const, data: m })),
-        ...events.map((e) => ({ kind: "event" as const, data: e })),
-    ].sort((a, b) => a.data.createdAt.localeCompare(b.data.createdAt))
+    const items = useMemo(() => buildThreadItems(messages, events), [events, messages])
 
     return (
         <div className="conversation-window">
             <section className="messages-container" aria-label="Conversation thread">
-                <div className="messages-scroll-area">
+                <div
+                    className="messages-scroll-area"
+                    role="log"
+                    aria-live="polite"
+                    aria-relevant="additions text"
+                    aria-busy={isStreaming || isLoading}
+                >
                     {isEmpty ? (
                         <div className="empty-state">
                             Start a new conversation, attach study material, or open one from
@@ -83,7 +101,11 @@ export function ConversationWindow({
                             )}
 
                             {streamError && (
-                                <fieldset className="message-bubble error">
+                                <fieldset
+                                    className="message-bubble error"
+                                    role="status"
+                                    aria-live="polite"
+                                >
                                     <legend className="message-bubble-legend">Error</legend>
                                     <div className="message-text">{streamError}</div>
                                 </fieldset>
@@ -94,7 +116,7 @@ export function ConversationWindow({
                                     <legend className="message-bubble-legend">
                                         {selectedModel}
                                     </legend>
-                                    <div className="message-text">
+                                    <div className="message-text" aria-live="polite">
                                         {streamingText}
                                         <span className="cursor">▋</span>
                                     </div>

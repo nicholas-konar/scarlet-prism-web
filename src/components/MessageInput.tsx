@@ -1,6 +1,13 @@
 import { useRef, useState, useEffect } from "react"
 import { AVAILABLE_MODELS, ModelSelector } from "./ModelSelector"
 
+function resizeTextarea(textarea: HTMLTextAreaElement | null) {
+    if (!textarea) return
+
+    textarea.style.height = "auto"
+    textarea.style.height = Math.min(textarea.scrollHeight, 220) + "px"
+}
+
 interface MessageInputProps {
     onSubmit: (message: string) => Promise<void>
     isDisabled: boolean
@@ -20,39 +27,33 @@ export function MessageInput({
         AVAILABLE_MODELS.find((model) => model.id === selectedModel) ?? AVAILABLE_MODELS[0]
 
     useEffect(() => {
-        const textarea = textareaRef.current
-        if (textarea) {
-            textarea.style.height = "auto"
-            textarea.style.height = Math.min(textarea.scrollHeight, 220) + "px"
-        }
+        resizeTextarea(textareaRef.current)
     }, [message])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const submitMessage = async () => {
         if (message.trim() && !isDisabled) {
             await onSubmit(message)
             setMessage("")
-            if (textareaRef.current) {
-                textareaRef.current.style.height = "auto"
-            }
+            resizeTextarea(textareaRef.current)
         }
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === "Enter" && !e.shiftKey && !isDisabled) {
-            e.preventDefault()
-            handleSubmit(e as unknown as React.FormEvent)
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault()
+        await submitMessage()
+    }
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === "Enter" && !event.shiftKey && !isDisabled) {
+            event.preventDefault()
+            event.currentTarget.form?.requestSubmit()
         }
     }
 
     return (
         <form onSubmit={handleSubmit} className="message-input-form-wrapper">
-            <div
-                className="message-input-form"
-                onClick={() => textareaRef.current?.focus()}
-                role="group"
-                aria-label="Prompt composer"
-            >
+            <fieldset className="message-input-form">
+                <legend className="visually-hidden">Prompt composer</legend>
                 <div className="message-input-toolbar">
                     <div className="message-input-model-block">
                         <p className="message-input-toolbar-label">Model</p>
@@ -70,11 +71,13 @@ export function MessageInput({
                 <div className="message-input-textarea-shell">
                     <textarea
                         ref={textareaRef}
+                        name="message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Ask a Bible study question, compare sermons, or outline the next discussion."
                         aria-label="Message"
+                        autoComplete="off"
                         disabled={isDisabled}
                         rows={1}
                     />
@@ -96,7 +99,7 @@ export function MessageInput({
                         </button>
                     </div>
                 </div>
-            </div>
+            </fieldset>
         </form>
     )
 }

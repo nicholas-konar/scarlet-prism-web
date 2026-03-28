@@ -45,6 +45,7 @@ export function HistoryConversationList({
                     conversations.map((conv, index) => (
                         <button
                             key={conv.id}
+                            type="button"
                             className={`list-item ${
                                 selectedId === conv.id ? "selected" : ""
                             }`}
@@ -70,7 +71,12 @@ export function HistoryConversationList({
             </div>
 
             <div className="list-footer">
-                <button className="new-conversation-btn" onClick={onNewConversation} disabled={isLoading}>
+                <button
+                    type="button"
+                    className="new-conversation-btn"
+                    onClick={onNewConversation}
+                    disabled={isLoading}
+                >
                     [+ new conversation]
                 </button>
             </div>

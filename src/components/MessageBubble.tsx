@@ -14,6 +14,7 @@ export function MessageBubble({ message, showRetry, onRetry }: MessageBubbleProp
             <div className="message-with-retry">
                 {showRetry && (
                     <button
+                        type="button"
                         className="retry-button"
                         onClick={onRetry}
                         aria-label="Retry AI response"

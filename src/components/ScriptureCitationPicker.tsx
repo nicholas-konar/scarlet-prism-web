@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import type { BibleTranslation, ScriptureCitationInput } from "@/types/api"
 import {
     getScriptureBookName,
@@ -21,6 +21,13 @@ type ScriptureCitationPickerProps = {
     defaultTranslationId: string
     disabled?: boolean
     onAdd: (citation: PendingScriptureCitation) => void
+}
+
+type ValidationField = "book" | "chapter" | "startVerse" | "endVerse"
+
+type ValidationState = {
+    field: ValidationField
+    message: string
 }
 
 function formatCitationLabel(
@@ -57,16 +64,33 @@ export function ScriptureCitationPicker({
     disabled,
     onAdd,
 }: ScriptureCitationPickerProps) {
+    const bookSelectRef = useRef<HTMLSelectElement>(null)
+    const chapterSelectRef = useRef<HTMLSelectElement>(null)
+    const startVerseSelectRef = useRef<HTMLSelectElement>(null)
+    const endVerseSelectRef = useRef<HTMLSelectElement>(null)
     const [translationId, setTranslationId] = useState(defaultTranslationId)
     const [bookId, setBookId] = useState("")
     const [chapterInput, setChapterInput] = useState("")
     const [startVerseInput, setStartVerseInput] = useState("")
     const [endVerseInput, setEndVerseInput] = useState("")
-    const [validationMessage, setValidationMessage] = useState<string | null>(null)
+    const [validation, setValidation] = useState<ValidationState | null>(null)
 
     useEffect(() => {
         setTranslationId(defaultTranslationId)
     }, [defaultTranslationId])
+
+    useEffect(() => {
+        if (!validation) return
+
+        const fieldRefs = {
+            book: bookSelectRef,
+            chapter: chapterSelectRef,
+            startVerse: startVerseSelectRef,
+            endVerse: endVerseSelectRef,
+        }
+
+        fieldRefs[validation.field].current?.focus()
+    }, [validation])
 
     const chapter = useMemo(
         () => parsePositiveNumber(chapterInput),
@@ -98,30 +122,45 @@ export function ScriptureCitationPicker({
         setChapterInput("")
         setStartVerseInput("")
         setEndVerseInput("")
-        setValidationMessage(null)
+        setValidation(null)
+    }
+
+    function clearValidation() {
+        setValidation(null)
+    }
+
+    function applyValidation(field: ValidationField, message: string) {
+        setValidation({ field, message })
     }
 
     function handleAddCitation() {
-        if (!bookId || chapter === null) {
-            setValidationMessage("Select a book and enter a chapter.")
+        if (!bookId) {
+            applyValidation("book", "Select a book and enter a chapter.")
+            return
+        }
+
+        if (chapter === null) {
+            applyValidation("chapter", "Select a book and enter a chapter.")
             return
         }
 
         if (startVerse === null && endVerse !== null) {
-            setValidationMessage(
+            applyValidation(
+                "startVerse",
                 "Choose a start verse before adding an end verse.",
             )
             return
         }
 
         if (startVerse !== null && endVerse !== null && endVerse < startVerse) {
-            setValidationMessage(
+            applyValidation(
+                "endVerse",
                 "End verse must be greater than or equal to the start verse.",
             )
             return
         }
 
-        setValidationMessage(null)
+        clearValidation()
 
         onAdd({
             translationId,
@@ -141,14 +180,17 @@ export function ScriptureCitationPicker({
                 <label className="form-field">
                     <span>Book</span>
                     <select
+                        ref={bookSelectRef}
                         value={bookId}
                         onChange={(event) => {
                             setBookId(event.target.value)
                             setChapterInput("")
                             setStartVerseInput("")
                             setEndVerseInput("")
-                            setValidationMessage(null)
+                            clearValidation()
                         }}
+                        aria-invalid={validation?.field === "book"}
+                        aria-describedby={validation ? "scripture-picker-validation" : undefined}
                         disabled={disabled}
                     >
                         <option value="">Select book</option>
@@ -162,13 +204,16 @@ export function ScriptureCitationPicker({
                 <label className="form-field">
                     <span>Chapter</span>
                     <select
+                        ref={chapterSelectRef}
                         value={chapterInput}
                         onChange={(event) => {
                             setChapterInput(event.target.value)
                             setStartVerseInput("")
                             setEndVerseInput("")
-                            setValidationMessage(null)
+                            clearValidation()
                         }}
+                        aria-invalid={validation?.field === "chapter"}
+                        aria-describedby={validation ? "scripture-picker-validation" : undefined}
                         disabled={disabled || !bookId}
                     >
                         <option value="">Select chapter</option>
@@ -185,14 +230,17 @@ export function ScriptureCitationPicker({
                 <label className="form-field">
                     <span>Start verse</span>
                     <select
+                        ref={startVerseSelectRef}
                         value={startVerseInput}
                         onChange={(event) => {
                             setStartVerseInput(event.target.value)
                             if (!event.target.value) {
                                 setEndVerseInput("")
                             }
-                            setValidationMessage(null)
+                            clearValidation()
                         }}
+                        aria-invalid={validation?.field === "startVerse"}
+                        aria-describedby={validation ? "scripture-picker-validation" : undefined}
                         disabled={disabled || !chapter}
                     >
                         <option value="">Optional</option>
@@ -207,11 +255,14 @@ export function ScriptureCitationPicker({
                 <label className="form-field">
                     <span>End verse</span>
                     <select
+                        ref={endVerseSelectRef}
                         value={endVerseInput}
                         onChange={(event) => {
                             setEndVerseInput(event.target.value)
-                            setValidationMessage(null)
+                            clearValidation()
                         }}
+                        aria-invalid={validation?.field === "endVerse"}
+                        aria-describedby={validation ? "scripture-picker-validation" : undefined}
                         disabled={disabled || !startVerseInput}
                     >
                         <option value="">Optional</option>
@@ -255,8 +306,15 @@ export function ScriptureCitationPicker({
                 )}
             </div>
 
-            {validationMessage && (
-                <p className="meta-copy">{validationMessage}</p>
+            {validation && (
+                <p
+                    id="scripture-picker-validation"
+                    className="meta-copy"
+                    role="status"
+                    aria-live="polite"
+                >
+                    {validation.message}
+                </p>
             )}
         </div>
     )
