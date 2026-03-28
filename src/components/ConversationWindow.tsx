@@ -140,8 +140,8 @@ export function ConversationWindow({
 
     return (
         <div className="conversation-window">
-            <section className="messages-container panel-shell" aria-label="Conversation thread">
-                <div className="panel-header panel-header-row">
+            <div className="conversation-window-header">
+                <div className="conversation-window-header-row">
                     <div className="conversation-window-header-copy">
                         <p className="panel-eyebrow">Bible study • sermon analysis</p>
                         <h2 className="panel-title">{displayedConversationTitle}</h2>
@@ -171,6 +171,8 @@ export function ConversationWindow({
                         </button>
                     </div>
                 </div>
+            </div>
+            <section className="messages-container" aria-label="Conversation thread">
                 <div className="messages-scroll-area">
                     {isEmpty ? (
                         <div className="empty-state">
