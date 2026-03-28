@@ -68,9 +68,39 @@ export function ConversationToolbar({
                     </span>
                 </button>
                 <div className="conversation-toolbar-context">
-                    <p className="conversation-toolbar-label">
-                        Bible study • sermon analysis
-                    </p>
+                    <div className="conversation-toolbar-meta">
+                        {currentCongregationId && currentCongregationName ? (
+                            <Link
+                                className="conversation-toolbar-congregation conversation-toolbar-congregation-link"
+                                to={`/congregations/${currentCongregationId}`}
+                            >
+                                <span
+                                    className="conversation-toolbar-congregation-mark"
+                                    aria-hidden="true"
+                                >
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M10.85 3h2.3v6.15h4.45v2.2h-4.45V21h-2.3v-9.65H6.4v-2.2h4.45z" />
+                                    </svg>
+                                </span>
+                                {currentCongregationName}
+                            </Link>
+                        ) : currentCongregationName ? (
+                            <p className="conversation-toolbar-congregation">
+                                <span
+                                    className="conversation-toolbar-congregation-mark"
+                                    aria-hidden="true"
+                                >
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M10.85 3h2.3v6.15h4.45v2.2h-4.45V21h-2.3v-9.65H6.4v-2.2h4.45z" />
+                                    </svg>
+                                </span>
+                                {currentCongregationName}
+                            </p>
+                        ) : null}
+                        <p className="conversation-toolbar-label">
+                            Bible study • sermon analysis
+                        </p>
+                    </div>
                     <h1 className="conversation-toolbar-title">{conversationTitle}</h1>
                 </div>
             </div>

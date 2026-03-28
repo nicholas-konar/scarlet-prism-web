@@ -431,28 +431,115 @@ fieldset legend {
 
 .conversation-toolbar-context {
     display: grid;
-    gap: 3px;
+    gap: 8px;
+    flex: 1 1 auto;
     min-width: 0;
+    padding: 3px 0 2px;
+}
+
+.conversation-toolbar-meta {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.conversation-toolbar-congregation {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 5px 10px 5px 12px;
+    border: 1px solid rgba(128, 107, 80, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 251, 245, 0.84);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    font-size: 10px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #5c5246;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversation-toolbar-congregation-link {
+    text-decoration: none;
+    transition:
+        border-color 180ms ease,
+        background-color 180ms ease,
+        box-shadow 180ms ease,
+        color 160ms ease,
+        transform 160ms ease;
+}
+
+.conversation-toolbar-congregation-link:hover,
+.conversation-toolbar-congregation-link:focus-visible {
+    border-color: rgba(128, 107, 80, 0.26);
+    background: rgba(255, 255, 252, 0.92);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        0 6px 16px rgba(88, 67, 40, 0.05);
+    color: #43382d;
+    transform: translateY(-1px);
+}
+
+.conversation-toolbar-congregation-link:hover .conversation-toolbar-congregation-mark,
+.conversation-toolbar-congregation-link:focus-visible .conversation-toolbar-congregation-mark {
+    color: #755733;
+    transform: scale(1.04);
+}
+
+.conversation-toolbar-congregation-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    color: #8d6c46;
+    transition:
+        color 160ms ease,
+        transform 160ms ease;
+}
+
+.conversation-toolbar-congregation-mark svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
 }
 
 .conversation-toolbar-label {
     margin: 0;
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
     font-size: 10px;
     line-height: 1;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: #6d6659;
+    letter-spacing: 0.18em;
+    color: #817668;
 }
 
 .conversation-toolbar-title {
     margin: 0;
-    font-size: 16px;
-    line-height: 1.15;
-    color: #231d16;
-    white-space: nowrap;
+    max-width: 32ch;
+    font-size: clamp(20px, 1.55vw, 25px);
+    line-height: 1.08;
+    font-weight: 600;
+    letter-spacing: -0.026em;
+    color: #241d15;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+    display: -webkit-box;
     overflow: hidden;
-    text-overflow: ellipsis;
-    text-wrap: balance;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    text-wrap: pretty;
 }
 
 .conversation-toolbar-button,
@@ -2197,6 +2284,11 @@ fieldset legend {
     .conversation-toolbar-primary {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .conversation-toolbar-context {
+        width: 100%;
+        padding: 6px 0 0;
     }
 
     .conversation-toolbar-actions {
