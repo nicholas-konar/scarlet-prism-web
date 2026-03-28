@@ -119,6 +119,94 @@ fieldset legend {
     color: #000;
 }
 
+.ui-button--workspace-primary,
+.ui-button--workspace-secondary,
+.ui-button--workspace-nav {
+    border-color: rgba(120, 104, 81, 0.26);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 242, 234, 0.94) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+    transition:
+        border-color 220ms ease,
+        background-color 160ms ease,
+        background 160ms ease,
+        box-shadow 220ms ease,
+        transform 180ms ease;
+}
+
+.ui-button--workspace-primary {
+    padding: 10px 14px;
+    color: #231d16;
+}
+
+.ui-button--workspace-secondary {
+    padding: 9px 12px;
+    color: #4f473b;
+}
+
+.ui-button--workspace-nav {
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #575044;
+}
+
+.ui-button--workspace-primary:hover:not(:disabled),
+.ui-button--workspace-primary:focus-visible {
+    border-color: rgba(98, 80, 58, 0.72);
+    background: var(--surface-paper-rich-dark);
+    color: #f8f4ee;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 248, 236, 0.12),
+        0 8px 18px rgba(82, 63, 35, 0.14);
+}
+
+.ui-button--workspace-primary:active:not(:disabled) {
+    border-color: rgba(88, 72, 54, 0.82);
+    box-shadow:
+        inset 0 2px 4px rgba(28, 22, 17, 0.24),
+        inset 0 1px 0 rgba(255, 248, 236, 0.08);
+    transform: none;
+}
+
+.ui-button--workspace-secondary:hover:not(:disabled),
+.ui-button--workspace-secondary:focus-visible {
+    border-color: rgba(92, 76, 58, 0.42);
+    background:
+        linear-gradient(180deg, rgba(100, 85, 69, 0.18) 0%, rgba(72, 60, 49, 0.22) 100%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 237, 226, 0.9) 100%);
+    color: #2b241d;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.58),
+        0 6px 14px rgba(82, 63, 35, 0.1);
+}
+
+.ui-button--workspace-secondary:active:not(:disabled) {
+    border-color: rgba(92, 76, 58, 0.5);
+    box-shadow:
+        inset 0 2px 4px rgba(82, 63, 35, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    transform: none;
+}
+
+.ui-button--workspace-nav:hover:not(:disabled),
+.ui-button--workspace-nav:focus-visible {
+    border-color: rgba(120, 104, 81, 0.34);
+    background:
+        linear-gradient(180deg, rgba(246, 239, 228, 0.94) 0%, rgba(237, 227, 212, 0.9) 100%);
+    color: #2f2821;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.54),
+        0 4px 12px rgba(82, 63, 35, 0.08);
+}
+
+.ui-button--workspace-nav:active:not(:disabled) {
+    border-color: rgba(120, 104, 81, 0.42);
+    box-shadow:
+        inset 0 2px 4px rgba(82, 63, 35, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.36);
+    transform: none;
+}
+
 .ui-button--subtle {
     background: rgba(255, 255, 255, 0.9);
     background-color: rgba(255, 255, 255, 0.9);

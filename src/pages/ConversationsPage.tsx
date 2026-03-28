@@ -7,7 +7,9 @@ import { HistorySermonList } from "@/components/HistorySermonList"
 import { ConversationWindow } from "@/components/ConversationWindow"
 import {
     PANEL_ACTION_BUTTON_CLASS,
-    WORKSPACE_ACTION_BUTTON_CLASS,
+    WORKSPACE_NAV_BUTTON_CLASS,
+    WORKSPACE_PRIMARY_BUTTON_CLASS,
+    WORKSPACE_SECONDARY_BUTTON_CLASS,
 } from "@/components/buttonClassNames"
 import {
     LibraryPanel,
@@ -915,7 +917,7 @@ export function ConversationsPage() {
                 <div className="conversation-toolbar-primary">
                     <button
                         type="button"
-                        className={WORKSPACE_ACTION_BUTTON_CLASS}
+                        className={WORKSPACE_PRIMARY_BUTTON_CLASS}
                         onClick={() => setIsLibraryOpen((current) => !current)}
                     >
                         {isLibraryOpen ? "Close library" : "Open library"}
@@ -937,12 +939,12 @@ export function ConversationsPage() {
                             {currentCongregation.name}
                         </span>
                     ) : null}
-                    <Link className="header-control" to="/">
+                    <Link className={WORKSPACE_NAV_BUTTON_CLASS} to="/">
                         Home
                     </Link>
                     {currentCongregation ? (
                         <Link
-                            className="header-control"
+                            className={WORKSPACE_NAV_BUTTON_CLASS}
                             to="/admin/congregation"
                         >
                             Admin
@@ -950,7 +952,7 @@ export function ConversationsPage() {
                     ) : null}
                     <button
                         type="button"
-                        className={PANEL_ACTION_BUTTON_CLASS}
+                        className={WORKSPACE_SECONDARY_BUTTON_CLASS}
                         onClick={() => openHistory()}
                     >
                         Open history
