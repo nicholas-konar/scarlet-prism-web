@@ -3,21 +3,12 @@ import {
     ITEM_ACTION_BUTTON_CLASS,
     PANEL_ACTION_BUTTON_CLASS,
 } from "./buttonClassNames"
+import type {
+    LibraryScriptureItem,
+    LibrarySermonItem,
+} from "@/pages/conversations/models"
 
-export type LibrarySermonItem = {
-    key: string
-    label: string
-    recordedOn?: string | null
-    speaker?: string | null
-    onDetach?: () => void
-}
-
-export type LibraryScriptureItem = {
-    key: string
-    label: string
-    source: string
-    onDetach?: () => void
-}
+export type { LibraryScriptureItem, LibrarySermonItem }
 
 interface LibraryPanelProps {
     sermons: LibrarySermonItem[]

@@ -1,11 +1,7 @@
-type ScriptureListItem = {
-    key: string
-    label: string
-    meta?: string
-}
+import type { HistoryScriptureItem } from "@/pages/conversations/models"
 
 interface ScriptureListProps {
-    scriptures: ScriptureListItem[]
+    scriptures: HistoryScriptureItem[]
     eyebrow?: string | null
 }
 
