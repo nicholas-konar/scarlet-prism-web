@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react"
+import { CORE_ACTION_BUTTON_CLASS } from "@/components/buttonClassNames"
 import { AVAILABLE_MODELS, ModelSelector } from "./ModelSelector"
 
 function resizeTextarea(textarea: HTMLTextAreaElement | null) {
@@ -92,7 +93,7 @@ export function MessageInput({
                         </p>
                         <button
                             type="submit"
-                            className="message-input-submit"
+                            className={`message-input-submit ${CORE_ACTION_BUTTON_CLASS}`}
                             disabled={isDisabled || !message.trim()}
                         >
                             Send message

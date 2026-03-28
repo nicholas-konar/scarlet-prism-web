@@ -335,6 +335,41 @@ fieldset legend {
     border: 0;
 }
 
+.ui-button--core-action {
+    padding: 11px 16px;
+    border-color: rgba(98, 80, 58, 0.36);
+    background: var(--surface-paper-rich-dark);
+    color: #f8f4ee;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 246, 232, 0.1),
+        0 10px 22px rgba(82, 63, 35, 0.09);
+    transition:
+        filter 220ms ease,
+        opacity 220ms ease,
+        border-color 220ms ease,
+        box-shadow 220ms ease,
+        color 0s linear;
+}
+
+.ui-button--core-action:hover:not(:disabled),
+.ui-button--core-action:focus-visible {
+    filter: brightness(1.04);
+    color: #f8f4ee;
+}
+
+.ui-button--core-action:active:not(:disabled) {
+    filter: brightness(0.98);
+    color: #f8f4ee;
+}
+
+.ui-button--core-action:disabled {
+    opacity: 0.58;
+    cursor: default;
+}
+
 /* ===== Conversations Page ===== */
 
 .conversations-page {
@@ -351,8 +386,13 @@ fieldset legend {
     gap: 18px;
     flex-shrink: 0;
     padding: 12px 24px 10px;
-    border-bottom: 1px solid rgba(120, 104, 81, 0.16);
-    background: var(--surface-workspace-shell-background);
+    border-bottom: 1px solid rgba(120, 104, 81, 0.18);
+    background:
+        radial-gradient(120% 160% at 50% 0%, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0) 52%),
+        linear-gradient(180deg, rgba(252, 249, 242, 0.98) 0%, rgba(239, 231, 218, 0.96) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.78),
+        inset 0 -1px 0 rgba(102, 82, 58, 0.08);
 }
 
 .conversation-toolbar-primary,
@@ -366,6 +406,21 @@ fieldset legend {
 .conversation-toolbar-actions {
     justify-content: flex-end;
     flex-wrap: wrap;
+    gap: 10px;
+}
+
+.conversation-toolbar-nav-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 6px;
+    border: 1px solid rgba(128, 110, 84, 0.2);
+    border-radius: 14px;
+    background: rgba(255, 252, 247, 0.58);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.76),
+        0 10px 24px rgba(82, 63, 35, 0.06);
 }
 
 .conversation-toolbar-context {
@@ -385,12 +440,252 @@ fieldset legend {
 
 .conversation-toolbar-title {
     margin: 0;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.15;
     color: #231d16;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-wrap: balance;
+}
+
+.conversation-toolbar-button,
+.conversation-toolbar-library-toggle {
+    position: relative;
+    min-height: 38px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.conversation-toolbar-button {
+    padding: 9px 14px;
+    border-color: rgba(118, 98, 73, 0.22);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(244, 236, 223, 0.94) 100%);
+    color: #473d31;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.76),
+        inset 0 -1px 0 rgba(120, 99, 72, 0.08),
+        0 8px 18px rgba(82, 63, 35, 0.07);
+    transition:
+        border-color 220ms ease,
+        background 220ms ease,
+        box-shadow 220ms ease,
+        color 160ms ease,
+        transform 180ms ease;
+}
+
+.conversation-toolbar-nav-group .conversation-toolbar-button {
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        inset 0 -1px 0 rgba(120, 99, 72, 0.08);
+}
+
+.conversation-toolbar-button:hover:not(:disabled),
+.conversation-toolbar-button:focus-visible {
+    border-color: rgba(106, 87, 62, 0.42);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 227, 211, 0.96) 100%);
+    color: #241d16;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        inset 0 -1px 0 rgba(120, 99, 72, 0.12),
+        0 12px 24px rgba(82, 63, 35, 0.1);
+    transform: translateY(-1px);
+}
+
+.conversation-toolbar-button:active:not(:disabled) {
+    box-shadow:
+        inset 0 2px 4px rgba(82, 63, 35, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.34);
+    transform: translateY(0);
+}
+
+.conversation-toolbar-button--congregation {
+    max-width: min(28ch, 100%);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.conversation-toolbar-button--history {
+    padding-right: 24px;
+    border-radius: 10px 0 0 10px;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+    background:
+        linear-gradient(180deg, rgba(250, 245, 236, 0.98) 0%, rgba(237, 228, 213, 0.96) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.76),
+        inset 0 -1px 0 rgba(120, 99, 72, 0.08),
+        0 10px 24px rgba(82, 63, 35, 0.06);
+}
+
+.conversation-toolbar-button--history:hover:not(:disabled),
+.conversation-toolbar-button--history:focus-visible {
+    background:
+        linear-gradient(180deg, rgba(255, 249, 240, 0.98) 0%, rgba(232, 220, 201, 0.96) 100%);
+}
+
+.conversation-toolbar-library-toggle {
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 10px 18px 11px;
+    min-width: 184px;
+    min-height: 52px;
+    border-radius: 15px;
+    text-align: left;
+    isolation: isolate;
+    transition:
+        filter 300ms ease,
+        opacity 300ms ease,
+        border-color 300ms ease,
+        background 300ms ease,
+        box-shadow 300ms ease,
+        color 300ms ease,
+        transform 220ms ease;
+}
+
+.conversation-toolbar-library-toggle::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background:
+        linear-gradient(180deg, rgba(255, 245, 228, 0.08) 0%, rgba(255, 245, 228, 0) 38%),
+        radial-gradient(80% 100% at 0% 0%, rgba(255, 232, 194, 0.12) 0%, rgba(255, 232, 194, 0) 68%);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.conversation-toolbar-library-toggle-copy {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 5px;
+    width: 100%;
+}
+
+.conversation-toolbar-library-toggle-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 9px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(244, 233, 218, 0.74);
+}
+
+.conversation-toolbar-library-toggle-kicker-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(241, 205, 143, 0.8);
+    box-shadow:
+        0 0 0 3px rgba(241, 205, 143, 0.12),
+        0 0 12px rgba(241, 205, 143, 0.24);
+    transition:
+        background-color 300ms ease,
+        box-shadow 300ms ease,
+        transform 220ms ease;
+}
+
+.conversation-toolbar-library-toggle-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.conversation-toolbar-library-toggle-title {
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: #f8f4ee;
+}
+
+.conversation-toolbar-library-toggle,
+.conversation-toolbar-library-toggle[data-open="true"],
+.conversation-toolbar-library-toggle[data-open="false"] {
+    border-color: rgba(112, 92, 68, 0.58);
+    background:
+        radial-gradient(140% 150% at 14% 0%, rgba(255, 239, 212, 0.18) 0%, rgba(255, 239, 212, 0) 42%),
+        linear-gradient(135deg, rgba(170, 139, 96, 0.16) 0%, rgba(170, 139, 96, 0) 44%),
+        linear-gradient(180deg, #655444 0%, #4c4135 50%, #393129 100%);
+    color: #f8f4ee;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 247, 230, 0.12),
+        inset 0 -1px 0 rgba(26, 20, 16, 0.28),
+        0 12px 24px rgba(70, 52, 31, 0.15),
+        0 0 0 1px rgba(255, 244, 222, 0.04);
+    filter: none;
+}
+
+.conversation-toolbar-library-toggle[data-open="true"] {
+    border-color: rgba(166, 136, 91, 0.72);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 247, 230, 0.16),
+        inset 0 -1px 0 rgba(26, 20, 16, 0.28),
+        0 14px 26px rgba(70, 52, 31, 0.18),
+        0 0 0 1px rgba(242, 212, 158, 0.14);
+}
+
+.conversation-toolbar-library-toggle[data-open="true"] .conversation-toolbar-library-toggle-kicker-dot {
+    background: rgba(245, 215, 157, 0.96);
+    box-shadow:
+        0 0 0 3px rgba(245, 215, 157, 0.16),
+        0 0 16px rgba(245, 215, 157, 0.28);
+}
+
+.conversation-toolbar-library-toggle:hover:not(:disabled),
+.conversation-toolbar-library-toggle:focus-visible,
+.conversation-toolbar-library-toggle[data-open="true"]:hover:not(:disabled),
+.conversation-toolbar-library-toggle[data-open="true"]:focus-visible,
+.conversation-toolbar-library-toggle[data-open="false"]:hover:not(:disabled),
+.conversation-toolbar-library-toggle[data-open="false"]:focus-visible {
+    background:
+        radial-gradient(140% 150% at 14% 0%, rgba(255, 237, 206, 0.24) 0%, rgba(255, 237, 206, 0) 44%),
+        linear-gradient(135deg, rgba(191, 156, 107, 0.18) 0%, rgba(191, 156, 107, 0) 46%),
+        var(--surface-paper-rich-dark);
+    border-color: rgba(177, 147, 104, 0.76);
+    color: #f8f4ee;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 247, 230, 0.16),
+        inset 0 -1px 0 rgba(18, 14, 11, 0.28),
+        0 16px 30px rgba(70, 52, 31, 0.2),
+        0 0 0 1px rgba(244, 220, 180, 0.12);
+    transform: translateY(-1px);
+}
+
+.conversation-toolbar-library-toggle:hover:not(:disabled) .conversation-toolbar-library-toggle-kicker,
+.conversation-toolbar-library-toggle:focus-visible .conversation-toolbar-library-toggle-kicker,
+.conversation-toolbar-library-toggle[data-open="true"]:hover:not(:disabled) .conversation-toolbar-library-toggle-kicker,
+.conversation-toolbar-library-toggle[data-open="true"]:focus-visible .conversation-toolbar-library-toggle-kicker,
+.conversation-toolbar-library-toggle[data-open="false"]:hover:not(:disabled) .conversation-toolbar-library-toggle-kicker,
+.conversation-toolbar-library-toggle[data-open="false"]:focus-visible .conversation-toolbar-library-toggle-kicker {
+    color: rgba(248, 239, 225, 0.88);
+}
+
+.conversation-toolbar-library-toggle:hover:not(:disabled) .conversation-toolbar-library-toggle-kicker-dot,
+.conversation-toolbar-library-toggle:focus-visible .conversation-toolbar-library-toggle-kicker-dot,
+.conversation-toolbar-library-toggle[data-open="true"]:hover:not(:disabled) .conversation-toolbar-library-toggle-kicker-dot,
+.conversation-toolbar-library-toggle[data-open="true"]:focus-visible .conversation-toolbar-library-toggle-kicker-dot,
+.conversation-toolbar-library-toggle[data-open="false"]:hover:not(:disabled) .conversation-toolbar-library-toggle-kicker-dot,
+.conversation-toolbar-library-toggle[data-open="false"]:focus-visible .conversation-toolbar-library-toggle-kicker-dot {
+    background: rgba(245, 215, 157, 0.98);
+    box-shadow:
+        0 0 0 3px rgba(245, 215, 157, 0.16),
+        0 0 18px rgba(245, 215, 157, 0.34);
+    transform: scale(1.05);
+}
+
+.conversation-toolbar-library-toggle:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow:
+        inset 0 2px 6px rgba(18, 14, 11, 0.28),
+        inset 0 1px 0 rgba(255, 247, 230, 0.08),
+        0 10px 20px rgba(70, 52, 31, 0.16);
 }
 
 .header {
@@ -1185,12 +1480,6 @@ fieldset legend {
     cursor: not-allowed;
 }
 
-.congregation-name {
-    font-size: 12px;
-    padding: 2px 8px;
-    border: var(--border);
-}
-
 /* ===== Library Panel ===== */
 
 .library-panel {
@@ -1683,32 +1972,8 @@ fieldset legend {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(98, 80, 58, 0.36);
-    padding: 11px 16px;
     min-width: 132px;
-    background: var(--surface-paper-rich-dark);
-    color: #f8f4ee;
-    font-size: 11px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
     cursor: pointer;
-    transition:
-        filter 220ms ease,
-        transform 220ms ease,
-        opacity 220ms ease;
-}
-
-.message-input-submit:hover:not(:disabled),
-.message-input-submit:focus-visible {
-    filter: brightness(1.04);
-    transform: translateY(-1px);
-}
-
-.message-input-submit:disabled {
-    opacity: 0.58;
-    cursor: default;
-    transform: none;
 }
 
 /* ===== Mobile Responsive ===== */
@@ -1754,7 +2019,21 @@ fieldset legend {
     }
 
     .conversation-toolbar-actions {
-        justify-content: stretch;
+        justify-content: flex-start;
+    }
+
+    .conversation-toolbar-nav-group,
+    .conversation-toolbar-actions > button {
+        flex: 1 1 180px;
+    }
+
+    .conversation-toolbar-nav-group {
+        width: 100%;
+    }
+
+    .conversation-toolbar-button,
+    .conversation-toolbar-library-toggle {
+        width: 100%;
     }
 
     .message-input-toolbar {

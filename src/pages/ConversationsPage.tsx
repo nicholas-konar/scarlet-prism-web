@@ -421,6 +421,7 @@ export function ConversationsPage() {
         <main className="conversations-page">
             <ConversationToolbar
                 conversationTitle={conversationTitle}
+                currentCongregationId={currentCongregation?.id ?? null}
                 currentCongregationName={currentCongregation?.name ?? null}
                 isLibraryOpen={isLibraryOpen}
                 onOpenHistory={() => openHistory()}

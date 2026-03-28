@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom"
 import {
+    CORE_ACTION_BUTTON_CLASS,
     WORKSPACE_NAV_BUTTON_CLASS,
-    WORKSPACE_PRIMARY_BUTTON_CLASS,
-    WORKSPACE_SECONDARY_BUTTON_CLASS,
 } from "@/components/buttonClassNames"
 
 type ConversationToolbarProps = {
     conversationTitle: string
+    currentCongregationId?: string | null
     currentCongregationName?: string | null
     isLibraryOpen: boolean
     onOpenHistory: () => void
@@ -15,20 +15,39 @@ type ConversationToolbarProps = {
 
 export function ConversationToolbar({
     conversationTitle,
+    currentCongregationId,
     currentCongregationName,
     isLibraryOpen,
     onOpenHistory,
     onToggleLibrary,
 }: ConversationToolbarProps) {
+    const libraryLabel = isLibraryOpen ? "Close library" : "Open library"
+
     return (
         <header className="conversation-toolbar">
             <div className="conversation-toolbar-primary">
                 <button
                     type="button"
-                    className={WORKSPACE_PRIMARY_BUTTON_CLASS}
+                    className={`${CORE_ACTION_BUTTON_CLASS} conversation-toolbar-library-toggle`}
+                    data-open={isLibraryOpen ? "true" : "false"}
+                    aria-label={libraryLabel}
+                    aria-pressed={isLibraryOpen}
                     onClick={onToggleLibrary}
                 >
-                    {isLibraryOpen ? "Close library" : "Open library"}
+                    <span
+                        className="conversation-toolbar-library-toggle-copy"
+                        aria-hidden="true"
+                    >
+                        <span className="conversation-toolbar-library-toggle-kicker">
+                            <span className="conversation-toolbar-library-toggle-kicker-dot" />
+                            Study material
+                        </span>
+                        <span className="conversation-toolbar-library-toggle-row">
+                            <span className="conversation-toolbar-library-toggle-title">
+                                Library
+                            </span>
+                        </span>
+                    </span>
                 </button>
                 <div className="conversation-toolbar-context">
                     <p className="conversation-toolbar-label">
@@ -38,23 +57,33 @@ export function ConversationToolbar({
                 </div>
             </div>
             <div className="conversation-toolbar-actions">
-                {currentCongregationName ? (
-                    <span className="congregation-name">{currentCongregationName}</span>
-                ) : null}
-                <Link className={WORKSPACE_NAV_BUTTON_CLASS} to="/">
-                    Home
-                </Link>
-                {currentCongregationName ? (
+                <div className="conversation-toolbar-nav-group">
                     <Link
-                        className={WORKSPACE_NAV_BUTTON_CLASS}
-                        to="/admin/congregation"
+                        className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button`}
+                        to="/"
                     >
-                        Admin
+                        Home
                     </Link>
-                ) : null}
+                    {currentCongregationId && currentCongregationName ? (
+                        <Link
+                            className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--congregation`}
+                            to={`/congregations/${currentCongregationId}`}
+                        >
+                            {currentCongregationName}
+                        </Link>
+                    ) : null}
+                    {currentCongregationName ? (
+                        <Link
+                            className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button`}
+                            to="/admin/congregation"
+                        >
+                            Admin
+                        </Link>
+                    ) : null}
+                </div>
                 <button
                     type="button"
-                    className={WORKSPACE_SECONDARY_BUTTON_CLASS}
+                    className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--history`}
                     onClick={onOpenHistory}
                 >
                     Open history
