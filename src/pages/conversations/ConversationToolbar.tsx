@@ -76,16 +76,6 @@ export function ConversationToolbar({
             </div>
             <div className="conversation-toolbar-actions">
                 <div className="conversation-toolbar-nav-group">
-                    {currentCongregationId && currentCongregationName ? (
-                        <Link
-                            className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--congregation`}
-                            to={`/congregations/${currentCongregationId}`}
-                        >
-                            <span className="conversation-toolbar-button-label">
-                                {currentCongregationName}
-                            </span>
-                        </Link>
-                    ) : null}
                     <Link
                         className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--home`}
                         to="/"
@@ -98,6 +88,16 @@ export function ConversationToolbar({
                             to="/admin/congregation"
                         >
                             <span className="conversation-toolbar-button-label">Admin</span>
+                        </Link>
+                    ) : null}
+                    {currentCongregationId && currentCongregationName ? (
+                        <Link
+                            className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--congregation`}
+                            to={`/congregations/${currentCongregationId}`}
+                        >
+                            <span className="conversation-toolbar-button-label">
+                                {currentCongregationName}
+                            </span>
                         </Link>
                     ) : null}
                 </div>
