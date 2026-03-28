@@ -82,7 +82,9 @@ export function ConversationToolbar({
                                         <path d="M10.85 3h2.3v6.15h4.45v2.2h-4.45V21h-2.3v-9.65H6.4v-2.2h4.45z" />
                                     </svg>
                                 </span>
-                                {currentCongregationName}
+                                <span className="conversation-toolbar-congregation-text">
+                                    {currentCongregationName}
+                                </span>
                             </Link>
                         ) : currentCongregationName ? (
                             <p className="conversation-toolbar-congregation">
@@ -94,7 +96,9 @@ export function ConversationToolbar({
                                         <path d="M10.85 3h2.3v6.15h4.45v2.2h-4.45V21h-2.3v-9.65H6.4v-2.2h4.45z" />
                                     </svg>
                                 </span>
-                                {currentCongregationName}
+                                <span className="conversation-toolbar-congregation-text">
+                                    {currentCongregationName}
+                                </span>
                             </p>
                         ) : null}
                         <p className="conversation-toolbar-label">
