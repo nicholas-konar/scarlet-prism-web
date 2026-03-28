@@ -593,8 +593,9 @@ fieldset legend {
 
 .conversation-toolbar-library-toggle-row {
     display: flex;
-    align-items: baseline;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     width: 100%;
 }
 
@@ -603,6 +604,41 @@ fieldset legend {
     line-height: 1;
     letter-spacing: 0.02em;
     color: #f8f4ee;
+}
+
+.conversation-toolbar-library-toggle-indicator {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+.conversation-toolbar-library-toggle-indicator::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(245, 215, 157, 0.18) 0%, rgba(245, 215, 157, 0) 72%);
+    opacity: 0.72;
+    transition:
+        opacity 300ms ease,
+        transform 240ms ease,
+        filter 300ms ease;
+}
+
+.conversation-toolbar-library-toggle-icon {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    fill: rgba(252, 245, 234, 0.92);
+    transition:
+        fill 300ms ease,
+        filter 300ms ease,
+        transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .conversation-toolbar-library-toggle,
@@ -636,6 +672,20 @@ fieldset legend {
     box-shadow:
         0 0 0 3px rgba(245, 215, 157, 0.16),
         0 0 16px rgba(245, 215, 157, 0.28);
+}
+
+.conversation-toolbar-library-toggle[data-open="true"] .conversation-toolbar-library-toggle-indicator::before {
+    opacity: 0.92;
+    transform: scale(1.08);
+    filter: blur(1px);
+}
+
+.conversation-toolbar-library-toggle[data-open="true"] .conversation-toolbar-library-toggle-icon {
+    width: 19px;
+    height: 19px;
+    fill: #fff5e6;
+    filter: drop-shadow(0 3px 8px rgba(18, 12, 7, 0.12));
+    transform: translateY(-0.5px);
 }
 
 .conversation-toolbar-library-toggle:hover:not(:disabled),
@@ -678,6 +728,27 @@ fieldset legend {
         0 0 0 3px rgba(245, 215, 157, 0.16),
         0 0 18px rgba(245, 215, 157, 0.34);
     transform: scale(1.05);
+}
+
+.conversation-toolbar-library-toggle:hover:not(:disabled) .conversation-toolbar-library-toggle-indicator::before,
+.conversation-toolbar-library-toggle:focus-visible .conversation-toolbar-library-toggle-indicator::before,
+.conversation-toolbar-library-toggle[data-open="true"]:hover:not(:disabled) .conversation-toolbar-library-toggle-indicator::before,
+.conversation-toolbar-library-toggle[data-open="true"]:focus-visible .conversation-toolbar-library-toggle-indicator::before,
+.conversation-toolbar-library-toggle[data-open="false"]:hover:not(:disabled) .conversation-toolbar-library-toggle-indicator::before,
+.conversation-toolbar-library-toggle[data-open="false"]:focus-visible .conversation-toolbar-library-toggle-indicator::before {
+    opacity: 1;
+    transform: scale(1.12);
+}
+
+.conversation-toolbar-library-toggle:hover:not(:disabled) .conversation-toolbar-library-toggle-icon,
+.conversation-toolbar-library-toggle:focus-visible .conversation-toolbar-library-toggle-icon,
+.conversation-toolbar-library-toggle[data-open="true"]:hover:not(:disabled) .conversation-toolbar-library-toggle-icon,
+.conversation-toolbar-library-toggle[data-open="true"]:focus-visible .conversation-toolbar-library-toggle-icon,
+.conversation-toolbar-library-toggle[data-open="false"]:hover:not(:disabled) .conversation-toolbar-library-toggle-icon,
+.conversation-toolbar-library-toggle[data-open="false"]:focus-visible .conversation-toolbar-library-toggle-icon {
+    fill: #fff8ee;
+    filter: drop-shadow(0 4px 10px rgba(18, 12, 7, 0.16));
+    transform: translateY(-0.5px);
 }
 
 .conversation-toolbar-library-toggle:active:not(:disabled) {
