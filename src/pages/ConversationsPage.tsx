@@ -293,7 +293,9 @@ export function ConversationsPage() {
     const [isLoadingConversations, setIsLoadingConversations] = useState(true)
     const [isLoadingMessages, setIsLoadingMessages] = useState(false)
     const [apiError, setApiError] = useState<string | null>(null)
-    const [selectedModel] = useState(user?.defaultModelId || DEFAULT_MODEL_ID)
+    const [selectedModel, setSelectedModel] = useState(
+        user?.defaultModelId || DEFAULT_MODEL_ID,
+    )
     const [lastUserMessageId, setLastUserMessageId] = useState<string | null>(null)
     const [isLibraryOpen, setIsLibraryOpen] = useState(true)
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -963,6 +965,7 @@ export function ConversationsPage() {
                         onSendMessage={handleSendMessage}
                         isLoading={isLoadingMessages}
                         selectedModel={selectedModel}
+                        onModelChange={setSelectedModel}
                         streamError={streamError}
                         lastUserMessageId={lastUserMessageId}
                         onOpenHistory={() => openHistory()}

@@ -24,6 +24,7 @@ interface ConversationWindowProps {
     ) => Promise<void>
     isLoading: boolean
     selectedModel: string
+    onModelChange: (model: string) => void
     streamError: string | null
     lastUserMessageId: string | null
     onOpenHistory: () => void
@@ -42,6 +43,7 @@ export function ConversationWindow({
     onSendMessage,
     isLoading,
     selectedModel,
+    onModelChange,
     streamError,
     lastUserMessageId,
     onOpenHistory,
@@ -229,6 +231,8 @@ export function ConversationWindow({
             <MessageInput
                 onSubmit={onSendMessage}
                 isDisabled={isStreaming || isLoading}
+                selectedModel={selectedModel}
+                onModelChange={onModelChange}
             />
         </div>
     )
