@@ -425,6 +425,10 @@ fieldset legend {
         0 10px 22px rgba(82, 63, 35, 0.05);
 }
 
+.conversation-toolbar-nav-group .conversation-toolbar-button {
+    border-radius: 13px;
+}
+
 .conversation-toolbar-context {
     display: grid;
     gap: 3px;
@@ -517,8 +521,7 @@ fieldset legend {
     color: #2f271f;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.88),
-        inset 0 -1px 0 rgba(120, 99, 72, 0.08),
-        0 8px 18px rgba(82, 63, 35, 0.08);
+        inset 0 -1px 0 rgba(120, 99, 72, 0.08);
     transform: translateY(-1px);
 }
 
