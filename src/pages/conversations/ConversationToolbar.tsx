@@ -76,35 +76,55 @@ export function ConversationToolbar({
             </div>
             <div className="conversation-toolbar-actions">
                 <div className="conversation-toolbar-nav-group">
-                    <Link
-                        className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button`}
-                        to="/"
-                    >
-                        Home
-                    </Link>
                     {currentCongregationId && currentCongregationName ? (
                         <Link
                             className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--congregation`}
                             to={`/congregations/${currentCongregationId}`}
                         >
-                            {currentCongregationName}
+                            <span className="conversation-toolbar-button-label">
+                                {currentCongregationName}
+                            </span>
                         </Link>
                     ) : null}
+                    <Link
+                        className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--home`}
+                        to="/"
+                    >
+                        <span className="conversation-toolbar-button-label">Home</span>
+                    </Link>
                     {currentCongregationName ? (
                         <Link
-                            className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button`}
+                            className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--admin`}
                             to="/admin/congregation"
                         >
-                            Admin
+                            <span className="conversation-toolbar-button-label">Admin</span>
                         </Link>
                     ) : null}
                 </div>
                 <button
                     type="button"
                     className={`${WORKSPACE_NAV_BUTTON_CLASS} conversation-toolbar-button conversation-toolbar-button--history`}
+                    aria-label="Open history"
                     onClick={onOpenHistory}
                 >
-                    Open history
+                    <span className="conversation-toolbar-history-icon" aria-hidden="true">
+                        <svg
+                            className="conversation-toolbar-history-icon-svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.9"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M4 12a8 8 0 1 0 2.34-5.66" />
+                            <path d="M4 4v4h4" />
+                            <path d="M12 8v4l2.5 1.5" />
+                        </svg>
+                    </span>
+                    <span className="conversation-toolbar-history-copy">
+                        <span className="conversation-toolbar-history-label">History</span>
+                    </span>
                 </button>
             </div>
         </header>
