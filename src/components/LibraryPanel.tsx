@@ -18,7 +18,6 @@ type LibraryCollectionSectionProps = {
     title: string
     count: number
     countLabel: string
-    detail: string
     actionLabel?: string
     onAction?: () => void
     actionDisabled?: boolean
@@ -89,7 +88,6 @@ function LibraryCollectionSection({
     title,
     count,
     countLabel,
-    detail,
     actionLabel,
     onAction,
     actionDisabled,
@@ -103,11 +101,16 @@ function LibraryCollectionSection({
         <section className="library-section" aria-label={ariaLabel}>
             <div className="library-section-header">
                 <div className="library-section-heading">
-                    <div className="library-section-heading-copy">
+                    <div className="library-section-heading-row">
                         <p className="library-section-kicker">{title}</p>
-                        <h3>{formatCountLabel(count, countLabel)}</h3>
+                        <span
+                            className="library-section-count-badge"
+                            aria-label={formatCountLabel(count, countLabel)}
+                            title={formatCountLabel(count, countLabel)}
+                        >
+                            {count}
+                        </span>
                     </div>
-                    <p className="library-section-detail">{detail}</p>
                 </div>
                 <div className="library-section-actions">
                     {actionLabel && onAction ? (
@@ -325,7 +328,6 @@ export function LibraryPanel({
             title: "Sermons",
             count: sermons.length,
             countLabel: "sermon",
-            detail: "Bring in sermon context, then prune it when the thread narrows.",
             actionLabel: isAddingSermon ? "Cancel" : "Add sermon",
             onAction: onToggleSermonPicker,
             actionDisabled: !canAddSermon,
@@ -346,7 +348,6 @@ export function LibraryPanel({
             title: "Scriptures",
             count: scriptures.length,
             countLabel: "scripture",
-            detail: "Attach direct references or inherit them from sermons already in context.",
             actionLabel: isAddingScripture ? "Cancel" : "Add scripture",
             onAction: onToggleScripturePicker,
             actionDisabled: !canAddScripture,
@@ -434,7 +435,6 @@ export function LibraryPanel({
                                 title={section.title}
                                 count={section.count}
                                 countLabel={section.countLabel}
-                                detail={section.detail}
                                 actionLabel={section.actionLabel}
                                 onAction={section.onAction}
                                 actionDisabled={section.actionDisabled}
