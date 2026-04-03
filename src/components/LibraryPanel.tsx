@@ -28,9 +28,6 @@ type LibraryCollectionSectionProps = {
     children: ReactNode
 }
 
-const CLOSE_LIBRARY_ICON_PATH =
-    "M17.59 7.82 16.18 6.41 12 10.59 7.82 6.41 6.41 7.82 10.59 12 6.41 16.18 7.82 17.59 12 13.41 16.18 17.59 17.59 16.18 13.41 12z"
-
 interface LibraryPanelProps {
     sermons: LibrarySermonItem[]
     scriptures: LibraryScriptureItem[]
@@ -157,8 +154,8 @@ function LibraryModeTab({
             tabIndex={isActive ? 0 : -1}
             onClick={() => onClick(tab)}
         >
-            <span>{label}</span>
-            <span>{count}</span>
+            <span className="library-mode-tab-label">{label}</span>
+            <span className="library-mode-tab-count">{count}</span>
         </button>
     )
 }
@@ -408,11 +405,14 @@ export function LibraryPanel({
                             onClick={onClose}
                             aria-label="Close library"
                         >
-                            <span className="library-panel-close-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24">
-                                    <path d={CLOSE_LIBRARY_ICON_PATH} />
-                                </svg>
-                            </span>
+                            <svg
+                                className="library-panel-close-svg"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path d="M8 8l8 8" />
+                                <path d="M16 8l-8 8" />
+                            </svg>
                         </button>
                     ) : null}
                 </div>
