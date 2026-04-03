@@ -11,10 +11,9 @@ import {
     ScriptureCitationPicker,
     type PendingScriptureCitation,
 } from "@/components/ScriptureCitationPicker"
-import * as sermonsApi from "@/api/sermons"
-import * as scriptureApi from "@/api/scripture"
 import { getEffectiveBibleTranslationId } from "@/lib/scripture"
 import type { Conversation, Message, Sermon } from "@/types/api"
+import { conversationWorkspaceApi } from "./conversations/api"
 import { ConversationHistoryDrawer } from "./conversations/ConversationHistoryDrawer"
 import { ConversationSermonPicker } from "./conversations/ConversationSermonPicker"
 import { ConversationToolbar } from "./conversations/ConversationToolbar"
@@ -50,7 +49,7 @@ export function ConversationsPage() {
         sendMessage,
         reset: resetStream,
         error: streamError,
-    } = useConversationStream()
+    } = useConversationStream(conversationWorkspaceApi)
 
     const {
         conversations,
@@ -72,6 +71,7 @@ export function ConversationsPage() {
         currentCongregationId: currentCongregation?.id ?? null,
         isStreaming,
         newConversationId,
+        api: conversationWorkspaceApi,
         resetStream,
         selectedConversationId,
         streamError,
@@ -253,7 +253,7 @@ export function ConversationsPage() {
         if (!effectiveConversationId) return
 
         try {
-            const record = await sermonsApi.attachSermon(
+            const record = await conversationWorkspaceApi.attachSermon(
                 effectiveConversationId,
                 sermon.id,
             )
@@ -291,7 +291,7 @@ export function ConversationsPage() {
         if (!effectiveConversationId) return
 
         try {
-            await sermonsApi.detachSermon(
+            await conversationWorkspaceApi.detachSermon(
                 effectiveConversationId,
                 conversationSermonId,
             )
@@ -322,7 +322,7 @@ export function ConversationsPage() {
             }
 
             try {
-                await scriptureApi.attachScripture(effectiveConversationId, {
+                await conversationWorkspaceApi.attachScripture(effectiveConversationId, {
                     translationId: citation.translationId,
                     bookId: citation.bookId,
                     startChapter: citation.startChapter,
@@ -350,7 +350,7 @@ export function ConversationsPage() {
     ) {
         if (effectiveConversationId && conversationScriptureId) {
             try {
-                await scriptureApi.detachScripture(
+                await conversationWorkspaceApi.detachScripture(
                     effectiveConversationId,
                     conversationScriptureId,
                 )

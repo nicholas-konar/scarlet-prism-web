@@ -1,7 +1,4 @@
 import { useCallback, useEffect, useState } from "react"
-import * as conversationApi from "@/api/conversations"
-import * as sermonsApi from "@/api/sermons"
-import * as scriptureApi from "@/api/scripture"
 import type {
     BibleTranslation,
     Conversation,
@@ -10,11 +7,16 @@ import type {
     Message,
     Sermon,
 } from "@/types/api"
+import {
+    conversationWorkspaceApi,
+    type ConversationWorkspaceApi,
+} from "./api"
 
 type UseConversationWorkspaceDataArgs = {
     currentCongregationId: string | null
     isStreaming: boolean
     newConversationId: string | null
+    api?: ConversationWorkspaceApi
     resetStream: () => void
     selectedConversationId: string | null
     streamError: string | null
@@ -25,6 +27,7 @@ export function useConversationWorkspaceData({
     currentCongregationId,
     isStreaming,
     newConversationId,
+    api = conversationWorkspaceApi,
     resetStream,
     selectedConversationId,
     streamError,
@@ -52,36 +55,35 @@ export function useConversationWorkspaceData({
 
     const fetchMessages = useCallback(
         async (conversationId: string) => {
-            const response = await conversationApi.getConversationMessages(
-                conversationId,
-            )
+            const response = await api.getConversationMessages(conversationId)
             setMessages([...response.data].reverse())
             resetStream()
         },
-        [resetStream],
+        [api, resetStream],
     )
 
-    const fetchConversationSermons = useCallback(async (conversationId: string) => {
-        try {
-            const records = await sermonsApi.getConversationSermons(conversationId)
-            setAllConversationSermons(records)
-        } catch {
-            setAllConversationSermons([])
-        }
-    }, [])
+    const fetchConversationSermons = useCallback(
+        async (conversationId: string) => {
+            try {
+                const records = await api.getConversationSermons(conversationId)
+                setAllConversationSermons(records)
+            } catch {
+                setAllConversationSermons([])
+            }
+        },
+        [api],
+    )
 
     const fetchConversationScriptures = useCallback(
         async (conversationId: string) => {
             try {
-                const records = await scriptureApi.getConversationScriptures(
-                    conversationId,
-                )
+                const records = await api.getConversationScriptures(conversationId)
                 setAllConversationScriptures(records)
             } catch {
                 setAllConversationScriptures([])
             }
         },
-        [],
+        [api],
     )
 
     useEffect(() => {
@@ -89,7 +91,7 @@ export function useConversationWorkspaceData({
             try {
                 setIsLoadingConversations(true)
                 setApiError(null)
-                const response = await conversationApi.listConversations()
+                const response = await api.listConversations()
                 setConversations(response.data)
             } catch (error) {
                 const message =
@@ -101,14 +103,13 @@ export function useConversationWorkspaceData({
         }
 
         void load()
-    }, [])
+    }, [api])
 
     useEffect(() => {
-        scriptureApi
-            .listBibleTranslations()
+        api.listBibleTranslations()
             .then(setTranslations)
             .catch(() => setTranslations([]))
-    }, [])
+    }, [api])
 
     useEffect(() => {
         if (!currentCongregationId) {
@@ -116,11 +117,10 @@ export function useConversationWorkspaceData({
             return
         }
 
-        sermonsApi
-            .listSermons(currentCongregationId)
+        api.listSermons(currentCongregationId)
             .then((response) => setSermons(response.data))
             .catch(() => setSermons([]))
-    }, [currentCongregationId])
+    }, [api, currentCongregationId])
 
     useEffect(() => {
         if (!selectedConversationId) {
@@ -135,11 +135,12 @@ export function useConversationWorkspaceData({
         const load = async () => {
             try {
                 setIsLoadingMessages(true)
-                await Promise.all([
-                    fetchMessages(selectedConversationId),
-                    fetchConversationSermons(selectedConversationId),
-                    fetchConversationScriptures(selectedConversationId),
-                ])
+                const resources =
+                    await api.loadConversationResources(selectedConversationId)
+                setMessages(resources.messages)
+                setAllConversationSermons(resources.sermons)
+                setAllConversationScriptures(resources.scriptures)
+                resetStream()
             } catch (error) {
                 console.error("Failed to load conversation:", error)
             } finally {
@@ -149,11 +150,10 @@ export function useConversationWorkspaceData({
 
         void load()
     }, [
+        api,
         clearConversationResources,
-        fetchConversationScriptures,
-        fetchConversationSermons,
-        fetchMessages,
         isStreaming,
+        resetStream,
         selectedConversationId,
         streamError,
     ])

@@ -1,6 +1,9 @@
 import { useState, useCallback } from "react"
-import { streamConversation } from "@/api/conversations"
 import type { Message, ScriptureCitationInput } from "@/types/api"
+import {
+    conversationWorkspaceApi,
+    type ConversationWorkspaceApi,
+} from "@/pages/conversations/api"
 
 interface UseConversationStreamResult {
     streamingText: string
@@ -21,7 +24,9 @@ interface UseConversationStreamResult {
     reset: () => void
 }
 
-export function useConversationStream(): UseConversationStreamResult {
+export function useConversationStream(
+    api: Pick<ConversationWorkspaceApi, "streamConversation"> = conversationWorkspaceApi,
+): UseConversationStreamResult {
     const [streamingText, setStreamingText] = useState("")
     const [isStreaming, setIsStreaming] = useState(false)
     const [conversationId, setConversationId] = useState<string | null>(null)
@@ -53,7 +58,7 @@ export function useConversationStream(): UseConversationStreamResult {
             try {
                 let currentConversationId = _conversationId || conversationId || undefined
 
-                await streamConversation(
+                await api.streamConversation(
                     {
                         prompt,
                         modelId,
@@ -106,7 +111,7 @@ export function useConversationStream(): UseConversationStreamResult {
                 setIsStreaming(false)
             }
         },
-        [conversationId],
+        [api, conversationId],
     )
 
     return {
