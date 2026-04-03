@@ -22,6 +22,7 @@ export type ConversationWorkspaceResources = {
 }
 
 export interface ConversationWorkspaceApi {
+    initConversation: () => Promise<string>
     listConversations: (
         limit?: number,
         cursor?: string,
@@ -65,6 +66,7 @@ export interface ConversationWorkspaceApi {
 }
 
 export const conversationWorkspaceApi: ConversationWorkspaceApi = {
+    initConversation: conversationsApi.initConversation,
     listConversations: conversationsApi.listConversations,
     getConversationMessages: conversationsApi.getConversationMessages,
     streamConversation: conversationsApi.streamConversation,

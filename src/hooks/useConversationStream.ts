@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react"
-import type { Message, ScriptureCitationInput } from "@/types/api"
+import type { Message } from "@/types/api"
 import {
     conversationWorkspaceApi,
     type ConversationWorkspaceApi,
@@ -10,22 +10,24 @@ interface UseConversationStreamResult {
     isStreaming: boolean
     conversationId: string | null
     conversationTitle: string | null
+    ensureConversation: () => Promise<string>
     sendMessage: (
         prompt: string,
         modelId: string,
-        conversationId?: string,
+        conversationId: string,
         onMessageReceived?: (message: Message) => void,
         isRetry?: boolean,
         messageId?: string,
-        sermonIds?: string[],
-        scriptureCitations?: ScriptureCitationInput[],
     ) => Promise<void>
     error: string | null
     reset: () => void
 }
 
 export function useConversationStream(
-    api: Pick<ConversationWorkspaceApi, "streamConversation"> = conversationWorkspaceApi,
+    api: Pick<
+        ConversationWorkspaceApi,
+        "initConversation" | "streamConversation"
+    > = conversationWorkspaceApi,
 ): UseConversationStreamResult {
     const [streamingText, setStreamingText] = useState("")
     const [isStreaming, setIsStreaming] = useState(false)
@@ -40,31 +42,33 @@ export function useConversationStream(
         setError(null)
     }, [])
 
+    const ensureConversation = useCallback(async () => {
+        if (conversationId) {
+            return conversationId
+        }
+
+        return api.initConversation()
+    }, [api, conversationId])
+
     const sendMessage = useCallback(
         async (
             prompt: string,
             modelId: string,
-            _conversationId?: string,
+            currentConversationId: string,
             onMessageReceived?: (message: Message) => void,
             isRetry?: boolean,
             messageId?: string,
-            sermonIds?: string[],
-            scriptureCitations?: ScriptureCitationInput[],
         ) => {
             setError(null)
             setIsStreaming(true)
             setStreamingText("")
 
             try {
-                let currentConversationId = _conversationId || conversationId || undefined
-
                 await api.streamConversation(
                     {
                         prompt,
                         modelId,
                         conversationId: currentConversationId,
-                        sermonIds,
-                        scriptureCitations,
                         isRetry,
                         messageId,
                     },
@@ -74,17 +78,10 @@ export function useConversationStream(
 
                             // Server confirmed user message saved
                             if (event.conversationId && event.message) {
-                                currentConversationId = event.conversationId
                                 setConversationId(event.conversationId)
-                                if (typeof event.conversationTitle === "string") {
-                                    setConversationTitle(event.conversationTitle)
-                                }
                                 if (onMessageReceived) {
                                     onMessageReceived(event.message)
                                 }
-                            }
-                            else if (typeof event.conversationTitle === "string") {
-                                setConversationTitle(event.conversationTitle)
                             }
                             // AI response chunk
                             else if (event.delta) {
@@ -111,7 +108,7 @@ export function useConversationStream(
                 setIsStreaming(false)
             }
         },
-        [api, conversationId],
+        [api],
     )
 
     return {
@@ -119,6 +116,7 @@ export function useConversationStream(
         isStreaming,
         conversationId,
         conversationTitle,
+        ensureConversation,
         sendMessage,
         error,
         reset,

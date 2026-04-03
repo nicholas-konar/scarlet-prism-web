@@ -34,37 +34,29 @@ export async function getConversationMessages(
     })
 }
 
+export async function initConversation(): Promise<string> {
+    const response = await apiCall<{ id: string }>("/conversations/init", {
+        method: "POST",
+    })
+
+    return response.id
+}
+
 export async function streamConversation(
     data: ConversationRequest,
     onChunk: (chunk: string) => void,
 ): Promise<void> {
-    const endpoint = data.conversationId
-        ? `/conversations/${data.conversationId}`
-        : "/conversations"
-
-    // Strip conversationId from body since it goes in the URL for existing conversations
-    const body = data.conversationId
-        ? {
-              prompt: data.prompt,
-              modelId: data.modelId,
-              ...(data.isRetry && { isRetry: data.isRetry }),
-              ...(data.messageId && { messageId: data.messageId }),
-          }
-        : {
-              prompt: data.prompt,
-              modelId: data.modelId,
-              ...(data.sermonIds?.length && { sermonIds: data.sermonIds }),
-              ...(data.scriptureCitations?.length && {
-                  scriptureCitations: data.scriptureCitations,
-              }),
-          }
-
     return apiStream(
-        endpoint,
+        `/conversations/${data.conversationId}`,
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify({
+                prompt: data.prompt,
+                modelId: data.modelId,
+                ...(data.isRetry && { isRetry: data.isRetry }),
+                ...(data.messageId && { messageId: data.messageId }),
+            }),
         },
         onChunk,
     )

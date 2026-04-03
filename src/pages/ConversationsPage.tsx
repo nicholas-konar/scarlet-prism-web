@@ -22,7 +22,6 @@ import { useConversationDraftState } from "./conversations/useConversationDraftS
 import { useConversationHistoryDrawer } from "./conversations/useConversationHistoryDrawer"
 import { useConversationWorkspaceData } from "./conversations/useConversationWorkspaceData"
 import {
-    buildPendingScripturePayload,
     buildConversationEvents,
     buildHistoryScriptureItems,
     buildHistorySectionButtons,
@@ -46,6 +45,7 @@ export function ConversationsPage() {
         isStreaming,
         conversationId: newConversationId,
         conversationTitle: streamedConversationTitle,
+        ensureConversation,
         sendMessage,
         reset: resetStream,
         error: streamError,
@@ -66,7 +66,6 @@ export function ConversationsPage() {
         isLoadingMessages,
         apiError,
         clearConversationResources,
-        fetchConversationScriptures,
     } = useConversationWorkspaceData({
         currentCongregationId: currentCongregation?.id ?? null,
         isStreaming,
@@ -184,20 +183,63 @@ export function ConversationsPage() {
         setSearchParams({})
     }
 
+    async function attachSermonToConversation(
+        conversationId: string,
+        sermon: Sermon,
+    ) {
+        const record = await conversationWorkspaceApi.attachSermon(
+            conversationId,
+            sermon.id,
+        )
+
+        setAllConversationSermons((current) => [...current, { ...record, sermon }])
+    }
+
+    async function attachScriptureToConversation(
+        conversationId: string,
+        citation: PendingScriptureCitation,
+    ) {
+        const record = await conversationWorkspaceApi.attachScripture(
+            conversationId,
+            {
+                translationId: citation.translationId,
+                bookId: citation.bookId,
+                startChapter: citation.startChapter,
+                startVerse: citation.startVerse,
+                endVerse: citation.endVerse,
+            },
+        )
+
+        setAllConversationScriptures((current) => [...current, record])
+    }
+
     async function handleSendMessage(
         message: string,
         isRetry?: boolean,
         retryMessageId?: string,
     ) {
         try {
-            resetStream()
             setLastUserMessageId(null)
+            let conversationId = selectedConversationId || newConversationId || null
+
+            if (!conversationId && !isRetry) {
+                conversationId = await ensureConversation()
+
+                for (const citation of pendingUserScriptures) {
+                    await attachScriptureToConversation(conversationId, citation)
+                }
+
+                for (const sermonId of pendingSermonIds) {
+                    const sermon = sermons.find((item) => item.id === sermonId)
+                    if (!sermon) continue
+                    await attachSermonToConversation(conversationId, sermon)
+                }
+            }
 
             const tempMessageId =
                 isRetry && retryMessageId ? retryMessageId : `temp-${Date.now()}`
 
             if (!isRetry) {
-                const conversationId = newConversationId || selectedConversationId
                 const userMessage: Message = {
                     id: tempMessageId,
                     conversationId: conversationId || tempMessageId,
@@ -219,23 +261,23 @@ export function ConversationsPage() {
                 setLastUserMessageId(realMessage.id)
             }
 
-            const isNewConversation = !selectedConversationId && !newConversationId
-            const pendingScripturePayload =
-                buildPendingScripturePayload(pendingUserScriptures)
+            if (!conversationId) {
+                throw new Error(
+                    isRetry
+                        ? "Retry requires an existing conversation"
+                        : "Conversation initialization failed",
+                )
+            }
+
+            const confirmedConversationId = conversationId
 
             await sendMessage(
                 message,
                 selectedModel,
-                selectedConversationId || undefined,
+                confirmedConversationId,
                 onUserMessageSucceeded,
                 isRetry,
                 retryMessageId,
-                isNewConversation && pendingSermonIds.length > 0
-                    ? pendingSermonIds
-                    : undefined,
-                isNewConversation && pendingScripturePayload.length > 0
-                    ? pendingScripturePayload
-                    : undefined,
             )
         } catch (err) {
             console.error("Failed to send message:", err)
@@ -253,11 +295,7 @@ export function ConversationsPage() {
         if (!effectiveConversationId) return
 
         try {
-            const record = await conversationWorkspaceApi.attachSermon(
-                effectiveConversationId,
-                sermon.id,
-            )
-            setAllConversationSermons((current) => [...current, { ...record, sermon }])
+            await attachSermonToConversation(effectiveConversationId, sermon)
         } catch (err) {
             console.error("Failed to attach sermon:", err)
         }
@@ -322,14 +360,10 @@ export function ConversationsPage() {
             }
 
             try {
-                await conversationWorkspaceApi.attachScripture(effectiveConversationId, {
-                    translationId: citation.translationId,
-                    bookId: citation.bookId,
-                    startChapter: citation.startChapter,
-                    startVerse: citation.startVerse,
-                    endVerse: citation.endVerse,
-                })
-                await fetchConversationScriptures(effectiveConversationId)
+                await attachScriptureToConversation(
+                    effectiveConversationId,
+                    citation,
+                )
                 closePickers()
             } catch (err) {
                 console.error("Failed to attach scripture:", err)

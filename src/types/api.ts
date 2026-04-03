@@ -169,9 +169,7 @@ export interface PaginatedResponse<T> {
 export interface ConversationRequest {
     prompt: string
     modelId: string
-    conversationId?: string
-    sermonIds?: string[]
-    scriptureCitations?: ScriptureCitationInput[]
+    conversationId: string
     isRetry?: boolean
     messageId?: string
 }
