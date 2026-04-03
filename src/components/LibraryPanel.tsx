@@ -427,31 +427,6 @@ export function LibraryPanel({
                         aria-labelledby="library-panel-tab-library"
                         className="library-mode-view library-column"
                     >
-                        <section className="library-hero" aria-label="Library overview">
-                            <div className="library-hero-copy">
-                                <p className="library-hero-kicker">Workspace overview</p>
-                                <h3>Shape the context before you ask the next question.</h3>
-                                <p>
-                                    Build the conversation’s study set here, then switch
-                                    to Reader when you want the passages in full.
-                                </p>
-                            </div>
-                            <div className="library-hero-stats">
-                                <div>
-                                    <span>Attached sermons</span>
-                                    <strong>{sermons.length}</strong>
-                                </div>
-                                <div>
-                                    <span>Attached references</span>
-                                    <strong>{scriptures.length}</strong>
-                                </div>
-                                <div>
-                                    <span>Reader ready</span>
-                                    <strong>{readerMetrics.ready}</strong>
-                                </div>
-                            </div>
-                        </section>
-
                         {librarySections.map((section) => (
                             <LibraryCollectionSection
                                 key={section.key}
