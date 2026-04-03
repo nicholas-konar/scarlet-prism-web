@@ -1793,10 +1793,13 @@ fieldset legend {
 }
 
 .library-panel-header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+        "topbar"
+        "heading";
     gap: 16px;
-    align-items: flex-start;
+    align-items: start;
     padding: 20px 20px 18px;
     border-bottom: 1px solid rgba(120, 104, 81, 0.12);
     background:
@@ -1806,13 +1809,18 @@ fieldset legend {
 
 .library-panel-heading {
     display: grid;
-    gap: 10px;
+    grid-area: heading;
+    gap: 8px;
+    min-width: 0;
 }
 
-.library-panel-actions {
+.library-panel-topbar {
+    grid-area: topbar;
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
 }
 
 .library-panel-eyebrow {
@@ -1831,9 +1839,9 @@ fieldset legend {
 }
 
 .library-panel-description {
-    max-width: 26ch;
-    font-size: 13px;
-    line-height: 1.45;
+    max-width: 34ch;
+    font-size: 12px;
+    line-height: 1.5;
     color: #5a5146;
 }
 
@@ -1841,6 +1849,7 @@ fieldset legend {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .library-summary-strip span {
@@ -1858,17 +1867,25 @@ fieldset legend {
 
 .library-panel-body {
     min-height: 0;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    display: block;
     background:
         linear-gradient(180deg, rgba(248, 243, 235, 0.92) 0%, rgba(243, 235, 223, 0.84) 100%);
 }
 
 .library-mode-tabs {
+    flex: 1 1 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    padding: 14px 16px 0;
+    gap: 4px;
+    min-width: 0;
+    max-width: 304px;
+    padding: 4px;
+    border: 1px solid rgba(123, 105, 79, 0.14);
+    border-radius: 18px;
+    background: rgba(255, 251, 245, 0.56);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.78),
+        0 8px 18px rgba(82, 63, 35, 0.04);
 }
 
 .library-mode-tab {
@@ -1877,21 +1894,39 @@ fieldset legend {
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    padding: 12px 14px;
-    border: 1px solid rgba(120, 104, 81, 0.12);
-    border-radius: 18px;
-    background: rgba(255, 251, 245, 0.62);
+    padding: 12px 14px 12px 28px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: transparent;
     color: #665c4f;
     font-size: 11px;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
     transition:
         border-color 180ms ease,
         background-color 180ms ease,
         box-shadow 220ms ease,
         color 180ms ease,
+        transform 180ms ease;
+}
+
+.library-mode-tab::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    width: 7px;
+    height: 7px;
+    margin-top: -3.5px;
+    border-radius: 999px;
+    background: rgba(147, 126, 96, 0.42);
+    box-shadow:
+        0 0 0 4px rgba(147, 126, 96, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.42);
+    transition:
+        background-color 180ms ease,
+        box-shadow 220ms ease,
         transform 180ms ease;
 }
 
@@ -1902,26 +1937,142 @@ fieldset legend {
     min-width: 28px;
     padding: 5px 7px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.76);
-    color: #43392e;
+    background: rgba(255, 255, 255, 0.7);
+    color: #4a3f33;
+    transition:
+        background-color 180ms ease,
+        color 180ms ease;
 }
 
 .library-mode-tab:hover,
 .library-mode-tab:focus-visible {
-    border-color: rgba(120, 104, 81, 0.22);
+    border-color: rgba(120, 104, 81, 0.16);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(243, 234, 220, 0.82) 100%);
     color: #3c332a;
     transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        inset 0 -1px 0 rgba(120, 99, 72, 0.05);
+}
+
+.library-mode-tab:hover::before,
+.library-mode-tab:focus-visible::before {
+    background: rgba(177, 149, 103, 0.82);
+    box-shadow: 0 0 0 4px rgba(177, 149, 103, 0.14);
+    transform: scale(1.08);
 }
 
 .library-mode-tab.active {
     border-color: rgba(110, 90, 66, 0.3);
     background:
-        linear-gradient(180deg, rgba(93, 79, 64, 0.16) 0%, rgba(68, 57, 47, 0.08) 100%),
-        rgba(255, 251, 245, 0.86);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(244, 235, 222, 0.92) 100%);
     color: #2d251d;
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.76),
         0 8px 20px rgba(82, 63, 35, 0.08);
+}
+
+.library-mode-tab.active::before {
+    background: rgba(177, 149, 103, 0.9);
+    box-shadow: 0 0 0 4px rgba(177, 149, 103, 0.14);
+}
+
+.library-mode-tab.active span:last-child {
+    background: rgba(90, 76, 61, 0.1);
+    color: #3c3126;
+}
+
+.library-panel-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(123, 104, 80, 0.24);
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(243, 234, 220, 0.88) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        inset 0 -1px 0 rgba(120, 99, 72, 0.08),
+        0 10px 24px rgba(82, 63, 35, 0.08);
+    transition:
+        border-color 180ms ease,
+        box-shadow 220ms ease,
+        transform 180ms ease,
+        background 180ms ease;
+}
+
+.library-panel[data-active-tab="reader"] .library-panel-header {
+    gap: 14px;
+    padding-bottom: 14px;
+}
+
+.library-panel[data-active-tab="reader"] .library-panel-heading {
+    gap: 6px;
+}
+
+.library-panel[data-active-tab="reader"] .library-panel-description {
+    max-width: 30ch;
+}
+
+.library-panel-close:hover,
+.library-panel-close:focus-visible {
+    border-color: rgba(134, 112, 84, 0.34);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.88),
+        inset 0 -1px 0 rgba(120, 99, 72, 0.12),
+        0 12px 28px rgba(82, 63, 35, 0.12);
+    transform: translateY(-1px);
+}
+
+.library-panel-close:active {
+    transform: translateY(0);
+}
+
+.library-panel-close-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    border: 1px solid rgba(118, 97, 71, 0.16);
+    background:
+        radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 62%),
+        linear-gradient(180deg, rgba(255, 251, 244, 0.92) 0%, rgba(237, 226, 208, 0.82) 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        0 4px 10px rgba(82, 63, 35, 0.08);
+    transition:
+        border-color 180ms ease,
+        box-shadow 220ms ease;
+}
+
+.library-panel-close-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: #6e5f4d;
+    transition:
+        fill 180ms ease,
+        transform 220ms ease;
+}
+
+.library-panel-close:hover .library-panel-close-icon,
+.library-panel-close:focus-visible .library-panel-close-icon {
+    border-color: rgba(132, 111, 82, 0.24);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.86),
+        0 6px 14px rgba(82, 63, 35, 0.1);
+}
+
+.library-panel-close:hover .library-panel-close-icon svg,
+.library-panel-close:focus-visible .library-panel-close-icon svg {
+    fill: #4c3f31;
+    transform: rotate(90deg);
 }
 
 .library-mode-view {
@@ -1956,7 +2107,6 @@ fieldset legend {
 }
 
 .library-hero-kicker,
-.library-reader-intro-kicker,
 .library-section-kicker,
 .library-reader-card-kicker {
     margin: 0;
@@ -1967,31 +2117,27 @@ fieldset legend {
     color: #706558;
 }
 
-.library-hero-copy h3,
-.library-reader-intro-copy h3 {
+.library-hero-copy h3 {
     margin: 0;
     font-size: 20px;
     line-height: 1.04;
     color: #2a231c;
 }
 
-.library-hero-copy p:last-child,
-.library-reader-intro-copy p:last-child {
+.library-hero-copy p:last-child {
     margin: 0;
     font-size: 13px;
     line-height: 1.55;
     color: #5c5246;
 }
 
-.library-hero-stats,
-.library-reader-intro-stats {
+.library-hero-stats {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
 }
 
-.library-hero-stats > div,
-.library-reader-intro-stats > div {
+.library-hero-stats > div {
     display: grid;
     gap: 8px;
     padding: 12px;
@@ -2000,8 +2146,7 @@ fieldset legend {
     border: 1px solid rgba(123, 105, 79, 0.12);
 }
 
-.library-hero-stats span,
-.library-reader-intro-stats span {
+.library-hero-stats span {
     font-size: 10px;
     line-height: 1;
     text-transform: uppercase;
@@ -2009,8 +2154,7 @@ fieldset legend {
     color: #706558;
 }
 
-.library-hero-stats strong,
-.library-reader-intro-stats strong {
+.library-hero-stats strong {
     font-size: 22px;
     line-height: 1;
     font-weight: 600;
@@ -2258,27 +2402,8 @@ fieldset legend {
 .library-reader-view {
     display: grid;
     align-content: start;
-    gap: 18px;
-    padding: 16px 16px 18px;
-}
-
-.library-reader-intro {
-    display: grid;
     gap: 16px;
-    padding: 18px;
-    border: 1px solid rgba(123, 105, 79, 0.14);
-    border-radius: 24px;
-    background:
-        radial-gradient(140% 120% at 50% 0%, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0) 56%),
-        linear-gradient(180deg, rgba(254, 251, 246, 0.94) 0%, rgba(243, 235, 223, 0.88) 100%);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.76),
-        0 10px 24px rgba(82, 63, 35, 0.05);
-}
-
-.library-reader-intro-copy {
-    display: grid;
-    gap: 10px;
+    padding: 14px 16px 18px;
 }
 
 .library-reader-empty {
@@ -2306,21 +2431,21 @@ fieldset legend {
 
 .library-reader-stack {
     display: grid;
-    gap: 14px;
+    gap: 16px;
 }
 
 .library-reader-card {
     display: grid;
     gap: 14px;
-    padding: 18px;
-    border: 1px solid rgba(123, 105, 79, 0.14);
-    border-radius: 24px;
+    padding: 20px;
+    border: 1px solid rgba(123, 105, 79, 0.12);
+    border-radius: 22px;
     background:
         radial-gradient(140% 120% at 50% 0%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 60%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(246, 240, 230, 0.88) 100%);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.78),
-        0 14px 28px rgba(82, 63, 35, 0.05);
+        0 12px 24px rgba(82, 63, 35, 0.05);
     transition:
         border-color 180ms ease,
         box-shadow 220ms ease,
@@ -2331,7 +2456,7 @@ fieldset legend {
     border-color: rgba(123, 105, 79, 0.22);
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.84),
-        0 18px 34px rgba(82, 63, 35, 0.08);
+        0 16px 30px rgba(82, 63, 35, 0.08);
     transform: translateY(-2px);
 }
 
@@ -2357,7 +2482,7 @@ fieldset legend {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 12px;
+    gap: 14px;
 }
 
 .library-reader-card-copy {
@@ -2425,7 +2550,7 @@ fieldset legend {
 .library-reader-placeholder p {
     margin: 0;
     font-size: 14px;
-    line-height: 1.75;
+    line-height: 1.8;
     color: #302922;
 }
 
@@ -2566,8 +2691,7 @@ fieldset legend {
         max-height: 45vh;
     }
 
-    .library-hero-stats,
-    .library-reader-intro-stats {
+    .library-hero-stats {
         grid-template-columns: 1fr;
     }
 
@@ -2702,10 +2826,6 @@ fieldset legend {
         border-radius: 24px;
     }
 
-    .library-mode-tabs {
-        grid-template-columns: 1fr;
-    }
-
     .library-panel-header,
     .library-column,
     .library-reader-view {
@@ -2719,7 +2839,6 @@ fieldset legend {
     }
 
     .library-hero,
-    .library-reader-intro,
     .library-reader-card,
     .library-inline-picker {
         border-radius: 20px;
@@ -2730,13 +2849,22 @@ fieldset legend {
         flex-direction: column;
     }
 
-    .library-section-actions,
-    .library-panel-actions {
+    .library-panel-topbar {
+        width: 100%;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .library-mode-tabs {
+        min-width: 0;
+        max-width: none;
+    }
+
+    .library-section-actions {
         width: 100%;
     }
 
-    .library-section-actions > button,
-    .library-panel-actions > button {
+    .library-section-actions > button {
         width: 100%;
     }
 

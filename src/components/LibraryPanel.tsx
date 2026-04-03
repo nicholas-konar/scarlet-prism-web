@@ -12,6 +12,9 @@ export type { LibraryScriptureItem, LibrarySermonItem }
 
 type LibraryTab = "library" | "reader"
 
+const CLOSE_LIBRARY_ICON_PATH =
+    "M17.59 7.82 16.18 6.41 12 10.59 7.82 6.41 6.41 7.82 10.59 12 6.41 16.18 7.82 17.59 12 13.41 16.18 17.59 17.59 16.18 13.41 12z"
+
 interface LibraryPanelProps {
     sermons: LibrarySermonItem[]
     scriptures: LibraryScriptureItem[]
@@ -28,6 +31,10 @@ interface LibraryPanelProps {
 
 function formatCountLabel(count: number, singular: string) {
     return `${count} ${singular}${count === 1 ? "" : "s"}`
+}
+
+function formatMetricLabel(count: number, singular: string, plural?: string) {
+    return `${count} ${count === 1 ? singular : plural ?? `${singular}s`}`
 }
 
 function formatReaderStatusLabel(status: LibraryScriptureItem["contentStatus"]) {
@@ -297,67 +304,89 @@ export function LibraryPanel({
     onClose,
 }: LibraryPanelProps) {
     const [activeTab, setActiveTab] = useState<LibraryTab>("library")
+    const isReaderView = activeTab === "reader"
     const readerReadyCount = scriptures.filter(
         (scripture) => scripture.contentStatus === "ready",
     ).length
     const readerPendingCount = scriptures.filter((scripture) =>
         ["pending", "hydrating"].includes(scripture.contentStatus),
     ).length
+    const panelTitle = isReaderView ? "Reader" : "Library"
+    const panelDescription = isReaderView
+        ? "Read attached passages in a quieter stack beside the thread."
+        : "Keep sermons and references close while the thread stays in focus."
+    const summaryItems = isReaderView
+        ? [
+              formatMetricLabel(scriptures.length, "passage"),
+              formatMetricLabel(readerReadyCount, "ready", "ready"),
+              formatMetricLabel(readerPendingCount, "loading", "loading"),
+          ]
+        : [
+              formatCountLabel(sermons.length, "sermon"),
+              formatCountLabel(scriptures.length, "scripture"),
+              formatMetricLabel(readerReadyCount, "ready", "ready"),
+          ]
 
     return (
-        <aside className="library-panel panel-shell" aria-label="Conversation library">
+        <aside
+            className="library-panel panel-shell"
+            aria-label="Conversation library"
+            data-active-tab={activeTab}
+        >
             <div className="library-panel-header">
                 <div className="library-panel-heading">
                     <div>
                         <p className="library-panel-eyebrow">Active study material</p>
-                        <h2>Library</h2>
+                        <h2>{panelTitle}</h2>
                     </div>
                     <p className="library-panel-description">
-                        Keep sermons and scripture close while the conversation
-                        stays in focus.
+                        {panelDescription}
                     </p>
                     <div className="library-summary-strip" aria-label="Library summary">
-                        <span>{formatCountLabel(sermons.length, "sermon")}</span>
-                        <span>{formatCountLabel(scriptures.length, "scripture")}</span>
-                        <span>{formatCountLabel(readerReadyCount, "readable passage")}</span>
+                        {summaryItems.map((item) => (
+                            <span key={item}>{item}</span>
+                        ))}
                     </div>
                 </div>
-                <div className="library-panel-actions">
+                <div className="library-panel-topbar">
+                    <div
+                        className="library-mode-tabs"
+                        role="tablist"
+                        aria-label="Library views"
+                    >
+                        <LibraryModeTab
+                            tab="library"
+                            label="Library"
+                            count={sermons.length + scriptures.length}
+                            isActive={activeTab === "library"}
+                            onClick={setActiveTab}
+                        />
+                        <LibraryModeTab
+                            tab="reader"
+                            label="Reader"
+                            count={scriptures.length}
+                            isActive={activeTab === "reader"}
+                            onClick={setActiveTab}
+                        />
+                    </div>
                     {onClose ? (
                         <button
                             type="button"
-                            className={PANEL_ACTION_BUTTON_CLASS}
+                            className="library-panel-close"
                             onClick={onClose}
                             aria-label="Close library"
                         >
-                            Close
+                            <span className="library-panel-close-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <path d={CLOSE_LIBRARY_ICON_PATH} />
+                                </svg>
+                            </span>
                         </button>
                     ) : null}
                 </div>
             </div>
 
             <div className="library-panel-body">
-                <div
-                    className="library-mode-tabs"
-                    role="tablist"
-                    aria-label="Library views"
-                >
-                    <LibraryModeTab
-                        tab="library"
-                        label="Library"
-                        count={sermons.length + scriptures.length}
-                        isActive={activeTab === "library"}
-                        onClick={setActiveTab}
-                    />
-                    <LibraryModeTab
-                        tab="reader"
-                        label="Reader"
-                        count={scriptures.length}
-                        isActive={activeTab === "reader"}
-                        onClick={setActiveTab}
-                    />
-                </div>
-
                 {activeTab === "library" ? (
                     <div
                         id="library-panel-view-library"
@@ -463,31 +492,6 @@ export function LibraryPanel({
                         aria-labelledby="library-panel-tab-reader"
                         className="library-mode-view library-reader-view"
                     >
-                        <section className="library-reader-intro" aria-label="Reader overview">
-                            <div className="library-reader-intro-copy">
-                                <p className="library-reader-intro-kicker">Reader mode</p>
-                                <h3>Read the attached passages without leaving the thread.</h3>
-                                <p>
-                                    Scroll through each citation as a quiet study stack
-                                    while the conversation stays visible beside it.
-                                </p>
-                            </div>
-                            <div className="library-reader-intro-stats">
-                                <div>
-                                    <span>Passages</span>
-                                    <strong>{scriptures.length}</strong>
-                                </div>
-                                <div>
-                                    <span>Readable</span>
-                                    <strong>{readerReadyCount}</strong>
-                                </div>
-                                <div>
-                                    <span>Fetching</span>
-                                    <strong>{readerPendingCount}</strong>
-                                </div>
-                            </div>
-                        </section>
-
                         {scriptures.length === 0 ? (
                             <div className="library-reader-empty">
                                 <p className="library-reader-empty-title">
