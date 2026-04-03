@@ -59,6 +59,8 @@ export interface Congregation {
 export interface BibleTranslation {
     id: string
     name: string
+    abbreviation?: string
+    edition?: string | null
     languageCode: string
     sortOrder: number
 }
@@ -75,6 +77,11 @@ export interface ScriptureCitation extends Omit<ScriptureCitationInput, "transla
     id: string
     translationId: string
     label: string
+    contentStatus?: "pending" | "hydrating" | "ready" | "failed"
+    contentHtml?: string | null
+    contentText?: string | null
+    contentFetchedAt?: string | null
+    contentExpiresAt?: string | null
     createdAt: string
     updatedAt: string
 }
@@ -136,6 +143,8 @@ export interface ConversationScripture {
     id: string
     conversationId: string
     scriptureCitationId: string
+    sermonId?: string | null
+    sermonTitle?: string | null
     removedAt: string | null
     createdAt: string
     citation?: ScriptureCitation

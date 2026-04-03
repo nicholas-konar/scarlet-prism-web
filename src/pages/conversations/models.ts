@@ -20,6 +20,12 @@ export type LibraryScriptureItem = {
     key: string
     label: string
     source: string
+    sources: string[]
+    translationLabel: string
+    translationName: string
+    translationEdition?: string | null
+    contentStatus: "pending" | "hydrating" | "ready" | "failed" | "unavailable"
+    contentText?: string | null
     onDetach?: () => void
 }
 

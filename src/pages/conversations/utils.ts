@@ -1,5 +1,6 @@
 import type { PendingScriptureCitation } from "@/components/ScriptureCitationPicker"
 import type {
+    BibleTranslation,
     ConversationEvent,
     ConversationSermon,
     ConversationScripture,
@@ -22,12 +23,20 @@ type LibraryCitation = Pick<
     | "startVerse"
     | "endVerse"
     | "label"
+    | "contentStatus"
+    | "contentText"
 >
 
 type LibraryCitationEntry = {
     label: string
     sources: Set<string>
     userScriptureIds: string[]
+    translationId: string
+    translationLabel: string
+    translationName: string
+    translationEdition?: string | null
+    contentStatus: LibraryScriptureItem["contentStatus"]
+    contentText?: string | null
 }
 
 export function formatSermonDate(value: string | null): string | null {
@@ -106,19 +115,70 @@ export function buildPendingScripturePayload(
     )
 }
 
+function getTranslationDisplay(
+    translationId: string | null | undefined,
+    translations: BibleTranslation[],
+) {
+    const fallbackId = translationId?.trim() || "unknown"
+    const match = translations.find((item) => item.id === fallbackId)
+
+    return {
+        translationLabel:
+            match?.abbreviation?.trim() || fallbackId.toUpperCase(),
+        translationName: match?.name || fallbackId.toUpperCase(),
+        translationEdition: match?.edition ?? null,
+    }
+}
+
+function getCitationContentStatus(
+    citation: Partial<Pick<ScriptureCitation, "contentStatus" | "contentText">> | null,
+): LibraryScriptureItem["contentStatus"] {
+    if (citation?.contentText?.trim()) {
+        return "ready"
+    }
+
+    return citation?.contentStatus ?? "unavailable"
+}
+
+function getContentPriority(status: LibraryScriptureItem["contentStatus"]): number {
+    switch (status) {
+        case "ready":
+            return 4
+        case "hydrating":
+            return 3
+        case "pending":
+            return 2
+        case "failed":
+            return 1
+        default:
+            return 0
+    }
+}
+
 function addLibraryCitation(
     items: Map<string, LibraryCitationEntry>,
     citation: LibraryCitation,
     source: string,
+    translations: BibleTranslation[],
     userScriptureId?: string,
 ) {
     const key = getCitationKey(citation)
     const existing = items.get(key)
+    const translationDisplay = getTranslationDisplay(
+        citation.translationId,
+        translations,
+    )
+    const nextStatus = getCitationContentStatus(citation)
+    const nextContent = citation.contentText?.trim() || null
 
     if (existing) {
         existing.sources.add(source)
         if (userScriptureId) {
             existing.userScriptureIds.push(userScriptureId)
+        }
+        if (getContentPriority(nextStatus) > getContentPriority(existing.contentStatus)) {
+            existing.contentStatus = nextStatus
+            existing.contentText = nextContent
         }
         return
     }
@@ -127,24 +187,30 @@ function addLibraryCitation(
         label: citation.label,
         sources: new Set([source]),
         userScriptureIds: userScriptureId ? [userScriptureId] : [],
+        translationId: citation.translationId,
+        translationLabel: translationDisplay.translationLabel,
+        translationName: translationDisplay.translationName,
+        translationEdition: translationDisplay.translationEdition,
+        contentStatus: nextStatus,
+        contentText: nextContent,
     })
 }
 
 export function buildLibraryScriptureItems({
     effectiveConversationId,
     activeScriptures,
-    activeSermons,
     pendingUserScriptures,
     pendingSermonIds,
     sermons,
+    translations,
     onDetachUserScripture,
 }: {
     effectiveConversationId: string | null
     activeScriptures: ConversationScripture[]
-    activeSermons: ConversationSermon[]
     pendingUserScriptures: PendingScriptureCitation[]
     pendingSermonIds: string[]
     sermons: Sermon[]
+    translations: BibleTranslation[]
     onDetachUserScripture: (
         scriptureKey: string,
         conversationScriptureId?: string,
@@ -155,29 +221,36 @@ export function buildLibraryScriptureItems({
     if (effectiveConversationId) {
         activeScriptures.forEach((item) => {
             if (!item.citation) return
-            addLibraryCitation(items, item.citation, "from you", item.id)
-        })
-
-        activeSermons.forEach((item) => {
-            item.sermon?.scriptures.forEach((citation) => {
-                addLibraryCitation(
-                    items,
-                    citation,
-                    item.sermon?.title
-                        ? `from ${item.sermon.title}`
-                        : "from attached sermon",
-                )
-            })
+            addLibraryCitation(
+                items,
+                item.citation,
+                item.sermonId
+                    ? item.sermonTitle || "Attached sermon"
+                    : "Added directly",
+                translations,
+                item.sermonId ? undefined : item.id,
+            )
         })
     } else {
         pendingUserScriptures.forEach((citation) => {
-            addLibraryCitation(items, citation, "from you", getCitationKey(citation))
+            addLibraryCitation(
+                items,
+                citation,
+                "Added directly",
+                translations,
+                getCitationKey(citation),
+            )
         })
 
         pendingSermonIds.forEach((sermonId) => {
             const sermon = sermons.find((item) => item.id === sermonId)
             sermon?.scriptures.forEach((citation) => {
-                addLibraryCitation(items, citation, `from ${sermon.title}`)
+                addLibraryCitation(
+                    items,
+                    citation,
+                    sermon.title,
+                    translations,
+                )
             })
         })
     }
@@ -185,7 +258,13 @@ export function buildLibraryScriptureItems({
     return Array.from(items.entries()).map(([key, value]) => ({
         key,
         label: value.label,
-        source: Array.from(value.sources).join(" + "),
+        source: Array.from(value.sources).join(" • "),
+        sources: Array.from(value.sources),
+        translationLabel: value.translationLabel,
+        translationName: value.translationName,
+        translationEdition: value.translationEdition,
+        contentStatus: value.contentStatus,
+        contentText: value.contentText,
         onDetach:
             value.userScriptureIds.length > 0
                 ? () => {

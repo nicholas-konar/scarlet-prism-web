@@ -375,10 +375,10 @@ export function ConversationsPage() {
     const libraryScriptureItems = buildLibraryScriptureItems({
         effectiveConversationId,
         activeScriptures,
-        activeSermons,
         pendingUserScriptures,
         pendingSermonIds,
         sermons,
+        translations,
         onDetachUserScripture: handleDetachUserScripture,
     })
 
