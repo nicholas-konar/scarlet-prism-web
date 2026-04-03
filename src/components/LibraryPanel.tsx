@@ -295,28 +295,23 @@ export function LibraryPanel({
     const isReaderView = activeTab === "reader"
     const readerMetrics = scriptures.reduce(
         (counts, scripture) => {
-            if (scripture.contentStatus === "ready") {
-                counts.ready += 1
-            }
             if (getLibraryScriptureStatus(scripture.contentStatus).isPending) {
                 counts.pending += 1
             }
             return counts
         },
-        { ready: 0, pending: 0 },
+        { pending: 0 },
     )
     const panelTitle = isReaderView ? "Reader" : "Library"
     const panelDescription = isReaderView ? "Read attached passages in a quieter stack beside the thread." : "Keep sermons and references close while the thread stays in focus."
     const summaryItems = isReaderView
         ? [
               formatCountLabel(scriptures.length, "passage"),
-              formatCountLabel(readerMetrics.ready, "ready", "ready"),
               formatCountLabel(readerMetrics.pending, "loading", "loading"),
           ]
         : [
               formatCountLabel(sermons.length, "sermon"),
               formatCountLabel(scriptures.length, "scripture"),
-              formatCountLabel(readerMetrics.ready, "ready", "ready"),
           ]
     const tabs: Array<{ tab: LibraryTab; count: number }> = [
         { tab: "library", count: sermons.length + scriptures.length }, { tab: "reader", count: scriptures.length },
@@ -374,8 +369,11 @@ export function LibraryPanel({
             <div className="library-panel-header">
                 <div className="library-panel-heading">
                     <div>
-                        <p className="library-panel-eyebrow">Active study material</p>
-                        <h2>{panelTitle}</h2>
+                        <p className="library-panel-eyebrow">Active study materials</p>
+                        <div className="library-panel-title-row">
+                            <h2 className="library-panel-title">{panelTitle}</h2>
+                            <span className="library-panel-title-rule" aria-hidden="true" />
+                        </div>
                     </div>
                     <p className="library-panel-description">
                         {panelDescription}

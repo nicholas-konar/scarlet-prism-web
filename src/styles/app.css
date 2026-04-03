@@ -1804,9 +1804,7 @@ fieldset legend {
     align-items: start;
     padding: 20px 20px 18px;
     border-bottom: 1px solid rgba(120, 104, 81, 0.12);
-    background:
-        radial-gradient(130% 120% at 50% 0%, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 58%),
-        linear-gradient(180deg, rgba(253, 251, 247, 0.96) 0%, rgba(244, 236, 225, 0.9) 100%);
+    background: transparent;
 }
 
 .library-panel-heading {
@@ -1826,18 +1824,38 @@ fieldset legend {
 }
 
 .library-panel-eyebrow {
+    margin: 0 0 10px;
+    display: inline-flex;
+    align-items: center;
     font-size: 10px;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: 0.18em;
     color: #6b6155;
-    margin-bottom: 10px;
 }
 
-.library-panel h2 {
-    font-size: 24px;
-    line-height: 0.95;
-    color: #2a231c;
+.library-panel-title-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.library-panel-title {
+    margin: 0;
+    font-size: clamp(19px, 1.4vw, 23px);
+    line-height: 1.04;
+    font-weight: 600;
+    letter-spacing: -0.024em;
+    color: #241d15;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.library-panel-title-rule {
+    flex: 1 1 auto;
+    min-width: 28px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(120, 104, 81, 0.22) 0%, rgba(120, 104, 81, 0.04) 100%);
 }
 
 .library-panel-description {
@@ -1871,8 +1889,7 @@ fieldset legend {
     display: flex;
     min-height: 0;
     overflow: hidden;
-    background:
-        linear-gradient(180deg, rgba(248, 243, 235, 0.92) 0%, rgba(243, 235, 223, 0.84) 100%);
+    background: transparent;
 }
 
 .library-mode-tabs {
