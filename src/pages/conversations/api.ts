@@ -9,6 +9,7 @@ import type {
     ConversationSermon,
     Message,
     PaginatedResponse,
+    ScriptureCitationDetail,
     ScriptureCitationInput,
     Sermon,
 } from "@/types/api"
@@ -44,6 +45,9 @@ export interface ConversationWorkspaceApi {
     getConversationScriptures: (
         conversationId: string,
     ) => Promise<ConversationScripture[]>
+    getScriptureCitation: (
+        citationId: string,
+    ) => Promise<ScriptureCitationDetail>
     loadConversationResources: (
         conversationId: string,
     ) => Promise<ConversationWorkspaceResources>
@@ -74,6 +78,7 @@ export const conversationWorkspaceApi: ConversationWorkspaceApi = {
     listBibleTranslations: scriptureApi.listBibleTranslations,
     getConversationSermons: sermonsApi.getConversationSermons,
     getConversationScriptures: scriptureApi.getConversationScriptures,
+    getScriptureCitation: scriptureApi.getScriptureCitation,
     async loadConversationResources(conversationId) {
         const [messagesResponse, sermons, scriptures] = await Promise.all([
             conversationsApi.getConversationMessages(conversationId),

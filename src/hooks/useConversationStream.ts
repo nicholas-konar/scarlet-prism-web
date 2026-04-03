@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import type { Message } from "@/types/api"
 import {
     conversationWorkspaceApi,
@@ -10,7 +10,7 @@ interface UseConversationStreamResult {
     isStreaming: boolean
     conversationId: string | null
     conversationTitle: string | null
-    ensureConversation: () => Promise<string>
+    initializeConversation: () => Promise<string>
     sendMessage: (
         prompt: string,
         modelId: string,
@@ -34,20 +34,37 @@ export function useConversationStream(
     const [conversationId, setConversationId] = useState<string | null>(null)
     const [conversationTitle, setConversationTitle] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
+    const pendingInitializationRef = useRef<Promise<string> | null>(null)
 
     const reset = useCallback(() => {
         setStreamingText("")
         setConversationId(null)
         setConversationTitle(null)
         setError(null)
+        pendingInitializationRef.current = null
     }, [])
 
-    const ensureConversation = useCallback(async () => {
+    const initializeConversation = useCallback(async () => {
         if (conversationId) {
             return conversationId
         }
 
-        return api.initConversation()
+        if (pendingInitializationRef.current) {
+            return pendingInitializationRef.current
+        }
+
+        const pendingConversation = api
+            .initConversation()
+            .then((id) => {
+                setConversationId(id)
+                return id
+            })
+            .finally(() => {
+                pendingInitializationRef.current = null
+            })
+
+        pendingInitializationRef.current = pendingConversation
+        return pendingConversation
     }, [api, conversationId])
 
     const sendMessage = useCallback(
@@ -116,7 +133,7 @@ export function useConversationStream(
         isStreaming,
         conversationId,
         conversationTitle,
-        ensureConversation,
+        initializeConversation,
         sendMessage,
         error,
         reset,

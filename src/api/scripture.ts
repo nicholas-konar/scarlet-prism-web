@@ -2,6 +2,7 @@ import { apiCall } from "./client"
 import type {
     BibleTranslation,
     ConversationScripture,
+    ScriptureCitationDetail,
     ScriptureCitationInput,
 } from "@/types/api"
 
@@ -49,4 +50,12 @@ export async function detachScripture(
             method: "DELETE",
         },
     )
+}
+
+export async function getScriptureCitation(
+    citationId: string,
+): Promise<ScriptureCitationDetail> {
+    return apiCall<ScriptureCitationDetail>(`/scripture/citations/${citationId}`, {
+        method: "GET",
+    })
 }

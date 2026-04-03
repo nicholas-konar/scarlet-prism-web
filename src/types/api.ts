@@ -86,6 +86,19 @@ export interface ScriptureCitation extends Omit<ScriptureCitationInput, "transla
     updatedAt: string
 }
 
+export interface ScriptureCitationDetail {
+    id: string
+    label: string
+    contentStatus: "pending" | "hydrating" | "ready" | "failed"
+    contentHtml?: string | null
+    translation: {
+        id: string
+        name: string
+        abbreviation: string
+        edition?: string | null
+    }
+}
+
 export type CongregationPermission =
     | "super_admin"
     | "edit_profile"
