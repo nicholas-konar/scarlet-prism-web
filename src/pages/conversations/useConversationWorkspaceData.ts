@@ -63,26 +63,18 @@ export function useConversationWorkspaceData({
     )
 
     const fetchConversationSermons = useCallback(
-        async (conversationId: string) => {
-            try {
-                const records = await api.getConversationSermons(conversationId)
-                setAllConversationSermons(records)
-            } catch {
-                setAllConversationSermons([])
-            }
-        },
+        async (conversationId: string) =>
+            setAllConversationSermons(
+                await api.getConversationSermons(conversationId).catch(() => []),
+            ),
         [api],
     )
 
     const fetchConversationScriptures = useCallback(
-        async (conversationId: string) => {
-            try {
-                const records = await api.getConversationScriptures(conversationId)
-                setAllConversationScriptures(records)
-            } catch {
-                setAllConversationScriptures([])
-            }
-        },
+        async (conversationId: string) =>
+            setAllConversationScriptures(
+                await api.getConversationScriptures(conversationId).catch(() => []),
+            ),
         [api],
     )
 

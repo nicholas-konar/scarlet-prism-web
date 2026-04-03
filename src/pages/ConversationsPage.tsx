@@ -140,21 +140,27 @@ export function ConversationsPage() {
         )
     }, [effectiveConversationId, setConversations, streamedConversationTitle])
 
-    function handleSelectConversation(id: string) {
+    function resetConversationWorkspace() {
         resetStream()
         clearConversationResources()
         resetDraftState()
+    }
+
+    function handleSelectConversation(id: string) {
+        resetConversationWorkspace()
         setSearchParams({ id })
     }
 
     function handleNewConversation() {
-        resetStream()
-        clearConversationResources()
-        resetDraftState()
+        resetConversationWorkspace()
         setSearchParams({})
         void initializeConversation().catch((error) => {
             console.error("Failed to initialize conversation:", error)
         })
+    }
+
+    async function ensureConversationId() {
+        return effectiveConversationId || initializeConversation().catch(() => null)
     }
 
     async function attachSermonToConversation(
@@ -186,6 +192,22 @@ export function ConversationsPage() {
         )
 
         setAllConversationScriptures((current) => [...current, record])
+    }
+
+    async function attachPendingContext(conversationId: string) {
+        for (const citation of pendingUserScriptures) {
+            await attachScriptureToConversation(conversationId, citation)
+        }
+
+        for (const sermonId of pendingSermonIds) {
+            const sermon = sermons.find((item) => item.id === sermonId)
+            if (!sermon) continue
+            await attachSermonToConversation(conversationId, sermon)
+        }
+
+        if (pendingUserScriptures.length > 0 || pendingSermonIds.length > 0) {
+            resetDraftState()
+        }
     }
 
     async function handleSendMessage(
@@ -262,19 +284,7 @@ export function ConversationsPage() {
             const confirmedConversationId = conversationId
 
             if (!isRetry) {
-                for (const citation of pendingUserScriptures) {
-                    await attachScriptureToConversation(confirmedConversationId, citation)
-                }
-
-                for (const sermonId of pendingSermonIds) {
-                    const sermon = sermons.find((item) => item.id === sermonId)
-                    if (!sermon) continue
-                    await attachSermonToConversation(confirmedConversationId, sermon)
-                }
-
-                if (pendingUserScriptures.length > 0 || pendingSermonIds.length > 0) {
-                    resetDraftState()
-                }
+                await attachPendingContext(confirmedConversationId)
             }
 
             await sendMessage(
@@ -308,8 +318,7 @@ export function ConversationsPage() {
     }
 
     async function handleAddSermonToContext(sermon: Sermon) {
-        const conversationId =
-            effectiveConversationId || (await initializeConversation().catch(() => null))
+        const conversationId = await ensureConversationId()
 
         if (conversationId) {
             const alreadyAttached = activeSermons.some(
@@ -358,8 +367,7 @@ export function ConversationsPage() {
 
     async function handleAddUserScripture(citation: PendingScriptureCitation) {
         const citationKey = getCitationKey(citation)
-        const conversationId =
-            effectiveConversationId || (await initializeConversation().catch(() => null))
+        const conversationId = await ensureConversationId()
 
         if (conversationId) {
             const alreadyAttached = activeScriptures.some(

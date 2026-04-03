@@ -2006,19 +2006,6 @@ fieldset legend {
         background 180ms ease;
 }
 
-.library-panel[data-active-tab="reader"] .library-panel-header {
-    gap: 14px;
-    padding-bottom: 14px;
-}
-
-.library-panel[data-active-tab="reader"] .library-panel-heading {
-    gap: 6px;
-}
-
-.library-panel[data-active-tab="reader"] .library-panel-description {
-    max-width: 30ch;
-}
-
 .library-panel-close:hover,
 .library-panel-close:focus-visible {
     border-color: rgba(134, 112, 84, 0.34);

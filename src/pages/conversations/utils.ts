@@ -39,6 +39,20 @@ type LibraryCitationEntry = {
     contentText?: string | null
 }
 
+const DIRECT_SCRIPTURE_SOURCE = "Added directly"
+const ATTACHED_SERMON_SOURCE = "Attached sermon"
+
+const LIBRARY_SCRIPTURE_STATUS = {
+    ready: ["Ready to read", "", 4, false],
+    hydrating: ["Preparing text", "The passage is being hydrated from the scripture provider and should appear here shortly.", 3, true],
+    pending: ["Queued for fetch", "This reference is attached, but the passage text has not been fetched yet.", 2, true],
+    failed: ["Needs refresh", "The reference is attached, but the passage text could not be loaded from the provider.", 1, false],
+    unavailable: ["Reference only", "This reference is attached, but passage text is not available in the current session.", 0, false],
+} satisfies Record<
+    LibraryScriptureItem["contentStatus"],
+    readonly [label: string, placeholder: string, priority: number, isPending: boolean]
+>
+
 export function formatSermonDate(value: string | null): string | null {
     if (!value?.trim()) return null
 
@@ -130,6 +144,18 @@ function getTranslationDisplay(
     }
 }
 
+export function getLibraryScriptureStatus(
+    status: LibraryScriptureItem["contentStatus"],
+) {
+    const [label, placeholder, priority, isPending] =
+        LIBRARY_SCRIPTURE_STATUS[status]
+    return { label, placeholder, priority, isPending }
+}
+
+function buildSermonLookup(sermons: Sermon[]) {
+    return new Map(sermons.map((sermon) => [sermon.id, sermon]))
+}
+
 function getCitationContentStatus(
     citation: Partial<Pick<ScriptureCitation, "contentStatus" | "contentText">> | null,
 ): LibraryScriptureItem["contentStatus"] {
@@ -138,21 +164,6 @@ function getCitationContentStatus(
     }
 
     return citation?.contentStatus ?? "unavailable"
-}
-
-function getContentPriority(status: LibraryScriptureItem["contentStatus"]): number {
-    switch (status) {
-        case "ready":
-            return 4
-        case "hydrating":
-            return 3
-        case "pending":
-            return 2
-        case "failed":
-            return 1
-        default:
-            return 0
-    }
 }
 
 function addLibraryCitation(
@@ -176,7 +187,10 @@ function addLibraryCitation(
         if (userScriptureId) {
             existing.userScriptureIds.push(userScriptureId)
         }
-        if (getContentPriority(nextStatus) > getContentPriority(existing.contentStatus)) {
+        if (
+            getLibraryScriptureStatus(nextStatus).priority >
+            getLibraryScriptureStatus(existing.contentStatus).priority
+        ) {
             existing.contentStatus = nextStatus
             existing.contentText = nextContent
         }
@@ -194,6 +208,30 @@ function addLibraryCitation(
         contentStatus: nextStatus,
         contentText: nextContent,
     })
+}
+
+function buildAttachmentEvents(
+    idPrefix: string,
+    textLabel: string,
+    createdAt: string,
+    removedAt?: string | null,
+) {
+    const attachedEvent: ConversationEvent = {
+        id: `${idPrefix}-attach`,
+        text: `Attached ${textLabel} to conversation`,
+        createdAt,
+    }
+
+    return removedAt
+        ? [
+              attachedEvent,
+              {
+                  id: `${idPrefix}-detach`,
+                  text: `Removed ${textLabel} from conversation`,
+                  createdAt: removedAt,
+              },
+          ]
+        : [attachedEvent]
 }
 
 export function buildLibraryScriptureItems({
@@ -217,6 +255,7 @@ export function buildLibraryScriptureItems({
     ) => Promise<void>
 }): LibraryScriptureItem[] {
     const items = new Map<string, LibraryCitationEntry>()
+    const sermonLookup = buildSermonLookup(sermons)
 
     if (effectiveConversationId) {
         activeScriptures.forEach((item) => {
@@ -225,8 +264,8 @@ export function buildLibraryScriptureItems({
                 items,
                 item.citation,
                 item.sermonId
-                    ? item.sermonTitle || "Attached sermon"
-                    : "Added directly",
+                    ? item.sermonTitle || ATTACHED_SERMON_SOURCE
+                    : DIRECT_SCRIPTURE_SOURCE,
                 translations,
                 item.sermonId ? undefined : item.id,
             )
@@ -236,47 +275,46 @@ export function buildLibraryScriptureItems({
             addLibraryCitation(
                 items,
                 citation,
-                "Added directly",
+                DIRECT_SCRIPTURE_SOURCE,
                 translations,
                 getCitationKey(citation),
             )
         })
 
         pendingSermonIds.forEach((sermonId) => {
-            const sermon = sermons.find((item) => item.id === sermonId)
+            const sermon = sermonLookup.get(sermonId)
             sermon?.scriptures.forEach((citation) => {
-                addLibraryCitation(
-                    items,
-                    citation,
-                    sermon.title,
-                    translations,
-                )
+                addLibraryCitation(items, citation, sermon.title, translations)
             })
         })
     }
 
-    return Array.from(items.entries()).map(([key, value]) => ({
-        key,
-        label: value.label,
-        source: Array.from(value.sources).join(" • "),
-        sources: Array.from(value.sources),
-        translationLabel: value.translationLabel,
-        translationName: value.translationName,
-        translationEdition: value.translationEdition,
-        contentStatus: value.contentStatus,
-        contentText: value.contentText,
-        onDetach:
-            value.userScriptureIds.length > 0
-                ? () => {
-                      void onDetachUserScripture(
-                          key,
-                          effectiveConversationId
-                              ? value.userScriptureIds[0]
-                              : undefined,
-                      )
-                  }
-                : undefined,
-    }))
+    return Array.from(items.entries()).map(([key, value]) => {
+        const sources = Array.from(value.sources)
+
+        return {
+            key,
+            label: value.label,
+            source: sources.join(" • "),
+            sources,
+            translationLabel: value.translationLabel,
+            translationName: value.translationName,
+            translationEdition: value.translationEdition,
+            contentStatus: value.contentStatus,
+            contentText: value.contentText,
+            onDetach:
+                value.userScriptureIds.length === 0
+                    ? undefined
+                    : () => {
+                          void onDetachUserScripture(
+                              key,
+                              effectiveConversationId
+                                  ? value.userScriptureIds[0]
+                                  : undefined,
+                          )
+                      },
+        }
+    })
 }
 
 export function buildLibrarySermonItems({
@@ -294,11 +332,12 @@ export function buildLibrarySermonItems({
     onDetachSermon: (conversationSermonId: string) => Promise<void>
     onTogglePendingSermon: (sermonId: string) => void
 }): LibrarySermonItem[] {
+    const sermonLookup = buildSermonLookup(sermons)
+
     if (effectiveConversationId) {
         return activeSermons.map((item) => {
             const sermon =
-                item.sermon ??
-                sermons.find((candidate) => candidate.id === item.sermonId)
+                item.sermon ?? sermonLookup.get(item.sermonId)
             const sermonDisplay = getSermonDisplay(sermon, item.sermonId)
 
             return {
@@ -312,7 +351,7 @@ export function buildLibrarySermonItems({
     }
 
     return pendingSermonIds.map((sermonId) => {
-        const sermon = sermons.find((item) => item.id === sermonId)
+        const sermon = sermonLookup.get(sermonId)
         const sermonDisplay = getSermonDisplay(sermon, sermonId)
 
         return {
@@ -340,50 +379,29 @@ export function buildConversationEvents({
         return pendingEvents
     }
 
+    const sermonLookup = buildSermonLookup(sermons)
+
     return [
         ...allConversationSermons.flatMap((record) => {
             const title =
                 record.sermon?.title ??
-                sermons.find((sermon) => sermon.id === record.sermonId)?.title ??
+                sermonLookup.get(record.sermonId)?.title ??
                 record.sermonId
-
-            const events: ConversationEvent[] = [
-                {
-                    id: `attach-${record.id}`,
-                    text: `Attached "${title}" to conversation`,
-                    createdAt: record.createdAt,
-                },
-            ]
-
-            if (record.removedAt) {
-                events.push({
-                    id: `detach-${record.id}`,
-                    text: `Removed "${title}" from conversation`,
-                    createdAt: record.removedAt,
-                })
-            }
-
-            return events
+            return buildAttachmentEvents(
+                record.id,
+                `"${title}"`,
+                record.createdAt,
+                record.removedAt,
+            )
         }),
         ...allConversationScriptures.flatMap((item) => {
             const label = item.citation?.label ?? item.scriptureCitationId
-            const events: ConversationEvent[] = [
-                {
-                    id: `scripture-attach-${item.id}`,
-                    text: `Attached scripture "${label}" to conversation`,
-                    createdAt: item.createdAt,
-                },
-            ]
-
-            if (item.removedAt) {
-                events.push({
-                    id: `scripture-detach-${item.id}`,
-                    text: `Removed scripture "${label}" from conversation`,
-                    createdAt: item.removedAt,
-                })
-            }
-
-            return events
+            return buildAttachmentEvents(
+                `scripture-${item.id}`,
+                `scripture "${label}"`,
+                item.createdAt,
+                item.removedAt,
+            )
         }),
     ]
 }

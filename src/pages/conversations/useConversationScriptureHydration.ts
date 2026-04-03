@@ -54,10 +54,19 @@ export function useConversationScriptureHydration({
             }
 
             inFlightRef.current.add(citationId)
+            const nextAttempt = attempt + 1
+
+            const scheduleRetry = () => {
+                attemptsRef.current.set(citationId, nextAttempt)
+                inFlightRef.current.delete(citationId)
+                const timer = window.setTimeout(() => {
+                    void pollCitation(citationId, nextAttempt)
+                }, POLL_DELAY_MS)
+                timersRef.current.set(citationId, timer)
+            }
 
             try {
                 const citation = await api.getScriptureCitation(citationId)
-                const nextAttempt = attempt + 1
 
                 if (citation.contentStatus === "ready") {
                     clearPolling(citationId)
@@ -65,37 +74,25 @@ export function useConversationScriptureHydration({
                     return
                 }
 
-                const reachedAttemptLimit =
-                    citation.contentStatus === "failed"
-                        ? nextAttempt >= MAX_FAILED_ATTEMPTS
-                        : nextAttempt >= MAX_ATTEMPTS
-
-                if (reachedAttemptLimit) {
+                if (
+                    nextAttempt >=
+                    (citation.contentStatus === "failed"
+                        ? MAX_FAILED_ATTEMPTS
+                        : MAX_ATTEMPTS)
+                ) {
                     clearPolling(citationId)
                     await refreshScriptures(currentConversationId)
                     return
                 }
 
-                attemptsRef.current.set(citationId, nextAttempt)
-                inFlightRef.current.delete(citationId)
-                const timer = window.setTimeout(() => {
-                    void pollCitation(citationId, nextAttempt)
-                }, POLL_DELAY_MS)
-                timersRef.current.set(citationId, timer)
-            } catch (error) {
-                const nextAttempt = attempt + 1
-
+                scheduleRetry()
+            } catch {
                 if (nextAttempt >= MAX_FAILED_ATTEMPTS) {
                     clearPolling(citationId)
                     return
                 }
 
-                attemptsRef.current.set(citationId, nextAttempt)
-                inFlightRef.current.delete(citationId)
-                const timer = window.setTimeout(() => {
-                    void pollCitation(citationId, nextAttempt)
-                }, POLL_DELAY_MS)
-                timersRef.current.set(citationId, timer)
+                scheduleRetry()
             }
         },
         [api, clearPolling, refreshScriptures],
@@ -112,14 +109,14 @@ export function useConversationScriptureHydration({
         }
 
         const pendingCitationIds = new Set(
-            scriptures
-                .filter((item) => !item.removedAt && item.citation?.id)
-                .filter(
-                    (item) =>
-                        !item.citation?.contentText?.trim() &&
-                        item.citation?.contentStatus !== "ready",
-                )
-                .map((item) => item.citation!.id),
+            scriptures.flatMap((item) => {
+                const citation = item.removedAt ? null : item.citation
+                return citation?.id &&
+                    !citation.contentText?.trim() &&
+                    citation.contentStatus !== "ready"
+                    ? [citation.id]
+                    : []
+            }),
         )
 
         Array.from(timersRef.current.keys()).forEach((citationId) => {

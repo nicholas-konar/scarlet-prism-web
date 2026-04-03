@@ -26,8 +26,13 @@ export function useConversationDraftState({
         setActivePicker(null)
     }, [])
 
-    const closePickers = useCallback(() => {
-        setActivePicker(null)
+    const closePickers = useCallback(() => setActivePicker(null), [])
+
+    const appendPendingEvent = useCallback((prefix: string, text: string) => {
+        setPendingEvents((current) => [
+            ...current,
+            createConversationEvent(prefix, text),
+        ])
     }, [])
 
     const toggleSermonPicker = useCallback(() => {
@@ -45,21 +50,20 @@ export function useConversationDraftState({
             const sermon = sermons.find((item) => item.id === sermonId)
             const title = sermon?.title ?? sermonId
             const isRemoving = pendingSermonIds.includes(sermonId)
-            const pendingEvent = createConversationEvent(
+            appendPendingEvent(
                 `pending-sermon-${sermonId}`,
                 isRemoving
                     ? `Removed "${title}" from new conversation`
                     : `Added "${title}" to new conversation`,
             )
 
-            setPendingEvents((current) => [...current, pendingEvent])
             setPendingSermonIds((current) =>
                 isRemoving
                     ? current.filter((id) => id !== sermonId)
                     : [...current, sermonId],
             )
         },
-        [pendingSermonIds, sermons],
+        [appendPendingEvent, pendingSermonIds, sermons],
     )
 
     const addPendingUserScripture = useCallback(
@@ -74,17 +78,14 @@ export function useConversationDraftState({
             }
 
             setPendingUserScriptures((current) => [...current, citation])
-            setPendingEvents((current) => [
-                ...current,
-                createConversationEvent(
-                    `pending-scripture-${citationKey}`,
-                    `Added scripture "${citation.label}" to new conversation`,
-                ),
-            ])
+            appendPendingEvent(
+                `pending-scripture-${citationKey}`,
+                `Added scripture "${citation.label}" to new conversation`,
+            )
 
             return true
         },
-        [pendingUserScriptures],
+        [appendPendingEvent, pendingUserScriptures],
     )
 
     const removePendingUserScripture = useCallback(
@@ -99,15 +100,12 @@ export function useConversationDraftState({
             setPendingUserScriptures((current) =>
                 current.filter((item) => getCitationKey(item) !== scriptureKey),
             )
-            setPendingEvents((current) => [
-                ...current,
-                createConversationEvent(
-                    `pending-scripture-remove-${scriptureKey}`,
-                    `Removed scripture "${removed.label}" from new conversation`,
-                ),
-            ])
+            appendPendingEvent(
+                `pending-scripture-remove-${scriptureKey}`,
+                `Removed scripture "${removed.label}" from new conversation`,
+            )
         },
-        [pendingUserScriptures],
+        [appendPendingEvent, pendingUserScriptures],
     )
 
     return {

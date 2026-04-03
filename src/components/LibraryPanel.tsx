@@ -7,10 +7,27 @@ import type {
     LibraryScriptureItem,
     LibrarySermonItem,
 } from "@/pages/conversations/models"
+import { getLibraryScriptureStatus } from "@/pages/conversations/utils"
 
 export type { LibraryScriptureItem, LibrarySermonItem }
 
 type LibraryTab = "library" | "reader"
+
+type LibraryCollectionSectionProps = {
+    ariaLabel: string
+    title: string
+    count: number
+    countLabel: string
+    detail: string
+    actionLabel?: string
+    onAction?: () => void
+    actionDisabled?: boolean
+    picker?: ReactNode
+    pickerClassName?: string
+    isEmpty: boolean
+    emptyMessage: string
+    children: ReactNode
+}
 
 const CLOSE_LIBRARY_ICON_PATH =
     "M17.59 7.82 16.18 6.41 12 10.59 7.82 6.41 6.41 7.82 10.59 12 6.41 16.18 7.82 17.59 12 13.41 16.18 17.59 17.59 16.18 13.41 12z"
@@ -29,40 +46,8 @@ interface LibraryPanelProps {
     onClose?: () => void
 }
 
-function formatCountLabel(count: number, singular: string) {
-    return `${count} ${singular}${count === 1 ? "" : "s"}`
-}
-
-function formatMetricLabel(count: number, singular: string, plural?: string) {
-    return `${count} ${count === 1 ? singular : plural ?? `${singular}s`}`
-}
-
-function formatReaderStatusLabel(status: LibraryScriptureItem["contentStatus"]) {
-    switch (status) {
-        case "ready":
-            return "Ready to read"
-        case "hydrating":
-            return "Preparing text"
-        case "pending":
-            return "Queued for fetch"
-        case "failed":
-            return "Needs refresh"
-        default:
-            return "Reference only"
-    }
-}
-
-function getReaderStatusCopy(status: LibraryScriptureItem["contentStatus"]) {
-    switch (status) {
-        case "hydrating":
-            return "The passage is being hydrated from the scripture provider and should appear here shortly."
-        case "pending":
-            return "This reference is attached, but the passage text has not been fetched yet."
-        case "failed":
-            return "The reference is attached, but the passage text could not be loaded from the provider."
-        default:
-            return "This reference is attached, but passage text is not available in the current session."
-    }
+function formatCountLabel(count: number, singular: string, plural = `${singular}s`) {
+    return `${count} ${count === 1 ? singular : plural}`
 }
 
 function splitScriptureContent(contentText?: string | null) {
@@ -76,11 +61,13 @@ function splitScriptureContent(contentText?: string | null) {
         .filter(Boolean)
 }
 
-function PanelActionButton({
+function ActionButton({
+    className,
     label,
     onClick,
     disabled,
 }: {
+    className: string
     label: string
     onClick: () => void
     disabled?: boolean
@@ -88,7 +75,7 @@ function PanelActionButton({
     return (
         <button
             type="button"
-            className={PANEL_ACTION_BUTTON_CLASS}
+            className={className}
             onClick={onClick}
             disabled={disabled}
         >
@@ -97,58 +84,49 @@ function PanelActionButton({
     )
 }
 
-function ItemActionButton({
-    label,
-    onClick,
-}: {
-    label: string
-    onClick: () => void
-}) {
-    return (
-        <button
-            type="button"
-            className={ITEM_ACTION_BUTTON_CLASS}
-            onClick={onClick}
-        >
-            {label}
-        </button>
-    )
-}
-
-function LibrarySectionHeader({
+function LibraryCollectionSection({
+    ariaLabel,
     title,
     count,
+    countLabel,
     detail,
     actionLabel,
     onAction,
     actionDisabled,
-}: {
-    title: string
-    count: number
-    detail: string
-    actionLabel?: string
-    onAction?: () => void
-    actionDisabled?: boolean
-}) {
+    picker,
+    pickerClassName = "library-inline-picker",
+    isEmpty,
+    emptyMessage,
+    children,
+}: LibraryCollectionSectionProps) {
     return (
-        <div className="library-section-header">
-            <div className="library-section-heading">
-                <div className="library-section-heading-copy">
-                    <p className="library-section-kicker">{title}</p>
-                    <h3>{formatCountLabel(count, title.slice(0, -1).toLowerCase())}</h3>
+        <section className="library-section" aria-label={ariaLabel}>
+            <div className="library-section-header">
+                <div className="library-section-heading">
+                    <div className="library-section-heading-copy">
+                        <p className="library-section-kicker">{title}</p>
+                        <h3>{formatCountLabel(count, countLabel)}</h3>
+                    </div>
+                    <p className="library-section-detail">{detail}</p>
                 </div>
-                <p className="library-section-detail">{detail}</p>
+                <div className="library-section-actions">
+                    {actionLabel && onAction ? (
+                        <ActionButton
+                            className={PANEL_ACTION_BUTTON_CLASS}
+                            label={actionLabel}
+                            onClick={onAction}
+                            disabled={actionDisabled}
+                        />
+                    ) : null}
+                </div>
             </div>
-            <div className="library-section-actions">
-                {actionLabel && onAction ? (
-                    <PanelActionButton
-                        label={actionLabel}
-                        onClick={onAction}
-                        disabled={actionDisabled}
-                    />
-                ) : null}
-            </div>
-        </div>
+            {picker ? <div className={pickerClassName}>{picker}</div> : null}
+            {isEmpty ? (
+                <p className="library-empty-inline">{emptyMessage}</p>
+            ) : (
+                children
+            )}
+        </section>
     )
 }
 
@@ -199,7 +177,11 @@ function SermonLibraryItem({ sermon }: { sermon: LibrarySermonItem }) {
                 )}
             </div>
             {sermon.onDetach ? (
-                <ItemActionButton label="Detach" onClick={sermon.onDetach} />
+                <ActionButton
+                    className={ITEM_ACTION_BUTTON_CLASS}
+                    label="Detach"
+                    onClick={sermon.onDetach}
+                />
             ) : null}
         </article>
     )
@@ -210,6 +192,8 @@ function ScriptureLibraryItem({
 }: {
     scripture: LibraryScriptureItem
 }) {
+    const status = getLibraryScriptureStatus(scripture.contentStatus)
+
     return (
         <article className="library-item library-item--scripture">
             <div className="library-item-main">
@@ -221,13 +205,15 @@ function ScriptureLibraryItem({
                 </div>
                 <p className="library-item-meta">
                     {scripture.source}
-                    {scripture.contentStatus !== "ready"
-                        ? ` • ${formatReaderStatusLabel(scripture.contentStatus)}`
-                        : ""}
+                    {scripture.contentStatus !== "ready" ? ` • ${status.label}` : ""}
                 </p>
             </div>
             {scripture.onDetach ? (
-                <ItemActionButton label="Detach" onClick={scripture.onDetach} />
+                <ActionButton
+                    className={ITEM_ACTION_BUTTON_CLASS}
+                    label="Detach"
+                    onClick={scripture.onDetach}
+                />
             ) : null}
         </article>
     )
@@ -238,6 +224,7 @@ function ScriptureReaderCard({
 }: {
     scripture: LibraryScriptureItem
 }) {
+    const status = getLibraryScriptureStatus(scripture.contentStatus)
     const paragraphs = splitScriptureContent(scripture.contentText)
     const hasContent =
         scripture.contentStatus === "ready" && paragraphs.length > 0
@@ -248,9 +235,7 @@ function ScriptureReaderCard({
         >
             <header className="library-reader-card-header">
                 <div className="library-reader-card-copy">
-                    <p className="library-reader-card-kicker">
-                        {formatReaderStatusLabel(scripture.contentStatus)}
-                    </p>
+                    <p className="library-reader-card-kicker">{status.label}</p>
                     <h3>{scripture.label}</h3>
                     <p className="library-reader-card-meta">
                         {scripture.translationName}
@@ -283,7 +268,7 @@ function ScriptureReaderCard({
                 </div>
             ) : (
                 <div className="library-reader-placeholder">
-                    <p>{getReaderStatusCopy(scripture.contentStatus)}</p>
+                    <p>{status.placeholder}</p>
                 </div>
             )}
         </article>
@@ -305,34 +290,86 @@ export function LibraryPanel({
 }: LibraryPanelProps) {
     const [activeTab, setActiveTab] = useState<LibraryTab>("library")
     const isReaderView = activeTab === "reader"
-    const readerReadyCount = scriptures.filter(
-        (scripture) => scripture.contentStatus === "ready",
-    ).length
-    const readerPendingCount = scriptures.filter((scripture) =>
-        ["pending", "hydrating"].includes(scripture.contentStatus),
-    ).length
+    const readerMetrics = scriptures.reduce(
+        (counts, scripture) => {
+            if (scripture.contentStatus === "ready") {
+                counts.ready += 1
+            }
+            if (getLibraryScriptureStatus(scripture.contentStatus).isPending) {
+                counts.pending += 1
+            }
+            return counts
+        },
+        { ready: 0, pending: 0 },
+    )
     const panelTitle = isReaderView ? "Reader" : "Library"
-    const panelDescription = isReaderView
-        ? "Read attached passages in a quieter stack beside the thread."
-        : "Keep sermons and references close while the thread stays in focus."
+    const panelDescription = isReaderView ? "Read attached passages in a quieter stack beside the thread." : "Keep sermons and references close while the thread stays in focus."
     const summaryItems = isReaderView
         ? [
-              formatMetricLabel(scriptures.length, "passage"),
-              formatMetricLabel(readerReadyCount, "ready", "ready"),
-              formatMetricLabel(readerPendingCount, "loading", "loading"),
+              formatCountLabel(scriptures.length, "passage"),
+              formatCountLabel(readerMetrics.ready, "ready", "ready"),
+              formatCountLabel(readerMetrics.pending, "loading", "loading"),
           ]
         : [
               formatCountLabel(sermons.length, "sermon"),
               formatCountLabel(scriptures.length, "scripture"),
-              formatMetricLabel(readerReadyCount, "ready", "ready"),
+              formatCountLabel(readerMetrics.ready, "ready", "ready"),
           ]
+    const tabs: Array<{ tab: LibraryTab; count: number }> = [
+        { tab: "library", count: sermons.length + scriptures.length }, { tab: "reader", count: scriptures.length },
+    ]
+    const librarySections = [
+        {
+            key: "sermons",
+            ariaLabel: "Sermons in library",
+            title: "Sermons",
+            count: sermons.length,
+            countLabel: "sermon",
+            detail: "Bring in sermon context, then prune it when the thread narrows.",
+            actionLabel: isAddingSermon ? "Cancel" : "Add sermon",
+            onAction: onToggleSermonPicker,
+            actionDisabled: !canAddSermon,
+            picker: isAddingSermon ? sermonPicker : null,
+            isEmpty: sermons.length === 0,
+            emptyMessage: "No sermons are attached to this conversation yet.",
+            content: (
+                <div className="library-stack">
+                    {sermons.map((sermon) => (
+                        <SermonLibraryItem key={sermon.key} sermon={sermon} />
+                    ))}
+                </div>
+            ),
+        },
+        {
+            key: "scriptures",
+            ariaLabel: "Scripture references in library",
+            title: "Scriptures",
+            count: scriptures.length,
+            countLabel: "scripture",
+            detail: "Attach direct references or inherit them from sermons already in context.",
+            actionLabel: isAddingScripture ? "Cancel" : "Add scripture",
+            onAction: onToggleScripturePicker,
+            actionDisabled: !canAddScripture,
+            picker: isAddingScripture ? scripturePicker : null,
+            pickerClassName: "library-inline-picker library-scripture-picker",
+            isEmpty: scriptures.length === 0,
+            emptyMessage:
+                "Add scripture directly or attach sermons to build out the reader.",
+            content: (
+                <div className="library-stack">
+                    {scriptures.map((scripture) => (
+                        <ScriptureLibraryItem
+                            key={scripture.key}
+                            scripture={scripture}
+                        />
+                    ))}
+                </div>
+            ),
+        },
+    ]
 
     return (
-        <aside
-            className="library-panel panel-shell"
-            aria-label="Conversation library"
-            data-active-tab={activeTab}
-        >
+        <aside className="library-panel panel-shell" aria-label="Conversation library">
             <div className="library-panel-header">
                 <div className="library-panel-heading">
                     <div>
@@ -354,20 +391,16 @@ export function LibraryPanel({
                         role="tablist"
                         aria-label="Library views"
                     >
-                        <LibraryModeTab
-                            tab="library"
-                            label="Library"
-                            count={sermons.length + scriptures.length}
-                            isActive={activeTab === "library"}
-                            onClick={setActiveTab}
-                        />
-                        <LibraryModeTab
-                            tab="reader"
-                            label="Reader"
-                            count={scriptures.length}
-                            isActive={activeTab === "reader"}
-                            onClick={setActiveTab}
-                        />
+                        {tabs.map(({ tab, count }) => (
+                            <LibraryModeTab
+                                key={tab}
+                                tab={tab}
+                                label={tab === "library" ? "Library" : "Reader"}
+                                count={count}
+                                isActive={activeTab === tab}
+                                onClick={setActiveTab}
+                            />
+                        ))}
                     </div>
                     {onClose ? (
                         <button
@@ -414,76 +447,30 @@ export function LibraryPanel({
                                 </div>
                                 <div>
                                     <span>Reader ready</span>
-                                    <strong>{readerReadyCount}</strong>
+                                    <strong>{readerMetrics.ready}</strong>
                                 </div>
                             </div>
                         </section>
 
-                        <section className="library-section" aria-label="Sermons in library">
-                            <LibrarySectionHeader
-                                title="Sermons"
-                                count={sermons.length}
-                                detail="Bring in sermon context, then prune it when the thread narrows."
-                                actionLabel={isAddingSermon ? "Cancel" : "Add sermon"}
-                                onAction={onToggleSermonPicker}
-                                actionDisabled={!canAddSermon}
-                            />
-                            {isAddingSermon && sermonPicker ? (
-                                <div className="library-inline-picker">
-                                    {sermonPicker}
-                                </div>
-                            ) : null}
-                            {sermons.length === 0 ? (
-                                <p className="library-empty-inline">
-                                    No sermons are attached to this conversation yet.
-                                </p>
-                            ) : (
-                                <div className="library-stack">
-                                    {sermons.map((sermon) => (
-                                        <SermonLibraryItem
-                                            key={sermon.key}
-                                            sermon={sermon}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </section>
-
-                        <section
-                            className="library-section"
-                            aria-label="Scripture references in library"
-                        >
-                            <LibrarySectionHeader
-                                title="Scriptures"
-                                count={scriptures.length}
-                                detail="Attach direct references or inherit them from sermons already in context."
-                                actionLabel={
-                                    isAddingScripture ? "Cancel" : "Add scripture"
-                                }
-                                onAction={onToggleScripturePicker}
-                                actionDisabled={!canAddScripture}
-                            />
-                            {isAddingScripture && scripturePicker ? (
-                                <div className="library-inline-picker library-scripture-picker">
-                                    {scripturePicker}
-                                </div>
-                            ) : null}
-                            {scriptures.length === 0 ? (
-                                <p className="library-empty-inline">
-                                    Add scripture directly or attach sermons to build
-                                    out the reader.
-                                </p>
-                            ) : (
-                                <div className="library-stack">
-                                    {scriptures.map((scripture) => (
-                                        <ScriptureLibraryItem
-                                            key={scripture.key}
-                                            scripture={scripture}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </section>
+                        {librarySections.map((section) => (
+                            <LibraryCollectionSection
+                                key={section.key}
+                                ariaLabel={section.ariaLabel}
+                                title={section.title}
+                                count={section.count}
+                                countLabel={section.countLabel}
+                                detail={section.detail}
+                                actionLabel={section.actionLabel}
+                                onAction={section.onAction}
+                                actionDisabled={section.actionDisabled}
+                                picker={section.picker}
+                                pickerClassName={section.pickerClassName}
+                                isEmpty={section.isEmpty}
+                                emptyMessage={section.emptyMessage}
+                            >
+                                {section.content}
+                            </LibraryCollectionSection>
+                        ))}
                     </div>
                 ) : (
                     <div
