@@ -167,6 +167,7 @@ export function ConversationsPage() {
         )
 
         setAllConversationSermons((current) => [...current, { ...record, sermon }])
+        await fetchConversationScriptures(conversationId)
     }
 
     async function attachScriptureToConversation(
@@ -349,6 +350,7 @@ export function ConversationsPage() {
                         : record,
                 ),
             )
+            await fetchConversationScriptures(effectiveConversationId)
         } catch (err) {
             console.error("Failed to detach sermon:", err)
         }
