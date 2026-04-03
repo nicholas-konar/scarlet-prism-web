@@ -1783,6 +1783,8 @@ fieldset legend {
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     gap: 0;
+    min-height: 0;
+    height: 100%;
     background:
         radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.76) 0%, rgba(255, 255, 255, 0) 48%),
         linear-gradient(180deg, rgba(249, 245, 238, 0.98) 0%, rgba(241, 233, 220, 0.94) 100%);
@@ -1866,8 +1868,9 @@ fieldset legend {
 }
 
 .library-panel-body {
+    display: flex;
     min-height: 0;
-    display: block;
+    overflow: hidden;
     background:
         linear-gradient(180deg, rgba(248, 243, 235, 0.92) 0%, rgba(243, 235, 223, 0.84) 100%);
 }
@@ -2063,6 +2066,7 @@ fieldset legend {
 }
 
 .library-mode-view {
+    flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
 }
