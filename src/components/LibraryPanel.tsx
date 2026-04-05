@@ -363,7 +363,43 @@ export function LibraryPanel({
 
     return (
         <aside className="library-panel panel-shell" aria-label="Conversation library">
-            <div className="library-panel-header">
+            <div className="library-panel-topbar">
+                <div
+                    className="library-mode-tabs"
+                    role="tablist"
+                    aria-label="Library views"
+                >
+                    {tabs.map(({ tab, count }) => (
+                        <LibraryModeTab
+                            key={tab}
+                            tab={tab}
+                            label={tab === "library" ? "Library" : "Reader"}
+                            count={count}
+                            isActive={activeTab === tab}
+                            onClick={setActiveTab}
+                        />
+                    ))}
+                </div>
+                {onClose ? (
+                    <button
+                        type="button"
+                        className="library-panel-close"
+                        onClick={onClose}
+                        aria-label="Close library"
+                    >
+                        <svg
+                            className="library-panel-close-svg"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M8 8l8 8" />
+                            <path d="M16 8l-8 8" />
+                        </svg>
+                    </button>
+                ) : null}
+            </div>
+
+            <div className="library-panel-scroll-region">
                 <div className="library-panel-heading">
                     <div>
                         <p className="library-panel-eyebrow">Active study materials</p>
@@ -381,99 +417,64 @@ export function LibraryPanel({
                         ))}
                     </div>
                 </div>
-                <div className="library-panel-topbar">
-                    <div
-                        className="library-mode-tabs"
-                        role="tablist"
-                        aria-label="Library views"
-                    >
-                        {tabs.map(({ tab, count }) => (
-                            <LibraryModeTab
-                                key={tab}
-                                tab={tab}
-                                label={tab === "library" ? "Library" : "Reader"}
-                                count={count}
-                                isActive={activeTab === tab}
-                                onClick={setActiveTab}
-                            />
-                        ))}
-                    </div>
-                    {onClose ? (
-                        <button
-                            type="button"
-                            className="library-panel-close"
-                            onClick={onClose}
-                            aria-label="Close library"
-                        >
-                            <svg
-                                className="library-panel-close-svg"
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                            >
-                                <path d="M8 8l8 8" />
-                                <path d="M16 8l-8 8" />
-                            </svg>
-                        </button>
-                    ) : null}
-                </div>
-            </div>
 
-            <div className="library-panel-body">
-                {activeTab === "library" ? (
-                    <div
-                        id="library-panel-view-library"
-                        role="tabpanel"
-                        aria-labelledby="library-panel-tab-library"
-                        className="library-mode-view library-column"
-                    >
-                        {librarySections.map((section) => (
-                            <LibraryCollectionSection
-                                key={section.key}
-                                ariaLabel={section.ariaLabel}
-                                title={section.title}
-                                count={section.count}
-                                countLabel={section.countLabel}
-                                actionLabel={section.actionLabel}
-                                onAction={section.onAction}
-                                actionDisabled={section.actionDisabled}
-                                picker={section.picker}
-                                pickerClassName={section.pickerClassName}
-                                isEmpty={section.isEmpty}
-                                emptyMessage={section.emptyMessage}
-                            >
-                                {section.content}
-                            </LibraryCollectionSection>
-                        ))}
-                    </div>
-                ) : (
-                    <div
-                        id="library-panel-view-reader"
-                        role="tabpanel"
-                        aria-labelledby="library-panel-tab-reader"
-                        className="library-mode-view library-reader-view"
-                    >
-                        {scriptures.length === 0 ? (
-                            <div className="library-reader-empty">
-                                <p className="library-reader-empty-title">
-                                    No passages are attached yet.
-                                </p>
-                                <p>
-                                    Add a scripture reference in the Library tab and it
-                                    will appear here as a full reading card.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="library-reader-stack">
-                                {scriptures.map((scripture) => (
-                                    <ScriptureReaderCard
-                                        key={scripture.key}
-                                        scripture={scripture}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                <div className="library-panel-body">
+                    {activeTab === "library" ? (
+                        <div
+                            id="library-panel-view-library"
+                            role="tabpanel"
+                            aria-labelledby="library-panel-tab-library"
+                            className="library-mode-view library-column"
+                        >
+                            {librarySections.map((section) => (
+                                <LibraryCollectionSection
+                                    key={section.key}
+                                    ariaLabel={section.ariaLabel}
+                                    title={section.title}
+                                    count={section.count}
+                                    countLabel={section.countLabel}
+                                    actionLabel={section.actionLabel}
+                                    onAction={section.onAction}
+                                    actionDisabled={section.actionDisabled}
+                                    picker={section.picker}
+                                    pickerClassName={section.pickerClassName}
+                                    isEmpty={section.isEmpty}
+                                    emptyMessage={section.emptyMessage}
+                                >
+                                    {section.content}
+                                </LibraryCollectionSection>
+                            ))}
+                        </div>
+                    ) : (
+                        <div
+                            id="library-panel-view-reader"
+                            role="tabpanel"
+                            aria-labelledby="library-panel-tab-reader"
+                            className="library-mode-view library-reader-view"
+                        >
+                            {scriptures.length === 0 ? (
+                                <div className="library-reader-empty">
+                                    <p className="library-reader-empty-title">
+                                        No passages are attached yet.
+                                    </p>
+                                    <p>
+                                        Add a scripture reference in the Library tab and it
+                                        will appear here as a full reading card.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="library-reader-stack">
+                                    {scriptures.map((scripture) => (
+                                        <ScriptureReaderCard
+                                            key={scripture.key}
+                                            scripture={scripture}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </aside>
     )

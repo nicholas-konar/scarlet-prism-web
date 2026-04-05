@@ -44,9 +44,9 @@ const ATTACHED_SERMON_SOURCE = "Attached sermon"
 
 const LIBRARY_SCRIPTURE_STATUS = {
     ready: ["Ready to read", "", 4, false],
-    hydrating: ["Preparing text", "The passage is being hydrated from the scripture provider and should appear here shortly.", 3, true],
-    pending: ["Queued for fetch", "This reference is attached, but the passage text has not been fetched yet.", 2, true],
-    failed: ["Needs refresh", "The reference is attached, but the passage text could not be loaded from the provider.", 1, false],
+    failed: ["Needs refresh", "The reference is attached, but the passage text could not be loaded from the provider.", 3, false],
+    hydrating: ["Preparing text", "The passage is being hydrated from the scripture provider and should appear here shortly.", 2, true],
+    pending: ["Queued for fetch", "This reference is attached, but the passage text has not been fetched yet.", 1, true],
     unavailable: ["Reference only", "This reference is attached, but passage text is not available in the current session.", 0, false],
 } satisfies Record<
     LibraryScriptureItem["contentStatus"],

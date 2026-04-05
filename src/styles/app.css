@@ -1794,20 +1794,18 @@ fieldset legend {
     overflow: hidden;
 }
 
-.library-panel-header {
+.library-panel-topbar {
     position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-        "topbar"
-        "heading";
-    gap: 16px;
-    align-items: start;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
     padding: 20px 20px 18px;
     background: transparent;
 }
 
-.library-panel-header::after {
+.library-panel-topbar::after {
     content: "";
     position: absolute;
     left: 16px;
@@ -1824,20 +1822,18 @@ fieldset legend {
     pointer-events: none;
 }
 
-.library-panel-heading {
+.library-panel-scroll-region {
+    min-height: 0;
+    overflow-y: auto;
     display: grid;
-    grid-area: heading;
-    gap: 8px;
-    min-width: 0;
+    align-content: start;
 }
 
-.library-panel-topbar {
-    grid-area: topbar;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.library-panel-heading {
+    display: grid;
     gap: 8px;
     min-width: 0;
+    padding: 18px 20px 0;
 }
 
 .library-panel-eyebrow {
@@ -1915,9 +1911,7 @@ fieldset legend {
 }
 
 .library-panel-body {
-    display: flex;
-    min-height: 0;
-    overflow: hidden;
+    display: block;
     background: transparent;
 }
 
@@ -2069,9 +2063,8 @@ fieldset legend {
 }
 
 .library-mode-view {
-    flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
+    overflow: visible;
 }
 
 .library-column {
@@ -2774,14 +2767,15 @@ fieldset legend {
         border-radius: 24px;
     }
 
-    .library-panel-header,
+    .library-panel-topbar,
+    .library-panel-heading,
     .library-column,
     .library-reader-view {
         padding-left: 14px;
         padding-right: 14px;
     }
 
-    .library-panel-header {
+    .library-panel-topbar {
         padding-top: 16px;
         padding-bottom: 16px;
     }

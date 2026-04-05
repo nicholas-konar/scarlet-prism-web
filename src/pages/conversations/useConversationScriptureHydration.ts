@@ -12,9 +12,8 @@ type UseConversationScriptureHydrationArgs = {
     refreshScriptures: (conversationId: string) => Promise<void>
 }
 
-const POLL_DELAY_MS = 500
+const POLL_DELAY_MS = 2000
 const MAX_ATTEMPTS = 12
-const MAX_FAILED_ATTEMPTS = 8
 
 export function useConversationScriptureHydration({
     api = conversationWorkspaceApi,
@@ -74,12 +73,13 @@ export function useConversationScriptureHydration({
                     return
                 }
 
-                if (
-                    nextAttempt >=
-                    (citation.contentStatus === "failed"
-                        ? MAX_FAILED_ATTEMPTS
-                        : MAX_ATTEMPTS)
-                ) {
+                if (citation.contentStatus === "failed") {
+                    clearPolling(citationId)
+                    await refreshScriptures(currentConversationId)
+                    return
+                }
+
+                if (nextAttempt >= MAX_ATTEMPTS) {
                     clearPolling(citationId)
                     await refreshScriptures(currentConversationId)
                     return
@@ -87,12 +87,7 @@ export function useConversationScriptureHydration({
 
                 scheduleRetry()
             } catch {
-                if (nextAttempt >= MAX_FAILED_ATTEMPTS) {
-                    clearPolling(citationId)
-                    return
-                }
-
-                scheduleRetry()
+                clearPolling(citationId)
             }
         },
         [api, clearPolling, refreshScriptures],
